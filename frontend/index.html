@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Stage Arcieri</title>
+</head>
+<body>
+    <h1>Benvenuto nel porting di Arcieri Vicenza!</h1>
+    <p id="stato-backend">Connessione al backend in corso...</p>
+
+    <script>
+        // Controlla se il frontend vede il backend FastAPI
+        fetch('http://localhost:8000/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stato-backend').innerText = "Risposta Backend: " + data.message;
+                document.getElementById('stato-backend').style.color = "green";
+            })
+            .catch(error => {
+                document.getElementById('stato-backend').innerText = "Errore di connessione al backend!";
+                document.getElementById('stato-backend').style.color = "red";
+            });
+    </script>
+</body>
+</html>
