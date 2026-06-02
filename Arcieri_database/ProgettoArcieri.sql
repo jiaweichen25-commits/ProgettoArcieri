@@ -267,6 +267,17 @@ CREATE TABLE IF NOT EXISTS public."TSdesEsercizioAllFisCor"
     PRIMARY KEY ("IDdescrizioneEsercizioAllFisCor")
 );
 
+CREATE TABLE IF NOT EXISTS public."TdetNoteAtleta"
+(
+    "IDnota"         serial NOT NULL,
+    "IDallenamento"  integer NOT NULL,
+    "IDsettimana"    integer NOT NULL,
+    "Nota"           text,
+    PRIMARY KEY ("IDnota"),
+    FOREIGN KEY ("IDallenamento")
+        REFERENCES public."Tallenamenti" ("IDallenamento")
+        ON UPDATE NO ACTION ON DELETE NO ACTION
+);
 -- ==========================================
 -- VINCOLI E CHIAVI ESTERNE (ALTER TABLES)
 -- ==========================================
