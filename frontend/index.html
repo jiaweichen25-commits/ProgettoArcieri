@@ -10,7 +10,7 @@
 
     <script>
         // Controlla se il frontend vede il backend FastAPI
-        fetch('http://localhost:8000/')
+        fetch(fetch('http://backend:8000/'))
             .then(response => response.json())
             .then(data => {
                 document.getElementById('stato-backend').innerText = "Risposta Backend: " + data.message;
