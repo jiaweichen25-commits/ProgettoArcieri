@@ -1,15 +1,20 @@
 from pydantic import BaseModel
 
-
-
 from fastapi import APIRouter, HTTPException, status
 from jose import jwt
 import bcrypt
 from datetime import datetime, timedelta
 import os
 
+import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+def get_db_conn():
+    return psycopg2.connect(os.getenv("DATABASE_URL"))
 
 SECRET_KEY = os.getenv("SECRET_KEY", "segnaposto")
 ALGORITHM = "HS256"
@@ -31,23 +36,44 @@ def create_access_token(data: dict):
 
 @router.post("/login", response_model=TokenOutput)
 def login(data: LoginInput):
-    # Per ora utente finto, poi lo leggeremo dal database
-    fake_user = {
-        "email": "test@test.it",
-        "password_hash": bcrypt.hashpw(b"password123", bcrypt.gensalt())
-    }
+    conn = get_db_conn()
+    cur = conn.cursor()
+    
+    cur.execute('SELECT "passwd_hash", "Ruolo" FROM "Tutenti" WHERE "E-mail" = %s', (data.email,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
 
-    if data.email != fake_user["email"]:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenziali non valide"
-        )
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenziali non valide")
 
-    if not bcrypt.checkpw(data.password.encode(), fake_user["password_hash"]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenziali non valide"
-        )
+    if not bcrypt.checkpw(data.password.encode(), user[0].encode()):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenziali non valide")
 
-    token = create_access_token({"sub": data.email})
+    token = create_access_token({"sub": data.email, "ruolo": user[1]})
     return TokenOutput(access_token=token, token_type="bearer")
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+def register(data: LoginInput):
+    conn = get_db_conn()
+    cur = conn.cursor()
+
+    cur.execute('SELECT "IDutente" FROM "Tutenti" WHERE "E-mail" = %s', (data.email,))
+    if cur.fetchone():
+        cur.close()
+        conn.close()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email già registrata"
+        )
+
+    hashed = bcrypt.hashpw(data.password.encode(), bcrypt.gensalt()).decode()
+    cur.execute(
+        'INSERT INTO "Tutenti" ("E-mail", "passwd_hash", "Ruolo") VALUES (%s, %s, %s)',
+        (data.email, hashed, "atleta")
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return {"message": "Utente registrato con successo"}
