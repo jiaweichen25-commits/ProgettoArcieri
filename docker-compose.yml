@@ -13,7 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/ProgettoArcieri.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./Arcieri_database/ProgettoArcieri.sql:/docker-entrypoint-initdb.d/init.sql
 
   # Container 2: Il Backend Python con FastAPI
   backend:

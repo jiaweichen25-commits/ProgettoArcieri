@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
+from routers import auth
+
 
 app = FastAPI(title="API Arcieri Vicenza")
+
+app.include_router(auth.router)
 
 # Permette al frontend (porta 8080) di dialogare con il backend (porta 8000)
 app.add_middleware(

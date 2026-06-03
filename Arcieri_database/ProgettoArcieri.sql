@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS public."TdetTecForCor"
 );
 
 COMMENT ON TABLE public."TdetTecForCor"
-    IS 'Tabella dettagli Tecnica-Forca-Coordinazione';
+    IS 'Tabella dettagli Tecnica-Forza-Coordinazione';
 
 CREATE TABLE IF NOT EXISTS public."TStarga"
 (
