@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+
 
 from fastapi import APIRouter, HTTPException, status
 from jose import jwt
 import bcrypt
 from datetime import datetime, timedelta
 import os
-
+from pydantic import BaseModel, EmailStr, field_validator
 import psycopg2
 from dotenv import load_dotenv
 
@@ -28,6 +28,24 @@ class TokenOutput(BaseModel):
     access_token: str
     token_type : str
 
+class RegisterInput(BaseModel):
+    email: EmailStr
+    password: str
+    ruolo: str
+
+    @field_validator("ruolo")
+    @classmethod
+    def ruolo_valido(cls, v):
+        if v not in ("atleta", "istruttore"):
+            raise ValueError("Ruolo deve essere 'atleta' o 'istruttore'")
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def password_lunghezza(cls, v):
+        if len(v) < 6:
+            raise ValueError("La password deve essere di almeno 6 caratteri")
+        return v
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -54,7 +72,7 @@ def login(data: LoginInput):
     return TokenOutput(access_token=token, token_type="bearer")
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(data: LoginInput):
+def register(data: RegisterInput):
     conn = get_db_conn()
     cur = conn.cursor()
 
@@ -70,7 +88,7 @@ def register(data: LoginInput):
     hashed = bcrypt.hashpw(data.password.encode(), bcrypt.gensalt()).decode()
     cur.execute(
         'INSERT INTO "Tutenti" ("E-mail", "passwd_hash", "Ruolo") VALUES (%s, %s, %s)',
-        (data.email, hashed, "atleta")
+        (data.email, hashed, data.ruolo)
     )
     conn.commit()
     cur.close()
