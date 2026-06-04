@@ -279,7 +279,8 @@
 
   <script>
     // ── CONFIGURAZIONE ───────────────────────────────────────────────────────
-    const API_URL = "http://localhost:8000";
+    // Usa URL relative per passare attraverso Nginx proxy
+    const API_URL = "";
     // ────────────────────────────────────────────────────────────────────────
 
     let currentRole = "atleta";
@@ -395,33 +396,39 @@
       btn.disabled    = true;
       btn.textContent = "Registrazione...";
 
-      try {
-        const res = await fetch(`${API_URL}/auth/register`, {
-          method:  "POST",
-          headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ email, password, ruolo })
-        });
+        try {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, password, ruolo })
+    });
 
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          showModalMsg(err.detail || "Errore durante la registrazione.", "error");
-          return;
-        }
-
-        const data = await res.json();
-        localStorage.setItem("access_token", data.access_token);
-
-        // Chiude la modale e reindirizza
-        closeRegisterModal();
-        redirectByRuolo(data.access_token);
-
-      } catch {
-        showModalMsg("Impossibile contattare il server.", "error");
-      } finally {
-        btn.disabled    = false;
-        btn.textContent = "Registrati";
-      }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showModalMsg(err.detail || "Errore durante la registrazione.", "error");
+      return;
     }
+
+    // Registrazione ok → ora fai login automatico per ottenere il token
+    const loginRes = await fetch(`${API_URL}/auth/login`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, password })
+    });
+
+    const loginData = await loginRes.json();
+    localStorage.setItem("access_token", loginData.access_token);
+
+    closeRegisterModal();
+    redirectByRuolo(loginData.access_token);
+
+  } catch {
+    showModalMsg("Impossibile contattare il server.", "error");
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = "Registrati";
+  }
+}
 
     // ── Al caricamento: ripristina email e controlla token esistente ─────────
     window.addEventListener("DOMContentLoaded", () => {

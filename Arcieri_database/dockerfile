@@ -1,1 +1,9 @@
 FROM postgres:18-alpine
+
+# Copia lo script di inizializzazione del database
+COPY ProgettoArcieri.sql /docker-entrypoint-initdb.d/
+
+# Espone la porta di PostgreSQL
+EXPOSE 5432
+
+# Le variabili di ambiente vengono passate dal docker-compose.yml
