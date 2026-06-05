@@ -315,10 +315,26 @@
     }
 
     function redirectByRuolo(token) {
-      const ruolo = getRuoloDalToken(token);
-      if (ruolo === "istruttore") window.location.href = "index.html";
-      else                        window.location.href = "dashboard.html";
-    }
+  try {
+    // Decodifica il payload del JWT token
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+    
+    // Creiamo l'oggetto esattamente come lo vuole la dashboard
+    const currentUser = {
+      role: payload.ruolo,
+      email: payload.sub // 'sub' nel backend contiene l'email
+    };
+    
+    // Salviamo l'utente nel localStorage
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    
+    // Mandiamo l'utente alla dashboard
+    window.location.href = "dashboard.html";
+  } catch (e) {
+    console.error("Errore nel reindirizzamento:", e);
+    showMsg("Errore nella lettura dei dati di accesso.", "error");
+  }
+}
 
     // ── LOGIN ────────────────────────────────────────────────────────────────
     async function handleLogin(e) {
