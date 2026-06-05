@@ -213,7 +213,7 @@
     <h2>Sign in to your account</h2>
 
     <div class="role-tabs">
-      <button class="active" id="tabUtente"    onclick="switchRole('atleta')">Utente</button>
+      <button class="active" id="tabAtleta"    onclick="switchRole('atleta')">Atleta</button>
       <button               id="tabIstruttore" onclick="switchRole('istruttore')">Istruttore</button>
     </div>
 
@@ -300,7 +300,7 @@
 
     function switchRole(role) {
       currentRole = role;
-      document.getElementById("tabUtente").classList.toggle("active", role === "atleta");
+      document.getElementById("tabAtleta").classList.toggle("active", role === "atleta");
       document.getElementById("tabIstruttore").classList.toggle("active", role === "istruttore");
       document.getElementById("roleLabel").textContent =
         role === "atleta" ? "Accesso Atleta" : "Accesso Istruttore";

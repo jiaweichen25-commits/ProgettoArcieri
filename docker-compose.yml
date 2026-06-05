@@ -3,7 +3,7 @@ services:
   # Container 1: Il Database PostgreSQL
   db:
     image: postgres:18-alpine
-    container_name: arcieri_db
+    container_name: arcieri_database
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER}
