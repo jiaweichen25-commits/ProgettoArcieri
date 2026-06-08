@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcieri - Accesso Istruttore</title>
+    <link rel="stylesheet" href="Istruttore.css">
+</head>
+<body>
+
+    <div class="top-bar"></div>
+
+    <a href="../../index.html" class="back-link">← Home</a>
+
+    <div class="card">
+        <div class="tag">Area Istruttore</div>
+        <h1>Accedi</h1>
+        <div class="divider"></div>
+
+        <div class="msg-box" id="msgBox"></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="email@example.com" required />
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required />
+            </div>
+
+            <div class="login-options">
+                <label>
+                    <input type="checkbox" id="rememberLogin" />
+                    Ricordami
+                </label>
+                <a onclick="event.preventDefault(); showMsg('Contatta la segreteria per recuperare la password.', 'error');">
+                    Password dimenticata?
+                </a>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">Accedi</button>
+
+            <p class="signup-link">
+                Non hai un account?
+                <a onclick="event.preventDefault(); openRegisterModal();">Registrati</a>
+            </p>
+        </form>
+    </div>
+
+    <!-- Modale registrazione -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-box">
+            <h3>Crea Account</h3>
+
+            <div class="msg-box" id="modalMsgBox"></div>
+
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="regEmail" placeholder="email@example.com" />
+            </div>
+            <div class="field">
+                <label>Password <span style="color:#555; font-weight:400;">(min. 6 caratteri)</span></label>
+                <input type="password" id="regPassword" placeholder="••••••••" />
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel"  onclick="closeRegisterModal()">Annulla</button>
+                <button class="btn-confirm" id="regBtn" onclick="handleRegister()">Registrati</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span>Arcieri Vicenza</span>
+        <span>© 2026</span>
+    </footer>
+
+    <script src="Istruttore.js"></script>
+</body>
+</html>

@@ -29,7 +29,6 @@ body {
     align-items: center;
 }
 
-/* Striscia rossa in alto */
 .top-bar {
     position: fixed;
     top: 0;
@@ -44,15 +43,12 @@ body {
     width: 90%;
     padding: 55px 60px;
     border-radius: 4px;
-
     background: rgba(10, 10, 10, 0.75);
     border-left: 5px solid #c0392b;
-
     position: relative;
     overflow: hidden;
 }
 
-/* Numero decorativo di sfondo */
 .card::before {
     content: "🏹";
     position: absolute;
@@ -105,27 +101,29 @@ h1 {
     font-size: 1rem;
     line-height: 1.8;
     color: #bbbbbb;
-    margin-bottom: 45px;
+    margin-bottom: 40px;
     max-width: 560px;
 }
 
-/* Pulsante stile sportivo */
+.btn-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
 .enter-btn {
     display: inline-flex;
     align-items: center;
     gap: 14px;
-
     text-decoration: none;
     color: white;
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-
     background: #c0392b;
     padding: 16px 36px;
     border-radius: 2px;
-
     transition: all 0.25s ease;
     position: relative;
     overflow: hidden;
@@ -142,9 +140,7 @@ h1 {
     transition: left 0.25s ease;
 }
 
-.enter-btn:hover::after {
-    left: 0;
-}
+.enter-btn:hover::after { left: 0; }
 
 .enter-btn:hover {
     background: #a93226;
@@ -152,22 +148,23 @@ h1 {
     box-shadow: 0 8px 25px rgba(192, 57, 43, 0.5);
 }
 
-.enter-btn .arrow {
+.btn-secondary {
+    background: transparent;
+    border: 2px solid #c0392b;
+    color: #c0392b;
+}
+
+.btn-secondary:hover {
+    background: rgba(192, 57, 43, 0.15);
+    color: white;
+}
+
+.arrow {
     font-size: 1.2rem;
     transition: transform 0.25s ease;
 }
 
-.enter-btn:hover .arrow {
-    transform: translateX(5px);
-}
-
-.hint {
-    margin-top: 16px;
-    color: #666;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
+.enter-btn:hover .arrow { transform: translateX(5px); }
 
 footer {
     position: fixed;
@@ -185,24 +182,8 @@ footer {
 }
 
 @media (max-width: 768px) {
-    .card {
-        padding: 35px 28px;
-    }
-
-    h1 {
-        font-size: 3.4rem;
-    }
-
-    .subtitle {
-        font-size: 0.85rem;
-    }
-
-    .description {
-        font-size: 0.95rem;
-    }
-
-    .enter-btn {
-        padding: 14px 28px;
-        font-size: 0.8rem;
-    }
+    .card { padding: 35px 28px; }
+    h1 { font-size: 3.4rem; }
+    .btn-group { flex-direction: column; }
+    .enter-btn { justify-content: center; }
 }
