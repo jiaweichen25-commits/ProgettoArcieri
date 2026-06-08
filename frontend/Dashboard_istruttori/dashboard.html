@@ -309,159 +309,131 @@
 </div>
 
 <script>
-  const KEY_I = "arcieri_istruttori";
-  const KEY_A = "arcieri_atleti";
+const API_URL = "http://localhost:8000";
+let atleti = [];
 
-  function load(key) {
-    try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
+const KEY_I = "arcieri_istruttori";
+
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
+}
+function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+
+async function fetchAtleti() {
+  const token = localStorage.getItem("access_token");
+  try {
+    const res = await fetch(`${API_URL}/atleti/`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error("Errore fetch atleti");
+    atleti = await res.json();
+  } catch (e) {
+    console.error(e);
+    atleti = [];
   }
-  function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+  render();
+}
 
-  function init() {
-    const user = JSON.parse(localStorage.getItem("currentUser") || "null");
-    // CORRETTO: Ora rimanda a Auth.html se la sessione non esiste
-    if (!user) { window.location.href = "Auth.html"; return; } 
-    document.getElementById("userDisplay").textContent = `Accesso come ${user.role} • ${user.email}`;
-    render();
-  }
+async function init() {
+  const user = JSON.parse(localStorage.getItem("currentUser") || "null");
+  if (!user) { window.location.href = "Auth.html"; return; }
+  document.getElementById("userDisplay").textContent = `Accesso come ${user.role} • ${user.email}`;
+  await fetchAtleti();
+}
 
-  function render() {
-    const istr = load(KEY_I);
-    const atl  = load(KEY_A);
+function render() {
+  const istr = load(KEY_I);
 
-    document.getElementById("cntIstr").textContent = istr.length;
-    document.getElementById("cntAtl").textContent  = atl.length;
-    // NOTA: Rimossa la riga cntTot poiché l'elemento HTML non esiste nella pagina originale
+  document.getElementById("cntIstr").textContent = istr.length;
+  document.getElementById("cntAtl").textContent  = atleti.length;
 
-    const iBody = document.getElementById("istrBody");
-    iBody.innerHTML = istr.length === 0
-      ? `<tr><td colspan="6"><div class="empty">📭 Nessun istruttore registrato</div></td></tr>`
-      : istr.map((r, i) => `
-          <tr>
-            <td>#${i + 1}</td>
-            <td>${r.nome || "-"}</td>
-            <td>${r.email || "-"}</td>
-            <td>${r.specialita || "-"}</td>
-            <td><span class="badge badge-green">${r.stato || "Attivo"}</span></td>
-            <td>
-              <button class="btn-sm btn-edit" onclick="editIstr(${i})">Modifica</button>
-              <button class="btn-sm btn-del"  onclick="delIstr(${i})">Elimina</button>
-            </td>
-          </tr>`).join("");
+  const iBody = document.getElementById("istrBody");
+  iBody.innerHTML = istr.length === 0
+    ? `<tr><td colspan="6"><div class="empty">📭 Nessun istruttore registrato</div></td></tr>`
+    : istr.map((r, i) => `
+        <tr>
+          <td>#${i + 1}</td>
+          <td>${r.nome || "-"}</td>
+          <td>${r.email || "-"}</td>
+          <td>${r.specialita || "-"}</td>
+          <td><span class="badge badge-green">${r.stato || "Attivo"}</span></td>
+          <td>
+            <button class="btn-sm btn-edit" onclick="editIstr(${i})">Modifica</button>
+            <button class="btn-sm btn-del"  onclick="delIstr(${i})">Elimina</button>
+          </td>
+        </tr>`).join("");
 
-    const aBody = document.getElementById("atlBody");
-    aBody.innerHTML = atl.length === 0
-      ? `<tr><td colspan="7"><div class="empty">📭 Nessun atleta registrato</div></td></tr>`
-      : atl.map((r, i) => `
-          <tr>
-            <td>#${i + 1}</td>
-            <td>${r.nome || "-"}</td>
-            <td>${r.cognome || "-"}</td>
-            <td>${r.email || "-"}</td>
-            <td>${r.citta || "-"}</td>
-            <td><span class="badge badge-amber">${r.livello || "Principiante"}</span></td>
-            <td>
-              <button class="btn-sm btn-edit" onclick="editAtl(${i})">Modifica</button>
-              <button class="btn-sm btn-del"  onclick="delAtl(${i})">Elimina</button>
-            </td>
-          </tr>`).join("");
-  }
+  const aBody = document.getElementById("atlBody");
+  aBody.innerHTML = atleti.length === 0
+    ? `<tr><td colspan="7"><div class="empty">📭 Nessun atleta registrato</div></td></tr>`
+    : atleti.map((r, i) => `
+        <tr>
+          <td>#${i + 1}</td>
+          <td>${r.nome || "-"}</td>
+          <td>${r.cognome || "-"}</td>
+          <td>${r.email || "-"}</td>
+          <td>${r.citta || "-"}</td>
+          <td>${r.data_nascita || "-"}</td>
+          <td>
+            <button class="btn-sm btn-edit" onclick="editAtl(${i})">Modifica</button>
+          </td>
+        </tr>`).join("");
+}
 
-  // MODAL helpers
-  function openModal(type) {
-    if (type === "istr") {
-      document.getElementById("istrTitle").textContent = "Aggiungi Istruttore";
-      document.getElementById("istrIdx").value = -1;
-      document.getElementById("istrNome").value = "";
-      document.getElementById("istrEmail").value = "";
-      document.getElementById("istrSpec").value = "";
-      document.getElementById("istrStato").value = "Attivo";
-      document.getElementById("modalIstr").classList.add("open");
-    } else {
-      document.getElementById("atlTitle").textContent = "Aggiungi Atleta";
-      document.getElementById("atlIdx").value = -1;
-      document.getElementById("atlNome").value = "";
-      document.getElementById("atlCognome").value = "";
-      document.getElementById("atlEmail").value = "";
-      document.getElementById("atlCitta").value = "";
-      document.getElementById("atlLivello").value = "Principiante";
-      document.getElementById("modalAtl").classList.add("open");
-    }
-  }
-  function closeModal(id) { document.getElementById(id).classList.remove("open"); }
-
-  // ISTRUTTORI CRUD
-  function editIstr(idx) {
-    const r = load(KEY_I)[idx];
-    document.getElementById("istrTitle").textContent = "Modifica Istruttore";
-    document.getElementById("istrIdx").value = idx;
-    document.getElementById("istrNome").value  = r.nome || "";
-    document.getElementById("istrEmail").value = r.email || "";
-    document.getElementById("istrSpec").value  = r.specialita || "";
-    document.getElementById("istrStato").value = r.stato || "Attivo";
+function openModal(type) {
+  if (type === "istr") {
+    document.getElementById("istrTitle").textContent = "Aggiungi Istruttore";
+    document.getElementById("istrIdx").value = -1;
+    document.getElementById("istrNome").value = "";
+    document.getElementById("istrEmail").value = "";
+    document.getElementById("istrSpec").value = "";
+    document.getElementById("istrStato").value = "Attivo";
     document.getElementById("modalIstr").classList.add("open");
   }
-  function saveIstruttore() {
-    const nome = document.getElementById("istrNome").value.trim();
-    const email = document.getElementById("istrEmail").value.trim();
-    if (!nome || !email) { alert("Nome ed email obbligatori"); return; }
-    const data = load(KEY_I);
-    const idx  = parseInt(document.getElementById("istrIdx").value);
-    const obj  = { nome, email, specialita: document.getElementById("istrSpec").value.trim(), stato: document.getElementById("istrStato").value };
-    if (idx === -1) data.push(obj); else data[idx] = obj;
-    save(KEY_I, data);
-    closeModal("modalIstr");
-    render();
-  }
-  function delIstr(idx) {
-    if (!confirm("Eliminare questo istruttore?")) return;
-    const data = load(KEY_I);
-    data.splice(idx, 1);
-    save(KEY_I, data);
-    render();
-  }
+}
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
-  // ATLETI CRUD
-  function editAtl(idx) {
-    const r = load(KEY_A)[idx];
-    document.getElementById("atlTitle").textContent = "Modifica Atleta";
-    document.getElementById("atlIdx").value = idx;
-    document.getElementById("atlNome").value    = r.nome || "";
-    document.getElementById("atlCognome").value = r.cognome || "";
-    document.getElementById("atlEmail").value   = r.email || "";
-    document.getElementById("atlCitta").value   = r.citta || "";
-    document.getElementById("atlLivello").value = r.livello || "Principiante";
-    document.getElementById("modalAtl").classList.add("open");
-  }
-  function saveAtleta() {
-    const nome = document.getElementById("atlNome").value.trim();
-    const cognome = document.getElementById("atlCognome").value.trim();
-    const email = document.getElementById("atlEmail").value.trim();
-    if (!nome || !email) { alert("Nome ed email obbligatori"); return; }
-    const data = load(KEY_A);
-    const idx  = parseInt(document.getElementById("atlIdx").value);
-    const obj  = { nome, cognome, email, citta: document.getElementById("atlCitta").value.trim(), livello: document.getElementById("atlLivello").value };
-    if (idx === -1) data.push(obj); else data[idx] = obj;
-    save(KEY_A, data);
-    closeModal("modalAtl");
-    render();
-  }
-  function delAtl(idx) {
-    if (!confirm("Eliminare questo atleta?")) return;
-    const data = load(KEY_A);
-    data.splice(idx, 1);
-    save(KEY_A, data);
-    render();
-  }
+function editIstr(idx) {
+  const r = load(KEY_I)[idx];
+  document.getElementById("istrTitle").textContent = "Modifica Istruttore";
+  document.getElementById("istrIdx").value = idx;
+  document.getElementById("istrNome").value  = r.nome || "";
+  document.getElementById("istrEmail").value = r.email || "";
+  document.getElementById("istrSpec").value  = r.specialita || "";
+  document.getElementById("istrStato").value = r.stato || "Attivo";
+  document.getElementById("modalIstr").classList.add("open");
+}
+function saveIstruttore() {
+  const nome = document.getElementById("istrNome").value.trim();
+  const email = document.getElementById("istrEmail").value.trim();
+  if (!nome || !email) { alert("Nome ed email obbligatori"); return; }
+  const data = load(KEY_I);
+  const idx  = parseInt(document.getElementById("istrIdx").value);
+  const obj  = { nome, email, specialita: document.getElementById("istrSpec").value.trim(), stato: document.getElementById("istrStato").value };
+  if (idx === -1) data.push(obj); else data[idx] = obj;
+  save(KEY_I, data);
+  closeModal("modalIstr");
+  render();
+}
+function delIstr(idx) {
+  if (!confirm("Eliminare questo istruttore?")) return;
+  const data = load(KEY_I);
+  data.splice(idx, 1);
+  save(KEY_I, data);
+  render();
+}
 
-  function logout() {
-    // CORRETTO: Svuota i dati e reindirizza correttamente ad Auth.html
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("access_token");
-    window.location.href = "Auth.html";
-  }
+function editAtl(idx) {
+  alert(`Dettaglio atleta: ${atleti[idx].nome} ${atleti[idx].cognome}`);
+}
 
-  init();
+function logout() {
+  localStorage.removeItem("currentUser");
+  localStorage.removeItem("access_token");
+  window.location.href = "Auth.html";
+}
+
+init();
 </script>
 </body>
 </html>

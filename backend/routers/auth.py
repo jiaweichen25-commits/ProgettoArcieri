@@ -94,4 +94,5 @@ def register(data: RegisterInput):
     cur.close()
     conn.close()
 
-    return {"message": "Utente registrato con successo"}
+    token = create_access_token({"sub": data.email, "ruolo": data.ruolo})
+    return {"access_token": token, "token_type": "bearer"}

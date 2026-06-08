@@ -9,8 +9,6 @@ load_dotenv()
 
 app = FastAPI(title="API Arcieri Vicenza")
 
-app.include_router(auth.router)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,6 +16,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth.router)
 
 def get_db():
     conn = psycopg2.connect(os.getenv("DATABASE_URL"))
