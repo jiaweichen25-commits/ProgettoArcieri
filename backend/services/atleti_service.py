@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
-from repositories import atleti_repository
+from repositories import atleti_repository, user_repository
+import bcrypt
 
 # --- FUNZIONI UTILITÀ PRIVATE ---
 
@@ -38,14 +39,27 @@ def get_atleti(id_utente: int):
 
 def crea_atleta(id_utente: int, dati: dict):
     id_istruttore = _get_istruttore_or_404(id_utente)
-    
-    id_utente_atleta = dati.get("id_utente_atleta")
-    if id_utente_atleta is None:
+
+    # Registra automaticamente l'utente atleta con password temporanea
+    email_atleta = dati.get("email")
+    if not email_atleta:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="id_utente_atleta è obbligatorio"
+            detail="L'email dell'atleta è obbligatoria"
         )
-        
+
+    # Controlla se esiste già un account con questa email
+    existing = user_repository.get_user_by_email(email_atleta)
+    if existing:
+        id_utente_atleta = existing[2]
+    else:
+        # Crea account con password temporanea
+        password_temp = "Arcieri2024!"
+        hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
+        user_repository.create_user(email_atleta, hashed, "atleta")
+        nuovo_utente = user_repository.get_user_by_email(email_atleta)
+        id_utente_atleta = nuovo_utente[2]
+
     new_id = atleti_repository.crea_atleta(id_istruttore, id_utente_atleta, dati)
     return {"IDatleta": new_id, "message": "Atleta creato con successo"}
 
