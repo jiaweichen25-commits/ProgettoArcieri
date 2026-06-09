@@ -67,7 +67,7 @@ async function handleLogin(e) {
     }
 }
 
-function openRegisterModal() {
+/*function openRegisterModal() {
     document.getElementById("regEmail").value    = "";
     document.getElementById("regPassword").value = "";
     document.getElementById("modalMsgBox").className = "msg-box";
@@ -113,7 +113,7 @@ async function handleRegister() {
         btn.disabled    = false;
         btn.textContent = "Registrati";
     }
-}
+}*/
 
 window.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("remember_email");
