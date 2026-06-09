@@ -14,11 +14,12 @@ CREATE TABLE IF NOT EXISTS public."Tistruttori"
 (
     "IDistruttore" serial NOT NULL,
     "IDutente" integer NOT NULL,
-    "Nome" character varying NOT NULL,
-    "Cognome" character varying NOT NULL,
+    "Nome" character varying DEFAULT '',
+    "Cognome" character varying DEFAULT '',
     "Qualifica" character varying,
     "Cellulare" character varying,
     "E-mail" character varying,
+    "Stato" character varying DEFAULT 'Attivo',
     PRIMARY KEY ("IDistruttore")
 );
 
@@ -29,13 +30,13 @@ CREATE TABLE IF NOT EXISTS public."Tatleti"
 (
     "IDatleta" serial NOT NULL,
     "IDistruttore" integer NOT NULL,
-    "IDutente" integer NOT NULL,
+    "IDutente" integer,
     "Nome" character varying NOT NULL,
     "Cognome" character varying NOT NULL,
     "Indirizzo" character varying,
     "CAP" integer,
     "CITTA" character varying,
-    "Codice_Fiscale" character varying NOT NULL UNIQUE,
+    "Codice_Fiscale" character varying,
     "Telefono" character varying,
     "Cellulare" character varying,
     "E-mail" character varying,
@@ -198,7 +199,7 @@ CREATE TABLE IF NOT EXISTS public."TSDescrizioneEsercizio"
     "IDdescrizioneEsercizio" serial NOT NULL,
     "NomeEsercizio" character varying,
     "Descrizione" text,
-    PRIMARY KEY ("IDdescrizioneEsercizio") 
+    PRIMARY KEY ("IDdescrizioneEsercizio")
 );
 
 CREATE TABLE IF NOT EXISTS public."TdetAllFisForRes"
@@ -278,6 +279,7 @@ CREATE TABLE IF NOT EXISTS public."TdetNoteAtleta"
         REFERENCES public."Tallenamenti" ("IDallenamento")
         ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+
 -- ==========================================
 -- VINCOLI E CHIAVI ESTERNE (ALTER TABLES)
 -- ==========================================
@@ -288,9 +290,7 @@ ALTER TABLE IF EXISTS public."Tistruttori"
 
 ALTER TABLE IF EXISTS public."Tatleti"
     ADD FOREIGN KEY ("IDistruttore")
-    REFERENCES public."Tistruttori" ("IDistruttore") ON UPDATE NO ACTION ON DELETE NO ACTION,
-    ADD FOREIGN KEY ("IDutente")
-    REFERENCES public."Tutenti" ("IDutente") ON UPDATE NO ACTION ON DELETE NO ACTION;
+    REFERENCES public."Tistruttori" ("IDistruttore") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE IF EXISTS public."Tmateriali"
     ADD FOREIGN KEY ("IDatleta")
@@ -304,7 +304,6 @@ ALTER TABLE IF EXISTS public."TdetAllenamenti"
     ADD FOREIGN KEY ("IDallenamento")
     REFERENCES public."Tallenamenti" ("IDallenamento") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
--- Chiavi composte per le tabelle dei dettagli degli allenamenti
 ALTER TABLE IF EXISTS public."TdetStretching"
     ADD FOREIGN KEY ("IDallenamento", "IDsettimana", "IDseduta")
     REFERENCES public."TdetAllenamenti" ("IDallenamento", "IDsettimana", "IDseduta") ON UPDATE NO ACTION ON DELETE NO ACTION,

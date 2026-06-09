@@ -1,11 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
-import psycopg2
-from dotenv import load_dotenv
-from controllers import auth_controller
-
-load_dotenv()
+from controllers import auth_controller, istruttori_controller, atleti_controller, allenamenti_controller, atleta_controller
 
 app = FastAPI(title="API Arcieri Vicenza")
 
@@ -18,14 +13,12 @@ app.add_middleware(
 )
 
 app.include_router(auth_controller.router)
+app.include_router(istruttori_controller.router)
+app.include_router(atleti_controller.router)
+app.include_router(allenamenti_controller.router)
+app.include_router(atleta_controller.router)
 
-def get_db():
-    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
-    try:
-        yield conn
-    finally:
-        conn.close()
 
 @app.get("/")
 def read_root():
-    return {"message": "Il backend di ProgettoArcieri con FastAPI funziona!"}
+    return {"message": "API Arcieri Vicenza attiva"}

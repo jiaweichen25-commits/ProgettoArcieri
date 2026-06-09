@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Area Atleta</title>
+  <link rel="stylesheet" href="AtletaDashboard.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Area Personale</span>
+      <strong>Arcieri Vicenza</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user">Benvenuto, <strong id="navUser">—</strong></div>
+    <button class="btn-logout" onclick="logout()">Esci</button>
+  </div>
+</nav>
+
+<!-- profilo non trovato -->
+<div id="noProfile" class="no-profile" style="display:none">
+  <div class="no-profile-box">
+    <div class="pill">Attenzione</div>
+    <h2>Profilo atleta non trovato</h2>
+    <p>Il tuo account non è ancora collegato ad un profilo atleta.<br>
+       Chiedi al tuo istruttore di creare la tua anagrafica usando questa email:
+       <strong id="noProfileEmail"></strong>
+    </p>
+  </div>
+</div>
+
+<div id="mainContent" style="display:none">
+
+  <div class="page">
+
+    <!-- header -->
+    <div class="page-header">
+      <div class="pill">Area Atleta – Sola Lettura</div>
+      <h1 id="atletaNome">—</h1>
+      <p id="atletaInfo">—</p>
+    </div>
+
+    <!-- stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Allenamenti</div>
+        <div class="stat-num" id="cntAll">0</div>
+        <div class="stat-sub">cicli assegnati</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Piano corrente</div>
+        <div class="stat-num" id="cntSettimane">—</div>
+        <div class="stat-sub">settimane totali</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Le mie note</div>
+        <div class="stat-num" id="cntNote">0</div>
+        <div class="stat-sub">annotazioni inserite</div>
+      </div>
+    </div>
+
+    <!-- ── 1. ULTIME STATISTICHE ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Ultime statistiche</div>
+      </div>
+      <div class="stat-detail-card">
+        <div class="accuracy-wrap">
+          <svg class="accuracy-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#1e1e1e" stroke-width="10"/>
+            <circle id="accuracyRing" cx="60" cy="60" r="50"
+                    fill="none" stroke="#2a2a2a" stroke-width="10" stroke-linecap="round"
+                    stroke-dasharray="314.16" stroke-dashoffset="314.16"
+                    transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="36" fill="rgba(43,108,176,0.10)"/>
+            <circle cx="60" cy="60" r="22" fill="rgba(197,48,48,0.10)"/>
+            <circle cx="60" cy="60" r="9"  fill="rgba(255,215,0,0.20)"/>
+          </svg>
+          <div class="accuracy-text">
+            <div class="accuracy-pct" id="accuracyPct">—</div>
+            <div class="accuracy-sub">precisione</div>
+          </div>
+        </div>
+        <div class="sdr-list">
+          <div class="sdr"><span>Ultima sessione</span><strong id="sdrData">—</strong></div>
+          <div class="sdr"><span>Frecce scagliate</span><strong id="sdrFrecce">—</strong></div>
+          <div class="sdr"><span>Punteggio totale</span><strong id="sdrPunteggio">—</strong></div>
+          <div class="sdr"><span>Media per freccia</span><strong id="sdrMedia">—</strong></div>
+          <p class="sdr-hint">I punteggi saranno visibili quando l'istruttore registra le sessioni di gara.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2. CALENDARIO SESSIONI ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Calendario sessioni</div>
+      </div>
+      <div id="calendarList"><div class="empty-state">Caricamento...</div></div>
+    </div>
+
+    <!-- ── 3. OBIETTIVO SETTIMANALE ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Obiettivo settimanale</div>
+        <div class="section-meta" id="weekRangeLabel"></div>
+      </div>
+      <div class="progress-card">
+        <div class="progress-top">
+          <span class="progress-label">Frecce scagliate questa settimana</span>
+          <span class="progress-ratio" id="progressRatio">0 / —</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="weeklyBar" style="width:0%">
+            <span class="progress-tip">&#10148;</span>
+          </div>
+        </div>
+        <div class="progress-bottom">
+          <span class="progress-pct" id="progressPct">0%</span>
+          <span class="progress-status" id="progressStatus">Nessun piano corrente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. NOTE ISTRUTTORE ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Note dell'istruttore</div>
+      </div>
+      <div id="noteIstruttoreList"><div class="empty-state">Caricamento...</div></div>
+    </div>
+
+    <!-- ── PIANI DI ALLENAMENTO ── -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">I miei allenamenti</div>
+      </div>
+      <div id="allenamentiList">
+        <div class="empty-state">Caricamento...</div>
+      </div>
+    </div>
+
+    <!-- materiali -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">I miei materiali</div>
+        <a href="../MaterialiAtleta/L.Materiali.html" class="btn btn-red" style="font-size:0.82rem;padding:6px 14px;text-decoration:none">Gestisci ⚙️</a>
+      </div>
+      <div id="materialiList">
+        <div class="empty-state">Caricamento...</div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+</div><!-- /mainContent -->
+
+
+<!-- ── MODAL: Nota personale ── -->
+<div class="overlay" id="notaModal">
+  <div class="modal">
+    <div class="modal-pill">Annotazione personale</div>
+    <h2 id="notaModalTitle">Settimana</h2>
+    <div class="modal-divider"></div>
+
+    <div id="noteEsistenti" style="margin-bottom:16px;max-height:220px;overflow-y:auto;"></div>
+
+    <div class="field">
+      <label>Nuova nota</label>
+      <textarea id="notaInput" rows="3" placeholder="Scrivi qui la tua annotazione..."></textarea>
+    </div>
+    <div id="notaMsg" style="font-size:0.8rem;margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeNotaModal()">Chiudi</button>
+      <button class="btn btn-red" onclick="salvaNota()">Salva nota</button>
+    </div>
+  </div>
+</div>
+
+<script src="AtletaDashboard.js"></script>
+</body>
+</html>

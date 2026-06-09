@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Materiali Atleta</title>
+  <link rel="stylesheet" href="L.Materiali.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <button class="back-btn" onclick="history.back()">&#8592; Indietro</button>
+  <h1>🏹 Materiali — <span id="atletaName">...</span></h1>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="toolbar-btn" onclick="duplicaSet()"    title="Duplica Record">📋</button>
+  <button class="toolbar-btn" onclick="eliminaSet()"    title="Elimina Record">🗑️</button>
+  <button class="toolbar-btn" onclick="showAllenamento()" title="Visualizza Allenamento">✅</button>
+  <span class="toolbar-sep"></span>
+  <button class="btn btn-green" onclick="openAddModal()">+ Aggiungi Set</button>
+  <span class="count-label" id="countLabel"></span>
+</div>
+
+<!-- CONTENUTO -->
+<main id="cardContainer">
+  <div class="empty-state" id="emptyState">
+    <div class="icon">📦</div>
+    <p>Nessun set di materiali registrato.<br>
+       Clicca <strong>+ Aggiungi Set</strong> per iniziare.</p>
+  </div>
+</main>
+
+<!-- MODAL: Aggiungi / Modifica Set -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <h2 id="modalTitle">Nuovo Set Materiali</h2>
+    <input type="hidden" id="editId" value="" />
+
+    <div class="mfield">
+      <label>Data</label>
+      <input type="date" id="mData" />
+    </div>
+    <div class="mfield">
+      <label class="check-row">
+        <input type="checkbox" id="mInUso" /> Materiale in Uso
+      </label>
+    </div>
+
+    <hr class="modal-sep" />
+    <p class="modal-section-label">🏹 Arco</p>
+    <div class="modal-grid">
+      <div class="mfield"><label>Riser</label><input id="mRiser" /></div>
+      <div class="mfield"><label>Lunghezza Riser</label><input id="mLunRiser" /></div>
+      <div class="mfield"><label>Flettenti</label><input id="mFlettenti" /></div>
+      <div class="mfield"><label>Lunghezza Flettenti</label><input id="mLunFlett" /></div>
+      <div class="mfield"><label>Potenza Nominale</label><input id="mPotNom" /></div>
+      <div class="mfield"><label>Rest</label><input id="mRest" /></div>
+      <div class="mfield"><label>Mirino</label><input id="mMirino" /></div>
+      <div class="mfield"><label>Stabilizzazione</label><input id="mStab" /></div>
+      <div class="mfield"><label>Aste</label><input id="mAste" /></div>
+      <div class="mfield"><label>Lunghezza Aste</label><input id="mLunAste" /></div>
+    </div>
+
+    <hr class="modal-sep" />
+    <p class="modal-section-label">🎯 Frecce</p>
+    <div class="modal-grid">
+      <div class="mfield"><label>Punte</label><input id="mPunte" /></div>
+      <div class="mfield"><label>Peso Punte</label><input id="mPesoPunte" /></div>
+      <div class="mfield"><label>Cocche</label><input id="mCocche" /></div>
+      <div class="mfield"><label>Alette</label><input id="mAlette" /></div>
+      <div class="mfield"><label>Lunghezza Alette</label><input id="mLunAlet" /></div>
+      <div class="mfield"><label>Spine</label><input id="mSpine" /></div>
+      <div class="mfield"><label>Corda</label><input id="mCorda" /></div>
+      <div class="mfield"><label>Fili</label><input id="mFili" /></div>
+      <div class="mfield" style="grid-column:1/-1"><label>Patella</label><input id="mPatella" /></div>
+    </div>
+
+    <hr class="modal-sep" />
+    <p class="modal-section-label">⚙️ Regolazioni</p>
+    <div class="modal-grid">
+      <div class="mfield"><label>Bottone</label><input id="mBottone" /></div>
+      <div class="mfield"><label>Molla</label><input id="mMolla" /></div>
+      <div class="mfield"><label>Tiller Superiore</label><input id="mTillerSup" /></div>
+      <div class="mfield"><label>Tiller Inferiore</label><input id="mTillerInf" /></div>
+      <div class="mfield"><label>Brace</label><input id="mBrace" /></div>
+      <div class="mfield"><label>Allungo</label><input id="mAllungo" /></div>
+      <div class="mfield"><label>Potenza Reale</label><input id="mPotReale" /></div>
+      <div class="mfield"><label>Punto Incocco</label><input id="mPuntoInc" /></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="closeModal('addModal')">Annulla</button>
+      <button class="btn btn-green" onclick="saveSet()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Visualizza Allenamenti della data -->
+<div class="overlay" id="allModal">
+  <div class="modal modal-wide">
+    <h2 id="allModalTitle">Allenamenti</h2>
+    <div id="allList" style="max-height:400px; overflow-y:auto; margin-bottom:16px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="closeModal('allModal')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<script src="L.Materiali.js"></script>
+</body>
+</html>

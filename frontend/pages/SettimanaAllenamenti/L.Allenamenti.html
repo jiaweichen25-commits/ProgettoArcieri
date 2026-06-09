@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Allenamenti</title>
+  <link rel="stylesheet" href="L.Allenamenti.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body>
+
+<!-- HEADER -->
+<nav class="top-nav">
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Allenamenti</span>
+      <strong id="atletaName">...</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-area">
+      <span class="nav-counter" id="navCounter">1 / 1</span>
+      <button class="nav-btn del" id="btnElimina"    onclick="eliminaAllenamento()"  title="Elimina Allenamento">✕</button>
+      <button class="nav-btn"     id="btnPrecedente" onclick="navPrecedente()"       title="Allenamento Precedente">&#9664;</button>
+      <button class="nav-btn"     id="btnSuccessivo" onclick="navSuccessivo()"       title="Allenamento Successivo">&#9654;</button>
+      <button class="nav-btn"     id="btnUltimo"     onclick="navUltimo()"           title="Ultimo Allenamento">&#9654;|</button>
+    </div>
+    <button class="back-btn" onclick="window.location.href='../Dashboard/Dashboard.html?panel=atleti'">&#8592; I miei Atleti</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- DATI -->
+  <div class="form-card">
+    <div class="form-row">
+      <label>Data Inizio</label>
+      <input type="date" id="dataInizio" onchange="autoSave()" />
+    </div>
+    <div class="form-row">
+      <label>Data Fine</label>
+      <input type="date" id="dataFine" onchange="autoSave()" />
+    </div>
+    <div class="form-row" style="align-items:flex-start;">
+      <label style="padding-top:6px;">Obiettivi</label>
+      <textarea id="obiettivi" onchange="autoSave()" placeholder="Obiettivi generali..."></textarea>
+    </div>
+  </div>
+
+  <!-- SETTIMANE -->
+  <div class="table-card">
+    <div class="table-card-head">
+      <span>Settimane</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="td-num">Settimana</th>
+          <th>Obiettivo</th>
+          <th class="td-actions"></th>
+        </tr>
+      </thead>
+      <tbody id="settimaneBody"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script src="L.Allenamenti.js"></script>
+</body>
+</html>

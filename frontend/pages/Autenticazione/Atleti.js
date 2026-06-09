@@ -17,7 +17,10 @@ function redirectByRuolo(token) {
         const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
         const currentUser = { role: payload.ruolo, email: payload.sub };
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
-        window.location.href = "../dashboard/dashboard.html";
+        const dest = payload.ruolo === "istruttore"
+            ? "../Dashboard/Dashboard.html"
+            : "../Dashboard/AtletaDashboard.html";
+        window.location.href = dest;
     } catch (e) {
         console.error("Errore nel reindirizzamento:", e);
         showMsg("Errore nella lettura dei dati di accesso.", "error");
@@ -122,5 +125,10 @@ window.addEventListener("DOMContentLoaded", () => {
         document.getElementById("rememberLogin").checked = true;
     }
     const token = localStorage.getItem("access_token");
-    if (token) redirectByRuolo(token);
+    if (token) {
+        try {
+            const p = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+            if (p.ruolo === "atleta") redirectByRuolo(token);
+        } catch {}
+    }
 });
