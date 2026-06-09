@@ -20,7 +20,7 @@ def authenticate_user(email: str, password: str):
     if not bcrypt.checkpw(password.encode(), user[0].encode()):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenziali non valide")
         
-    token = create_access_token({"sub": email, "ruolo": user[1]})
+    token = create_access_token({"sub": email, "ruolo": user[1], "id_utente": user[2]})
     return token
 
 def register_user(email: str, password: str, ruolo: str):
@@ -31,5 +31,6 @@ def register_user(email: str, password: str, ruolo: str):
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     user_repository.create_user(email, hashed, ruolo)
     
-    token = create_access_token({"sub": email, "ruolo": ruolo})
+    new_user = user_repository.get_user_by_email(email)
+    token = create_access_token({"sub": email, "ruolo": ruolo, "id_utente": new_user[2]})
     return token

@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS public."Tatleti"
     "Nome" character varying NOT NULL,
     "Cognome" character varying NOT NULL,
     "Indirizzo" character varying,
-    "CAP" integer,
+    "CAP" character varyng,
     "CITTA" character varying,
     "Codice_Fiscale" character varying NOT NULL UNIQUE,
     "Telefono" character varying,
