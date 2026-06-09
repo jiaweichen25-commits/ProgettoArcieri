@@ -1,21 +1,24 @@
-
 services:
-  # Container 1: Il Database PostgreSQL
   db:
-    image: postgres:18-alpine
-    container_name: arcieri_database
+    build: ./Arcieri_database
+    container_name: arcieri_db
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-troia}
+      POSTGRES_DB: ${DB_NAME:-ProgettoArcieri}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./Arcieri_database/ProgettoArcieri.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - arcieri_network
 
-  # Container 2: Il Backend Python con FastAPI
   backend:
     build: ./backend
     container_name: arcieri_backend
@@ -23,21 +26,43 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-troia}@db:5432/${DB_NAME:-ProgettoArcieri}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - arcieri_network
 
-  # Container 3: Il Frontend
   frontend:
     build: ./frontend
     container_name: arcieri_frontend
     restart: always
     ports:
       - "8080:80"
-    volumes:
-      - ./frontend:/usr/share/nginx/html
     depends_on:
       - backend
+    networks:
+      - arcieri_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: arcieri_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - arcieri_network
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  arcieri_network:
+    driver: bridge
