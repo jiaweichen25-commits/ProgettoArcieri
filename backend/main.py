@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 
 # Assicurati che i file si chiamino esattamente così dentro la cartella controllers
 from controllers import auth_controller
-from controllers import atleti_controller  
+from controllers import atleti_controller
+from controllers import materiali_controller
+from controllers import me_controller
 
 # Carica le variabili d'ambiente dal file .env
 load_dotenv()
@@ -23,7 +25,9 @@ app.add_middleware(
 
 # Inclusione dei Router/Controller delle varie entità
 app.include_router(auth_controller.router)
-app.include_router(atleti_controller.router)  
+app.include_router(atleti_controller.router)
+app.include_router(materiali_controller.router)
+app.include_router(me_controller.router)
 
 @app.get("/")
 def read_root():

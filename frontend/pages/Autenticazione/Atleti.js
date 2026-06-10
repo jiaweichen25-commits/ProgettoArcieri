@@ -1,4 +1,6 @@
 const API_URL = "http://localhost:8000";
+const PORTALE = "atleta";
+const AREA_ATLETA = "../AreaAtleta/dashboard.html";
 
 function showMsg(testo, tipo) {
     const box = document.getElementById("msgBox");
@@ -6,18 +8,22 @@ function showMsg(testo, tipo) {
     box.className = "msg-box " + tipo;
 }
 
-function showModalMsg(testo, tipo) {
-    const box = document.getElementById("modalMsgBox");
-    box.textContent = testo;
-    box.className = "msg-box " + tipo;
+function parseToken(token) {
+    return JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
 }
 
 function redirectByRuolo(token) {
     try {
-        const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+        const payload = parseToken(token);
+        if (payload.ruolo !== "atleta") {
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("currentUser");
+            showMsg("Questo accesso è riservato agli atleti.", "error");
+            return;
+        }
         const currentUser = { role: payload.ruolo, email: payload.sub };
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
-        window.location.href = "../dashboard/dashboard.html";
+        window.location.href = AREA_ATLETA;
     } catch (e) {
         console.error("Errore nel reindirizzamento:", e);
         showMsg("Errore nella lettura dei dati di accesso.", "error");
@@ -39,7 +45,7 @@ async function handleLogin(e) {
         const res = await fetch(`${API_URL}/auth/login`, {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ email, password })
+            body:    JSON.stringify({ email, password, portale: PORTALE })
         });
 
         if (!res.ok) {
@@ -67,54 +73,6 @@ async function handleLogin(e) {
     }
 }
 
-/*function openRegisterModal() {
-    document.getElementById("regEmail").value    = "";
-    document.getElementById("regPassword").value = "";
-    document.getElementById("modalMsgBox").className = "msg-box";
-    document.getElementById("registerModal").classList.add("open");
-}
-
-function closeRegisterModal() {
-    document.getElementById("registerModal").classList.remove("open");
-}
-
-async function handleRegister() {
-    const email    = document.getElementById("regEmail").value.trim();
-    const password = document.getElementById("regPassword").value;
-    const btn      = document.getElementById("regBtn");
-
-    if (!email || !password) { showModalMsg("Compila tutti i campi.", "error"); return; }
-    if (password.length < 6) { showModalMsg("Password di almeno 6 caratteri.", "error"); return; }
-
-    btn.disabled    = true;
-    btn.textContent = "Registrazione...";
-
-    try {
-        const res = await fetch(`${API_URL}/auth/register`, {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ email, password, ruolo: "atleta" })
-        });
-
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            showModalMsg(err.detail || "Errore durante la registrazione.", "error");
-            return;
-        }
-
-        const data = await res.json();
-        localStorage.setItem("access_token", data.access_token);
-        closeRegisterModal();
-        redirectByRuolo(data.access_token);
-
-    } catch {
-        showModalMsg("Impossibile contattare il server.", "error");
-    } finally {
-        btn.disabled    = false;
-        btn.textContent = "Registrati";
-    }
-}*/
-
 window.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("remember_email");
     if (saved) {
@@ -122,5 +80,10 @@ window.addEventListener("DOMContentLoaded", () => {
         document.getElementById("rememberLogin").checked = true;
     }
     const token = localStorage.getItem("access_token");
-    if (token) redirectByRuolo(token);
+    if (token) {
+        try {
+            const payload = parseToken(token);
+            if (payload.ruolo === "atleta") redirectByRuolo(token);
+        } catch { /* token invalido, resta sulla login */ }
+    }
 });

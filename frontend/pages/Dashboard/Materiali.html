@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Materiali Atleta</title>
+  <link rel="stylesheet" href="Materiali.css" />
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Portale Ufficiale</span>
+      <strong>Arcieri Vicenza</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <a href="dashboard.html" class="btn-back">← Lista Atleti</a>
+    <button class="btn-logout" onclick="logout()">Esci</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Elenco Materiali</div>
+    <h1 id="titoloAtleta">Materiali</h1>
+    <p>Storico attrezzatura dell'atleta</p>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Configurazioni</div>
+      <button class="btn btn-red" type="button" onclick="openAddModal()">+ Nuovo Materiale</button>
+    </div>
+
+    <div class="msg-box" id="pageMsgBox"></div>
+    <div class="materiali-list" id="materialiList"></div>
+    <div class="empty-state" id="emptyState">
+      <p>Nessun materiale registrato. Aggiungi la prima configurazione.</p>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="formModal">
+  <div class="modal modal-wide">
+    <div class="modal-pill" id="formModalPill">Nuovo Materiale</div>
+    <h2 id="formModalTitle">Aggiungi configurazione</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="formMsgBox"></div>
+    <input type="hidden" id="editMaterialeId" />
+
+    <div class="form-meta">
+      <div class="field">
+        <label>Data <span class="required">*</span></label>
+        <input type="date" id="fData" />
+      </div>
+      <div class="field field-check">
+        <label>
+          <input type="checkbox" id="fMaterialeCorrente" />
+          Materiale in uso
+        </label>
+      </div>
+    </div>
+
+    <div class="form-grid-3">
+      <div class="form-col">
+        <div class="field"><label>Riser</label><input type="text" id="fRiser" /></div>
+        <div class="field"><label>Lunghezza Riser</label><input type="text" id="fLunghezzaRiser" /></div>
+        <div class="field"><label>Flettenti</label><input type="text" id="fFlettenti" /></div>
+        <div class="field"><label>Lunghezza Flettenti</label><input type="text" id="fLunghezzaFlettenti" /></div>
+        <div class="field"><label>Potenza Nominale</label><input type="text" id="fPotenzaNominale" /></div>
+        <div class="field"><label>Rest</label><input type="text" id="fRest" /></div>
+        <div class="field"><label>Mirino</label><input type="text" id="fMirino" /></div>
+        <div class="field"><label>Stabilizzazione</label><input type="text" id="fStabilizzazione" /></div>
+        <div class="field"><label>Aste</label><input type="text" id="fAste" /></div>
+        <div class="field"><label>Lunghezza Aste</label><input type="text" id="fLunghezzaAste" /></div>
+      </div>
+      <div class="form-col">
+        <div class="field"><label>Punte</label><input type="text" id="fPunte" /></div>
+        <div class="field"><label>Peso Punte</label><input type="text" id="fPesoPunte" /></div>
+        <div class="field"><label>Cocche</label><input type="text" id="fCocche" /></div>
+        <div class="field"><label>Alette</label><input type="text" id="fAlette" /></div>
+        <div class="field"><label>Lunghezza Alette</label><input type="text" id="fLunghezzaAlette" /></div>
+        <div class="field"><label>Spine</label><input type="text" id="fSpine" /></div>
+        <div class="field"><label>Corda</label><input type="text" id="fCorda" /></div>
+        <div class="field"><label>Fili</label><input type="number" id="fFili" min="0" /></div>
+        <div class="field"><label>Patella</label><input type="text" id="fPatella" /></div>
+      </div>
+      <div class="form-col">
+        <div class="field"><label>Bottone</label><input type="text" id="fBottone" /></div>
+        <div class="field"><label>Molla</label><input type="text" id="fMolla" /></div>
+        <div class="field"><label>Tiller Superiore</label><input type="text" id="fTillerSuperiore" /></div>
+        <div class="field"><label>Tiller Inferiore</label><input type="text" id="fTillerInferiore" /></div>
+        <div class="field"><label>Brace</label><input type="text" id="fBrace" /></div>
+        <div class="field"><label>Allungo</label><input type="text" id="fAllungo" /></div>
+        <div class="field"><label>Potenza Reale</label><input type="text" id="fPotenzaReale" /></div>
+        <div class="field"><label>Punto Incocco</label><input type="text" id="fPuntoIncocco" /></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" type="button" onclick="closeModal('formModal')">Annulla</button>
+      <button class="btn btn-red" type="button" id="btnSalvaMateriale" onclick="salvaMateriale()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="deleteModal">
+  <div class="modal modal-small">
+    <div class="modal-pill">Attenzione</div>
+    <h2>Elimina Materiale</h2>
+    <div class="modal-divider"></div>
+    <p id="deleteMsg">Sei sicuro di voler eliminare questa configurazione?</p>
+    <input type="hidden" id="deleteMaterialeId" />
+    <div class="modal-actions">
+      <button class="btn btn-outline" type="button" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-red" type="button" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<script src="Materiali.js"></script>
+</body>
+</html>

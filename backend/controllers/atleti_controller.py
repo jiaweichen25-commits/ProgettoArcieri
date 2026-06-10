@@ -1,33 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError
+from fastapi import APIRouter, Depends, status, Response
 from schemas.atleti_schemas import AtletaCreate, AtletaUpdate, AtletaOut
 from services import atleti_service
-from config.settings import SECRET_KEY, ALGORITHM
+from dependencies.auth_deps import solo_istruttore
 from typing import List
 
 router = APIRouter(prefix="/atleti", tags=["atleti"])
-security = HTTPBearer()
-
-# --- DIPENDENZE DI SICUREZZA ---
-
-def get_utente_loggato(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
-    """Legge il JWT e restituisce i dati dell'utente loggato."""
-    try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        id_utente: int = payload.get("id_utente")
-        ruolo: str = payload.get("ruolo")
-        if id_utente is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token non valido")
-        return {"id_utente": id_utente, "ruolo": ruolo}
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token non valido")
-
-def solo_istruttore(utente: dict = Depends(get_utente_loggato)) -> dict:
-    """Blocca l'accesso se l'utente non è un istruttore."""
-    if utente["ruolo"] != "istruttore":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accesso riservato agli istruttori")
-    return utente
 
 # --- ENDPOINT ---
 

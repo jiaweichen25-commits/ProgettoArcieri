@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Dashboard Istruttore</title>
+  <link rel="stylesheet" href="Dashboard.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     DASHBOARD PRINCIPALE
+══════════════════════════════════════════ -->
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Portale Ufficiale</span>
+      <strong>Arcieri Vicenza</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user">Benvenuto, <strong id="navUser">Istruttore</strong></div>
+    <button class="btn-logout" onclick="logout()">Esci</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Area Istruttore</div>
+    <h1>Dashboard</h1>
+    <p>Gestione dei tuoi atleti</p>
+  </div>
+
+  <!-- Contatori -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">I miei atleti</div>
+      <div class="stat-num" id="cntAtleti">0</div>
+      <div class="stat-sub">nella tua lista</div>
+    </div>
+  </div>
+
+  <!-- Sezione atleti -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Lista Atleti</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Atleta</button>
+    </div>
+
+    <!-- Barra ricerca -->
+    <div class="searchbar">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Cerca per nome, cognome o email..."
+        oninput="filterTable()"
+      />
+    </div>
+
+    <!-- Tabella atleti -->
+    <div class="table-wrap">
+      <table id="atletiTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Indirizzo</th>
+            <th>CAP</th>
+            <th>Città</th>
+            <th>Cod. Fiscale</th>
+            <th>Telefono</th>
+            <th>Cellulare</th>
+            <th>Email</th>
+            <th>Data Nascita</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="atletiBody">
+          <!-- Le righe vengono inserite dal JS -->
+        </tbody>
+      </table>
+
+      <!-- Stato vuoto -->
+      <div class="empty-state" id="emptyState">
+        <p>Nessun atleta trovato. Aggiungi il primo!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Nuovo Atleta
+══════════════════════════════════════════ -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-pill">Nuovo Atleta</div>
+    <h2>Aggiungi</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="addMsgBox"></div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Nome <span class="required">*</span></label>
+        <input type="text" id="addNome" placeholder="es. Marco" />
+      </div>
+      <div class="field">
+        <label>Cognome <span class="required">*</span></label>
+        <input type="text" id="addCognome" placeholder="es. Rossi" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Codice Fiscale <span class="required">*</span></label>
+      <input type="text" id="addCf" placeholder="es. RSSMRC90A01L840T" />
+    </div>
+
+    <div class="field">
+      <label>Email <span class="required">*</span></label>
+      <input type="email" id="addEmail" placeholder="es. marco.rossi@email.com" />
+    </div>
+
+    <div class="field">
+      <label>Indirizzo</label>
+      <input type="text" id="addIndirizzo" placeholder="es. Via Roma 1" />
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>CAP</label>
+        <input type="text" id="addCap" placeholder="es. 36100" />
+      </div>
+      <div class="field">
+        <label>Città</label>
+        <input type="text" id="addCitta" placeholder="es. Vicenza" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Telefono</label>
+        <input type="tel" id="addTelefono" placeholder="es. 0444 123456" />
+      </div>
+      <div class="field">
+        <label>Cellulare</label>
+        <input type="tel" id="addCellulare" placeholder="es. 348 1234567" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Data di Nascita</label>
+      <input type="date" id="addDataNascita" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('addModal')">Annulla</button>
+      <button class="btn btn-red" onclick="salvaAtleta()">Salva Atleta</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Modifica Atleta (Anagrafica)
+══════════════════════════════════════════ -->
+<div class="overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-pill">Anagrafica</div>
+    <h2>Modifica Atleta</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="editMsgBox"></div>
+
+    <!-- ID nascosto, serve al JS per sapere quale atleta modificare -->
+    <input type="hidden" id="editId" />
+
+    <div class="form-row">
+      <div class="field">
+        <label>Nome <span class="required">*</span></label>
+        <input type="text" id="editNome" />
+      </div>
+      <div class="field">
+        <label>Cognome <span class="required">*</span></label>
+        <input type="text" id="editCognome" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Codice Fiscale <span class="required">*</span></label>
+      <input type="text" id="editCf" />
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="editEmail" />
+    </div>
+
+    <div class="field">
+      <label>Indirizzo</label>
+      <input type="text" id="editIndirizzo" />
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>CAP</label>
+        <input type="text" id="editCap" />
+      </div>
+      <div class="field">
+        <label>Città</label>
+        <input type="text" id="editCitta" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Telefono</label>
+        <input type="tel" id="editTelefono" />
+      </div>
+      <div class="field">
+        <label>Cellulare</label>
+        <input type="tel" id="editCellulare" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Data di Nascita</label>
+      <input type="date" id="editDataNascita" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('editModal')">Annulla</button>
+      <button class="btn btn-red" onclick="aggiornaAtleta()">Salva Modifiche</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Conferma Eliminazione
+══════════════════════════════════════════ -->
+<div class="overlay" id="deleteModal">
+  <div class="modal modal-small">
+    <div class="modal-pill">Attenzione</div>
+    <h2>Elimina Atleta</h2>
+    <div class="modal-divider"></div>
+    <p id="deleteMsg">Sei sicuro di voler eliminare questo atleta? L'operazione non è reversibile.</p>
+    <input type="hidden" id="deleteId" />
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="Dashboard.js"></script>
+</body>
+</html>

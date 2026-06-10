@@ -17,6 +17,22 @@ def get_atleti_by_istruttore(id_istruttore: int):
     finally:
         conn.close()
 
+def get_atleta_by_id_utente(id_utente: int):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''SELECT "IDatleta", "Nome", "Cognome", "Codice_Fiscale",
+                          "DataNascita", "Telefono", "Cellulare", "E-mail",
+                          "Indirizzo", "CAP", "CITTA"
+                   FROM "Tatleti"
+                   WHERE "IDutente" = %s''',
+                (id_utente,)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
 def get_id_istruttore_by_utente(id_utente: int):
     conn = get_db_conn()
     try:

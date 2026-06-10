@@ -26,7 +26,7 @@ def _row_to_dict(row) -> dict:
         "cellulare":      row[6],
         "email":          row[7],
         "indirizzo":      row[8],
-        "cap":            row[9],
+        "cap":            str(row[9]) if row[9] is not None else None,
         "citta":          row[10],
     }
 
@@ -48,13 +48,22 @@ def crea_atleta(id_utente: int, dati: dict):
             detail="L'email dell'atleta è obbligatoria"
         )
 
+    # Controlla se esiste già un atleta con questa email per questo istruttore
+    atleti_esistenti = atleti_repository.get_atleti_by_istruttore(id_istruttore)
+    for row in atleti_esistenti:
+        if row[7] and row[7].lower() == email_atleta.lower():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Esiste già un atleta con questa email"
+            )
+
     # Controlla se esiste già un account con questa email
     existing = user_repository.get_user_by_email(email_atleta)
     if existing:
         id_utente_atleta = existing[2]
     else:
         # Crea account con password temporanea
-        password_temp = "Arcieri2024!"
+        password_temp = "123456"
         hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
         user_repository.create_user(email_atleta, hashed, "atleta")
         nuovo_utente = user_repository.get_user_by_email(email_atleta)
