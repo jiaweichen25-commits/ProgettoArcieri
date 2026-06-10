@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS public."TdetAllFisCor"
     "IDallenamento" integer NOT NULL,
     "IDsettimana" integer NOT NULL,
     "IDseduta" integer NOT NULL,
-    "IDatrezzo" integer,
+    "IDattrezzo" integer,
     "Lunedi" character varying,
     "Martedi" character varying,
     "Mercoledi" character varying,
@@ -252,11 +252,11 @@ CREATE TABLE IF NOT EXISTS public."TdetAllFisCor"
     PRIMARY KEY ("IDdetAllFisCor")
 );
 
-CREATE TABLE IF NOT EXISTS public."TSatrezzi"
+CREATE TABLE IF NOT EXISTS public."TSattrezzi"
 (
-    "IDatrezzo" serial NOT NULL,
-    "AtrezzoDes" character varying,
-    PRIMARY KEY ("IDatrezzo")
+    "IDattrezzo" serial NOT NULL,
+    "AttrezzoDes" character varying,
+    PRIMARY KEY ("IDattrezzo")
 );
 
 CREATE TABLE IF NOT EXISTS public."TSdesEsercizioAllFisCor"
@@ -278,6 +278,26 @@ CREATE TABLE IF NOT EXISTS public."TdetNoteAtleta"
         REFERENCES public."Tallenamenti" ("IDallenamento")
         ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+
+CREATE TABLE IF NOT EXISTS public."Tvisitemediche"
+(
+    "IDvisita"      serial NOT NULL,
+    "IDatleta"      integer NOT NULL,
+    "DataVisita"    date NOT NULL,
+    "DataScadenza"  date NOT NULL,
+    PRIMARY KEY     ("IDvisita")
+);
+
+CREATE TABLE IF NOT EXISTS public."Tantidoping"
+(
+    "IDantidoping"              serial NOT NULL,
+    "IDatleta"                  integer NOT NULL,
+    "Anno"                      integer NOT NULL,
+    "AutorizzazioneFitarco"     boolean NOT NULL DEFAULT false,
+    "ScadenzaAutorizzazione"    date,
+    PRIMARY KEY ("IDantidoping")
+);
+
 -- ==========================================
 -- VINCOLI E CHIAVI ESTERNE (ALTER TABLES)
 -- ==========================================
@@ -338,9 +358,17 @@ ALTER TABLE IF EXISTS public."TdetAllFisForRes"
 ALTER TABLE IF EXISTS public."TdetAllFisCor"
     ADD FOREIGN KEY ("IDallenamento", "IDsettimana", "IDseduta")
     REFERENCES public."TdetAllenamenti" ("IDallenamento", "IDsettimana", "IDseduta") ON UPDATE NO ACTION ON DELETE NO ACTION,
-    ADD FOREIGN KEY ("IDatrezzo")
-    REFERENCES public."TSatrezzi" ("IDatrezzo") ON UPDATE NO ACTION ON DELETE NO ACTION,
+    ADD FOREIGN KEY ("IDattrezzo")
+    REFERENCES public."TSattrezzi" ("IDattrezzo") ON UPDATE NO ACTION ON DELETE NO ACTION,
     ADD FOREIGN KEY ("IDdescrizioneEsercizioAllFisCor")
     REFERENCES public."TSdesEsercizioAllFisCor" ("IDdescrizioneEsercizioAllFisCor") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE IF EXISTS public."Tvisitemediche"
+    ADD FOREIGN KEY ("IDatleta")
+    REFERENCES public."Tatleti" ("IDatleta") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE IF EXISTS public."Tantidoping"
+    ADD FOREIGN KEY ("IDatleta")
+    REFERENCES public."Tatleti" ("IDatleta") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 COMMIT;
