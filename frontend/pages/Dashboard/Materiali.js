@@ -288,7 +288,7 @@ async function confermaElimina() {
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
   if (!ID_ATLETA) {
-    window.location.href = "dashboard.html";
+    window.location.href = "Dashboard.html";
     return;
   }
   const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");

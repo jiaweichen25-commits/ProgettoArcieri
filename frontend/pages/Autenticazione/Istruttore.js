@@ -1,6 +1,6 @@
 const API_URL = "http://localhost:8000";
 const PORTALE = "istruttore";
-const DASHBOARD = "../Dashboard/dashboard.html";
+const DASHBOARD = "../Dashboard/Dashboard.html";
 
 function showMsg(testo, tipo) {
     const box = document.getElementById("msgBox");
