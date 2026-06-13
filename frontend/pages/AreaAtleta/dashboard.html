@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arcieri Vicenza – Area Atleta</title>
-  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="Dashboard.css" />
 </head>
 <body>
 
@@ -25,49 +25,73 @@
 <div class="page">
   <div class="page-header">
     <div class="pill">Area Atleta</div>
-    <h1 id="titoloAtleta">La mia area</h1>
-    <p>Consulta i tuoi dati e i piani di allenamento</p>
+    <h1 id="nomeAtleta">—</h1>
+    <p>Il tuo profilo e i tuoi dati</p>
   </div>
 
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-label">Allenamenti</div>
-      <div class="stat-num" id="cntAllenamenti">0</div>
-      <div class="stat-sub">piani attivi</div>
-    </div>
-  </div>
-
+  <!-- ══ PROFILO ══ -->
   <div class="section">
-    <div class="section-title">I miei dati</div>
-    <div class="profilo-grid" id="profiloGrid">
-      <p class="loading">Caricamento...</p>
+    <div class="section-title">Il mio profilo</div>
+    <div class="info-grid" id="profiloGrid">
+      <div class="info-item"><span class="info-label">Nome</span><span class="info-value" id="pNome">—</span></div>
+      <div class="info-item"><span class="info-label">Cognome</span><span class="info-value" id="pCognome">—</span></div>
+      <div class="info-item"><span class="info-label">Codice Fiscale</span><span class="info-value" id="pCf">—</span></div>
+      <div class="info-item"><span class="info-label">Data di Nascita</span><span class="info-value" id="pDataNascita">—</span></div>
+      <div class="info-item"><span class="info-label">Indirizzo</span><span class="info-value" id="pIndirizzo">—</span></div>
+      <div class="info-item"><span class="info-label">CAP</span><span class="info-value" id="pCap">—</span></div>
+      <div class="info-item"><span class="info-label">Città</span><span class="info-value" id="pCitta">—</span></div>
+      <div class="info-item"><span class="info-label">Telefono</span><span class="info-value" id="pTelefono">—</span></div>
+      <div class="info-item"><span class="info-label">Cellulare</span><span class="info-value" id="pCellulare">—</span></div>
+      <div class="info-item"><span class="info-label">Email</span><span class="info-value" id="pEmail">—</span></div>
     </div>
   </div>
 
-  <div class="section section-spaced">
+  <!-- ══ MATERIALE CORRENTE ══ -->
+  <div class="section">
     <div class="section-title">Materiale in uso</div>
-    <div id="materialeCorrente" class="materiale-box">
-      <p class="loading">Caricamento...</p>
+    <div id="materialeCorrente">
+      <div class="empty-state" id="materialeCorrenteEmpty">Nessun materiale attivo.</div>
     </div>
   </div>
 
-  <div class="section section-spaced">
+  <!-- ══ STORICO MATERIALI ══ -->
+  <div class="section">
     <div class="section-title">Storico materiali</div>
-    <div id="storicoMateriali" class="storico-list"></div>
-    <div class="empty-state" id="emptyMateriali" style="display:none">
-      <p>Nessun materiale registrato.</p>
+    <div id="storicoMateriali"></div>
+    <div class="empty-state" id="storicoEmpty" style="display:none">
+      Nessun materiale nello storico.
     </div>
   </div>
 
-  <div class="section section-spaced">
+  <!-- ══ ALLENAMENTI ══ -->
+  <div class="section">
     <div class="section-title">I miei allenamenti</div>
-    <div id="allenamentiList" class="storico-list"></div>
-    <div class="empty-state" id="emptyAllenamenti">
-      <p>Nessun piano di allenamento disponibile al momento.</p>
+    <div id="allenamentoList"></div>
+    <div class="empty-state" id="allenamentoEmpty">
+      Nessun allenamento registrato.
     </div>
   </div>
+
+  <!-- ══ VISITE MEDICHE ══ -->
+  <div class="section">
+    <div class="section-title">Visite mediche</div>
+    <div id="visiteList"></div>
+    <div class="empty-state" id="visiteEmpty">
+      Nessuna visita registrata.
+    </div>
+  </div>
+
+  <!-- ══ ANTIDOPING ══ -->
+  <div class="section">
+    <div class="section-title">Antidoping</div>
+    <div id="antidopingList"></div>
+    <div class="empty-state" id="antidopingEmpty">
+      Nessun record antidoping registrato.
+    </div>
+  </div>
+
 </div>
 
-<script src="dashboard.js"></script>
+<script src="Dashboard.js"></script>
 </body>
 </html>

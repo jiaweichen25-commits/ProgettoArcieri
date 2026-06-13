@@ -1,18 +1,5 @@
 const API_URL = "http://localhost:8000";
 
-const MAT_LABELS = [
-  ["riser", "Riser"], ["lunghezza_riser", "Lunghezza Riser"], ["flettenti", "Flettenti"],
-  ["lunghezza_flettenti", "Lunghezza Flettenti"], ["potenza_nominale", "Potenza Nominale"],
-  ["rest", "Rest"], ["mirino", "Mirino"], ["stabilizzazione", "Stabilizzazione"],
-  ["aste", "Aste"], ["lunghezza_aste", "Lunghezza Aste"], ["punte", "Punte"],
-  ["peso_punte", "Peso Punte"], ["cocche", "Cocche"], ["alette", "Alette"],
-  ["lunghezza_alette", "Lunghezza Alette"], ["spine", "Spine"], ["corda", "Corda"],
-  ["fili", "Fili"], ["patella", "Patella"], ["bottone", "Bottone"], ["molla", "Molla"],
-  ["tiller_superiore", "Tiller Sup."], ["tiller_inferiore", "Tiller Inf."],
-  ["brace", "Brace"], ["allungo", "Allungo"], ["potenza_reale", "Potenza Reale"],
-  ["punto_incocco", "Punto Incocco"],
-];
-
 function getToken() {
   return localStorage.getItem("access_token");
 }
@@ -24,49 +11,32 @@ function authHeaders() {
   };
 }
 
-function parseToken() {
-  const token = getToken();
-  if (!token) return null;
-  try {
-    return JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
-  } catch {
-    return null;
-  }
-}
-
 function requireAuth() {
-  const payload = parseToken();
-  if (!payload) {
-    window.location.href = "../Autenticazione/Atleti.html";
+  const token = getToken();
+  if (!token) {
+    window.location.href = "../Autenticazione/Atleta.html";
     return false;
   }
-  if (payload.ruolo !== "atleta") {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("currentUser");
-    window.location.href = "../Autenticazione/Atleti.html";
+  try {
+    const payload = JSON.parse(
+      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    if (payload.ruolo !== "atleta") {
+      localStorage.clear();
+      window.location.href = "../Autenticazione/Atleta.html";
+      return false;
+    }
+    return true;
+  } catch {
+    window.location.href = "../Autenticazione/Atleta.html";
     return false;
   }
-  const navUser = document.getElementById("navUser");
-  if (navUser) {
-    const saved = localStorage.getItem("currentUser");
-    const user = saved ? JSON.parse(saved) : { email: payload.sub };
-    navUser.textContent = user.email || payload.sub;
-  }
-  return true;
 }
 
 function logout() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("currentUser");
-  window.location.href = "../Autenticazione/Atleti.html";
-}
-
-function escHtml(str) {
-  if (str == null || str === "") return "—";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  window.location.href = "../Autenticazione/Atleta.html";
 }
 
 function formatDate(iso) {
@@ -76,114 +46,219 @@ function formatDate(iso) {
   return d.toLocaleDateString("it-IT");
 }
 
-function renderProfilo(p) {
-  const grid = document.getElementById("profiloGrid");
-  document.getElementById("titoloAtleta").textContent = `${p.nome} ${p.cognome}`;
-  const fields = [
-    ["Nome", p.nome], ["Cognome", p.cognome], ["Email", p.email],
-    ["Cod. Fiscale", p.codice_fiscale], ["Data Nascita", formatDate(p.data_nascita)],
-    ["Indirizzo", p.indirizzo], ["CAP", p.cap], ["Città", p.citta],
-    ["Telefono", p.telefono], ["Cellulare", p.cellulare],
-  ];
-  grid.innerHTML = fields.map(([label, val]) => `
-    <div class="profilo-item">
-      <label>${label}</label>
-      <span>${escHtml(val)}</span>
-    </div>
-  `).join("");
+function escHtml(str) {
+  if (str == null || str === "") return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function renderMaterialeBox(m, targetId) {
-  const el = document.getElementById(targetId);
-  if (!m) {
-    el.innerHTML = '<p class="empty-state">Nessun materiale in uso.</p>';
-    return;
-  }
-  el.innerHTML = `
-    <div class="materiale-grid">
-      ${MAT_LABELS.map(([key, label]) =>
-        `<span><strong>${label}:</strong> ${escHtml(m[key])}</span>`
-      ).join("")}
-    </div>
-    <p style="margin-top:12px;font-size:0.78rem;color:#666">Data: ${formatDate(m.data)}</p>
-  `;
+function val(v) {
+  return v ? escHtml(v) : "—";
 }
 
-function renderStoricoMateriali(lista) {
-  const storico = document.getElementById("storicoMateriali");
-  const empty = document.getElementById("emptyMateriali");
-  const altri = lista.filter((m) => !m.materiale_corrente);
-
-  if (!altri.length) {
-    storico.innerHTML = "";
-    empty.style.display = lista.length ? "none" : "block";
-    if (lista.length) empty.style.display = "none";
-    return;
-  }
-  empty.style.display = "none";
-  storico.innerHTML = altri.map((m) => `
-    <div class="storico-item">
-      <strong>${formatDate(m.data)}</strong> —
-      Riser: ${escHtml(m.riser)} · Flettenti: ${escHtml(m.flettenti)} · Corda: ${escHtml(m.corda)}
-    </div>
-  `).join("");
-}
-
-function renderAllenamenti(lista) {
-  const box = document.getElementById("allenamentiList");
-  const empty = document.getElementById("emptyAllenamenti");
-  document.getElementById("cntAllenamenti").textContent = lista.length;
-
-  if (!lista.length) {
-    box.innerHTML = "";
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
-  box.innerHTML = lista.map((a) => `
-    <div class="storico-item">
-      <strong>${formatDate(a.data_inizio)} – ${formatDate(a.data_fine)}</strong>
-      ${escHtml(a.obiettivi)}
-    </div>
-  `).join("");
-}
-
-async function caricaDati() {
+// ══ PROFILO ══
+async function caricaProfilo() {
   try {
-    const [profiloRes, matRes, allRes] = await Promise.all([
-      fetch(`${API_URL}/me/profilo`, { headers: authHeaders() }),
-      fetch(`${API_URL}/me/materiali`, { headers: authHeaders() }),
-      fetch(`${API_URL}/me/allenamenti`, { headers: authHeaders() }),
-    ]);
+    const res = await fetch(`${API_URL}/me/profilo`, { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    if (!res.ok) return;
+    const p = await res.json();
 
-    if ([profiloRes, matRes, allRes].some((r) => r.status === 401)) {
-      logout();
-      return;
-    }
-
-    if (!profiloRes.ok) {
-      document.getElementById("profiloGrid").innerHTML =
-        '<p class="empty-state">Profilo non disponibile.</p>';
-      return;
-    }
-
-    const profilo = await profiloRes.json();
-    renderProfilo(profilo);
-
-    const materiali = matRes.ok ? await matRes.json() : [];
-    const corrente = materiali.find((m) => m.materiale_corrente) || materiali[0] || null;
-    renderMaterialeBox(corrente, "materialeCorrente");
-    renderStoricoMateriali(materiali);
-
-    const allenamenti = allRes.ok ? await allRes.json() : [];
-    renderAllenamenti(allenamenti);
+    document.getElementById("nomeAtleta").textContent = `${p.nome} ${p.cognome}`;
+    document.getElementById("navUser").textContent = `${p.nome} ${p.cognome}`;
+    document.getElementById("pNome").textContent = val(p.nome);
+    document.getElementById("pCognome").textContent = val(p.cognome);
+    document.getElementById("pCf").textContent = val(p.codice_fiscale);
+    document.getElementById("pDataNascita").textContent = formatDate(p.data_nascita);
+    document.getElementById("pIndirizzo").textContent = val(p.indirizzo);
+    document.getElementById("pCap").textContent = val(p.cap);
+    document.getElementById("pCitta").textContent = val(p.citta);
+    document.getElementById("pTelefono").textContent = val(p.telefono);
+    document.getElementById("pCellulare").textContent = val(p.cellulare);
+    document.getElementById("pEmail").textContent = val(p.email);
   } catch {
-    document.getElementById("profiloGrid").innerHTML =
-      '<p class="empty-state">Impossibile contattare il server.</p>';
+    console.error("Errore caricamento profilo");
   }
 }
 
+// ══ MATERIALI ══
+async function caricaMateriali() {
+  try {
+    const res = await fetch(`${API_URL}/me/materiali`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const lista = await res.json();
+
+    const corrente = lista.find((m) => m.materiale_corrente);
+    const storico = lista.filter((m) => !m.materiale_corrente);
+
+    // Materiale corrente
+    const boxCorrente = document.getElementById("materialeCorrente");
+    const emptyCorrente = document.getElementById("materialeCorrenteEmpty");
+    if (corrente) {
+      emptyCorrente.style.display = "none";
+      boxCorrente.innerHTML = `
+        <div class="info-card in-uso">
+          <div class="info-card-header">
+            <span class="materiale-badge">In uso</span>
+            <span class="info-date">${formatDate(corrente.data)}</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">Riser</span><span class="info-value">${val(corrente.riser)}</span></div>
+            <div class="info-item"><span class="info-label">Flettenti</span><span class="info-value">${val(corrente.flettenti)}</span></div>
+            <div class="info-item"><span class="info-label">Potenza Nominale</span><span class="info-value">${val(corrente.potenza_nominale)}</span></div>
+            <div class="info-item"><span class="info-label">Potenza Reale</span><span class="info-value">${val(corrente.potenza_reale)}</span></div>
+            <div class="info-item"><span class="info-label">Mirino</span><span class="info-value">${val(corrente.mirino)}</span></div>
+            <div class="info-item"><span class="info-label">Corda</span><span class="info-value">${val(corrente.corda)}</span></div>
+            <div class="info-item"><span class="info-label">Punte</span><span class="info-value">${val(corrente.punte)}</span></div>
+            <div class="info-item"><span class="info-label">Allungo</span><span class="info-value">${val(corrente.allungo)}</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Storico
+    const boxStorico = document.getElementById("storicoMateriali");
+    const emptyStorico = document.getElementById("storicoEmpty");
+    if (!storico.length) {
+      emptyStorico.style.display = "block";
+      return;
+    }
+    emptyStorico.style.display = "none";
+    boxStorico.innerHTML = storico.map((m) => `
+      <div class="info-card">
+        <div class="info-card-header">
+          <span class="info-date">${formatDate(m.data)}</span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">Riser</span><span class="info-value">${val(m.riser)}</span></div>
+          <div class="info-item"><span class="info-label">Flettenti</span><span class="info-value">${val(m.flettenti)}</span></div>
+          <div class="info-item"><span class="info-label">Potenza Reale</span><span class="info-value">${val(m.potenza_reale)}</span></div>
+          <div class="info-item"><span class="info-label">Mirino</span><span class="info-value">${val(m.mirino)}</span></div>
+        </div>
+      </div>
+    `).join("");
+  } catch {
+    console.error("Errore caricamento materiali");
+  }
+}
+
+// ══ ALLENAMENTI ══
+async function caricaAllenamenti() {
+  try {
+    const res = await fetch(`${API_URL}/me/allenamenti`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const lista = await res.json();
+
+    const box = document.getElementById("allenamentoList");
+    const empty = document.getElementById("allenamentoEmpty");
+
+    if (!lista.length) {
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    const oggi = new Date();
+    box.innerHTML = lista.map((a) => {
+      const inCorso = new Date(a.data_fine) >= oggi;
+      return `
+        <div class="info-card${inCorso ? " in-uso" : ""}">
+          <div class="info-card-header">
+            <span class="materiale-badge" style="background:${inCorso ? "#276749" : "#c53030"}">
+              ${inCorso ? "In corso" : "Concluso"}
+            </span>
+            <span class="info-date">${formatDate(a.data_inizio)} → ${formatDate(a.data_fine)}</span>
+          </div>
+          ${a.obiettivi ? `<p class="info-obiettivi">${escHtml(a.obiettivi)}</p>` : ""}
+        </div>
+      `;
+    }).join("");
+  } catch {
+    console.error("Errore caricamento allenamenti");
+  }
+}
+
+// ══ VISITE ══
+async function caricaVisite() {
+  try {
+    const res = await fetch(`${API_URL}/me/visite`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const lista = await res.json();
+
+    const box = document.getElementById("visiteList");
+    const empty = document.getElementById("visiteEmpty");
+
+    if (!lista.length) {
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    const oggi = new Date();
+    box.innerHTML = lista.map((v) => {
+      const valida = new Date(v.data_scadenza) >= oggi;
+      return `
+        <div class="info-card${valida ? " in-uso" : ""}">
+          <div class="info-card-header">
+            <span class="materiale-badge" style="background:${valida ? "#276749" : "#c53030"}">
+              ${valida ? "Valida" : "Scaduta"}
+            </span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">Data visita</span><span class="info-value">${formatDate(v.data_visita)}</span></div>
+            <div class="info-item"><span class="info-label">Scadenza</span><span class="info-value">${formatDate(v.data_scadenza)}</span></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch {
+    console.error("Errore caricamento visite");
+  }
+}
+
+// ══ ANTIDOPING ══
+async function caricaAntidoping() {
+  try {
+    const res = await fetch(`${API_URL}/me/antidoping`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const lista = await res.json();
+
+    const box = document.getElementById("antidopingList");
+    const empty = document.getElementById("antidopingEmpty");
+
+    if (!lista.length) {
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    box.innerHTML = lista.map((a) => `
+      <div class="info-card${a.autorizzazione_fitarco ? " in-uso" : ""}">
+        <div class="info-card-header">
+          <span class="materiale-badge" style="background:${a.autorizzazione_fitarco ? "#276749" : "#c53030"}">
+            ${a.autorizzazione_fitarco ? "Autorizzato" : "Non autorizzato"}
+          </span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><span class="info-label">Anno</span><span class="info-value">${a.anno}</span></div>
+          <div class="info-item"><span class="info-label">Scadenza</span><span class="info-value">${formatDate(a.scadenza_autorizzazione)}</span></div>
+        </div>
+      </div>
+    `).join("");
+  } catch {
+    console.error("Errore caricamento antidoping");
+  }
+}
+
+// ══ INIT ══
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
-  caricaDati();
+  caricaProfilo();
+  caricaMateriali();
+  caricaAllenamenti();
+  caricaVisite();
+  caricaAntidoping();
 });

@@ -1,6 +1,6 @@
 const API_URL = "http://localhost:8000";
 const PORTALE = "atleta";
-const AREA_ATLETA = "../AreaAtleta/dashboard.html";
+const AREA_ATLETA = "../AreaAtleta/Dashboard.html";
 
 function showMsg(testo, tipo) {
     const box = document.getElementById("msgBox");
