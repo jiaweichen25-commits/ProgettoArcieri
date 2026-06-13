@@ -18,3 +18,11 @@ def i_miei_materiali(utente: dict = Depends(solo_atleta)):
 @router.get("/allenamenti")
 def i_miei_allenamenti(utente: dict = Depends(solo_atleta)):
     return me_service.get_allenamenti(utente["id_utente"])
+
+@router.get("/visite")
+def le_mie_visite(utente: dict = Depends(solo_atleta)):
+    return me_service.get_visite(utente["id_utente"])
+
+@router.get("/antidoping")
+def il_mio_antidoping(utente: dict = Depends(solo_atleta)):
+    return me_service.get_antidoping(utente["id_utente"])
