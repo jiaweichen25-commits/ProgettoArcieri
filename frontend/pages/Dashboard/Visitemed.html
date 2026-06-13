@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Visite Mediche</title>
+  <link rel="stylesheet" href="Materiali.css" />
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Visite Mediche</span>
+      <strong id="titoloAtleta">—</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="btn-logout" onclick="tornaDashboard()">← Dashboard</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Area Istruttore</div>
+    <h1 id="titoloAtleta2">Visite Mediche</h1>
+  </div>
+
+  <div class="msg-box" id="pageMsgBox"></div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Elenco Visite</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuova Visita</button>
+    </div>
+
+    <div id="visitaList"></div>
+
+    <div class="empty-state" id="emptyState">
+      <p>Nessuna visita registrata. Aggiungi la prima!</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Aggiungi / Modifica Visita
+══════════════════════════════════════════ -->
+<div class="overlay" id="formModal">
+  <div class="modal">
+    <div class="modal-pill" id="formModalPill">Nuova Visita</div>
+    <h2 id="formModalTitle">Aggiungi visita</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="formMsgBox"></div>
+
+    <input type="hidden" id="editVisitaId" />
+
+    <div class="field">
+      <label>Data Visita <span class="required">*</span></label>
+      <input type="date" id="fDataVisita" />
+    </div>
+
+    <div class="field">
+      <label>Data Scadenza <span class="required">*</span></label>
+      <input type="date" id="fDataScadenza" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
+      <button class="btn btn-red" onclick="salvaVisita()">Salva</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Conferma Eliminazione
+══════════════════════════════════════════ -->
+<div class="overlay" id="deleteModal">
+  <div class="modal modal-small">
+    <div class="modal-pill">Attenzione</div>
+    <h2>Elimina Visita</h2>
+    <div class="modal-divider"></div>
+    <p id="deleteMsg">Sei sicuro di voler eliminare questa visita?</p>
+    <input type="hidden" id="deleteVisitaId" />
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="Visitemed.js"></script>
+</body>
+</html>

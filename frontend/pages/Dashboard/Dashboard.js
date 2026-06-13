@@ -150,6 +150,9 @@ function renderTable(lista) {
       <td>${formatDate(atleta.data_nascita)}</td>
       <td class="actions-cell">
         <button class="btn btn-sm btn-outline" type="button" data-materiali="${id}">Materiali</button>
+        <button class="btn btn-sm btn-outline" type="button" data-visite="${id}">Visite</button>
+        <button class="btn btn-sm btn-outline" type="button" data-antidoping="${id}">Antidoping</button>
+        <button class="btn btn-sm btn-outline" type="button" data-allenamenti="${id}">Allenamenti</button>
         <button class="btn btn-sm btn-outline" type="button" data-edit="${id}">Modifica</button>
         <button class="btn btn-sm btn-red" type="button" data-delete="${id}">Elimina</button>
       </td>
@@ -171,6 +174,35 @@ function renderTable(lista) {
     });
   });
 
+  tbody.querySelectorAll("[data-visite]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.visite));
+      if (a) {
+        const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
+        window.location.href = `Visitemed.html?${q.toString()}`;
+      }
+    });
+  });
+
+  tbody.querySelectorAll("[data-antidoping]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.antidoping));
+      if (a) {
+        const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
+        window.location.href = `Antidoping.html?${q.toString()}`;
+      }
+    });
+  });
+
+  tbody.querySelectorAll("[data-allenamenti]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.allenamenti));
+      if (a) {
+        const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
+        window.location.href = `Allenamenti.html?${q.toString()}`;
+      }
+    });
+  });
   tbody.querySelectorAll("[data-edit]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.edit));

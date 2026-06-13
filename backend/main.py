@@ -1,13 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from dotenv import load_dotenv
 
-# Assicurati che i file si chiamino esattamente così dentro la cartella controllers
+
+from dotenv import load_dotenv
+from controllers import visitemed_controller
 from controllers import auth_controller
 from controllers import atleti_controller
 from controllers import materiali_controller
 from controllers import me_controller
+from controllers import antidoping_controller
 
 # Carica le variabili d'ambiente dal file .env
 load_dotenv()
@@ -28,7 +30,9 @@ app.include_router(auth_controller.router)
 app.include_router(atleti_controller.router)
 app.include_router(materiali_controller.router)
 app.include_router(me_controller.router)
+app.include_router(visitemed_controller.router)
+app.include_router(antidoping_controller.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Il backend di ProgettoArcieri con FastAPI funziona!"}
+    return {"message": "QUALCOSA???"}
