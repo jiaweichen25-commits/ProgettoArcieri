@@ -10,6 +10,8 @@ from controllers import atleti_controller
 from controllers import materiali_controller
 from controllers import me_controller
 from controllers import antidoping_controller
+from controllers import allenamenti_controller
+
 
 # Carica le variabili d'ambiente dal file .env
 load_dotenv()
@@ -32,6 +34,8 @@ app.include_router(materiali_controller.router)
 app.include_router(me_controller.router)
 app.include_router(visitemed_controller.router)
 app.include_router(antidoping_controller.router)
+app.include_router(allenamenti_controller.router)
+
 
 @app.get("/")
 def read_root():

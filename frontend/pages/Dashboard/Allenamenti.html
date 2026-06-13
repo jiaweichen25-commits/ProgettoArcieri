@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Allenamenti</title>
+  <link rel="stylesheet" href="Materiali.css" />
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Allenamenti</span>
+      <strong id="titoloAtleta">—</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="btn-logout" onclick="tornaDashboard()">← Dashboard</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Area Istruttore</div>
+    <h1 id="titoloAtleta2">Allenamenti</h1>
+  </div>
+
+  <div class="msg-box" id="pageMsgBox"></div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Elenco Allenamenti</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Allenamento</button>
+    </div>
+
+    <div id="allenamentoList"></div>
+
+    <div class="empty-state" id="emptyState">
+      <p>Nessun allenamento registrato. Aggiungi il primo!</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Aggiungi / Modifica Allenamento
+══════════════════════════════════════════ -->
+<div class="overlay" id="formModal">
+  <div class="modal">
+    <div class="modal-pill" id="formModalPill">Nuovo Allenamento</div>
+    <h2 id="formModalTitle">Aggiungi allenamento</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="formMsgBox"></div>
+
+    <input type="hidden" id="editAllenamentoId" />
+
+    <div class="form-row">
+      <div class="field">
+        <label>Data Inizio <span class="required">*</span></label>
+        <input type="date" id="fDataInizio" />
+      </div>
+      <div class="field">
+        <label>Data Fine <span class="required">*</span></label>
+        <input type="date" id="fDataFine" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Obiettivi</label>
+      <textarea id="fObiettivi" rows="3"
+        placeholder="es. Migliorare la tecnica di tiro..."
+        style="width:100%;background:#1e1e1e;border:1px solid #2a2a2a;color:#f0f0f0;
+               padding:8px;font-family:inherit;font-size:0.88rem;border-radius:4px;
+               outline:none;resize:vertical;">
+      </textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
+      <button class="btn btn-red" onclick="salvaAllenamento()">Salva</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Conferma Eliminazione
+══════════════════════════════════════════ -->
+<div class="overlay" id="deleteModal">
+  <div class="modal modal-small">
+    <div class="modal-pill">Attenzione</div>
+    <h2>Elimina Allenamento</h2>
+    <div class="modal-divider"></div>
+    <p id="deleteMsg">Sei sicuro di voler eliminare questo allenamento?</p>
+    <input type="hidden" id="deleteAllenamentoId" />
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="Allenamenti.js"></script>
+</body>
+</html>
