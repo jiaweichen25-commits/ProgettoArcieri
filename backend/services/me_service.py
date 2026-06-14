@@ -4,6 +4,7 @@ from services.materiali_service import _row_to_dict as _materiale_row_to_dict
 from services.allenamenti_service import _row_to_dict as _allenamento_row_to_dict
 from services.visitemed_service import _row_to_dict as _visita_row_to_dict
 from services.antidoping_service import _row_to_dict as _antidoping_row_to_dict
+from repositories import pianogare_repository
 
 def _atleta_row_to_dict(row) -> dict:
     return {
@@ -51,3 +52,28 @@ def get_antidoping(id_utente: int):
     atleta = _get_atleta_or_404(id_utente)
     rows = antidoping_repository.get_antidoping_by_atleta(atleta["IDatleta"])
     return [_antidoping_row_to_dict(row) for row in rows]
+
+def get_piano_gare(id_utente: int):
+    atleta = _get_atleta_or_404(id_utente)
+    # Prende tutti gli allenamenti dell'atleta
+    rows_all = allenamenti_repository.get_allenamenti_by_atleta(atleta["IDatleta"])
+    # Per ogni allenamento prende le gare visibili
+    gare = []
+    for row in rows_all:
+        id_allenamento = row[0]
+        rows_gare = pianogare_repository.get_gare_by_allenamento(id_allenamento)
+        for g in rows_gare:
+            if not g[8]:  # EscludiVisualizzazione = False
+                gare.append({
+                    "IDpianogara":   g[0],
+                    "IDallenamento": g[1],
+                    "id_tipogara":   g[2],
+                    "tipo_gara":     g[3],
+                    "data":          g[4],
+                    "luogo":         g[5],
+                    "distanza":      g[6],
+                    "note":          g[7],
+                    "escludi_visualizzazione": g[8],
+                })
+    gare.sort(key=lambda x: (x["data"] is None, x["data"]))
+    return gare

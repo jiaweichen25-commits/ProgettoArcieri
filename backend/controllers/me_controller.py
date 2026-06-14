@@ -26,3 +26,7 @@ def le_mie_visite(utente: dict = Depends(solo_atleta)):
 @router.get("/antidoping")
 def il_mio_antidoping(utente: dict = Depends(solo_atleta)):
     return me_service.get_antidoping(utente["id_utente"])
+
+@router.get("/piano-gare")
+def il_mio_piano_gare(utente: dict = Depends(solo_atleta)):
+    return me_service.get_piano_gare(utente["id_utente"])

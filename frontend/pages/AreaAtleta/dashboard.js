@@ -14,7 +14,7 @@ function authHeaders() {
 function requireAuth() {
   const token = getToken();
   if (!token) {
-    window.location.href = "../Autenticazione/Atleta.html";
+    window.location.href = "/pages/Autenticazione/Atleti.html";
     return false;
   }
   try {
@@ -23,12 +23,12 @@ function requireAuth() {
     );
     if (payload.ruolo !== "atleta") {
       localStorage.clear();
-      window.location.href = "../Autenticazione/Atleta.html";
+      window.location.href = "../Autenticazione/Atleti.html";
       return false;
     }
     return true;
   } catch {
-    window.location.href = "../Autenticazione/Atleta.html";
+    window.location.href = "../Autenticazione/Atleti.html";
     return false;
   }
 }
@@ -36,7 +36,7 @@ function requireAuth() {
 function logout() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("currentUser");
-  window.location.href = "../Autenticazione/Atleta.html";
+  window.location.href = "../Autenticazione/Atleti.html";
 }
 
 function formatDate(iso) {
@@ -253,6 +253,47 @@ async function caricaAntidoping() {
   }
 }
 
+// ══ PIANO GARE ══
+async function caricaPianoGare() {
+  try {
+    const res = await fetch(`${API_URL}/me/piano-gare`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const lista = await res.json();
+
+    const box = document.getElementById("pianoGareList");
+    const empty = document.getElementById("pianoGareEmpty");
+
+    if (!lista.length) {
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    const oggi = new Date();
+    box.innerHTML = lista.map((g) => {
+      const futura = g.data ? new Date(g.data) >= oggi : false;
+      return `
+        <div class="info-card${futura ? " in-uso" : ""}">
+          <div class="info-card-header">
+            <span class="materiale-badge" style="background:${futura ? "#276749" : "#555"}">
+              ${futura ? "In programma" : "Passata"}
+            </span>
+            <span class="info-date">${formatDate(g.data)}</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">Tipo</span><span class="info-value">${g.tipo_gara || "—"}</span></div>
+            <div class="info-item"><span class="info-label">Luogo</span><span class="info-value">${escHtml(g.luogo) || "—"}</span></div>
+            <div class="info-item"><span class="info-label">Distanza</span><span class="info-value">${escHtml(g.distanza) || "—"}</span></div>
+            ${g.note ? `<div class="info-item"><span class="info-label">Note</span><span class="info-value">${escHtml(g.note)}</span></div>` : ""}
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch {
+    console.error("Errore caricamento piano gare");
+  }
+}
+
 // ══ INIT ══
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
@@ -261,4 +302,5 @@ window.addEventListener("DOMContentLoaded", () => {
   caricaAllenamenti();
   caricaVisite();
   caricaAntidoping();
+  caricaPianoGare();
 });

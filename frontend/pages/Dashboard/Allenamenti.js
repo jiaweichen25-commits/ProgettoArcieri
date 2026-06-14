@@ -161,6 +161,7 @@ function renderList() {
         if (a) {
           const q = new URLSearchParams({
             allenamento: a.IDallenamento,
+            atleta: ID_ATLETA,
             nome: NOME_ATLETA,
             cognome: COGNOME_ATLETA,
             inizio: a.data_inizio,
