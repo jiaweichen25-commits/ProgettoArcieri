@@ -298,7 +298,7 @@ CREATE TABLE IF NOT EXISTS public."Tantidoping"
     PRIMARY KEY ("IDantidoping")
 );
 
-CREATE TABLE IF NOT EXISTS public."TSpianogare"
+CREATE TABLE IF NOT EXISTS public."TStipigare"
 (
     "IDtipogara"        serial NOT NULL,
     "Descrizione"       character varying,
@@ -397,6 +397,6 @@ ALTER TABLE IF EXISTS public."Tpianogare"
     ADD FOREIGN KEY ("IDallenamento")
     REFERENCES public."Tallenamenti" ("IDallenamento") ON UPDATE NO ACTION ON DELETE NO ACTION,
     ADD FOREIGN KEY ("IDtipogara")
-    REFERENCES public."TSpianogare" ("IDtipogara") ON UPDATE NO ACTION ON DELETE NO ACTION;
+    REFERENCES public."TStipigare" ("IDtipogara") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 COMMIT;
