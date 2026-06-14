@@ -65,3 +65,18 @@ def elimina_allenamento(id_allenamento: int, id_atleta: int):
             return cur.rowcount > 0
     finally:
         conn.close()
+        
+def get_allenamenti_by_atleta_istruttore(id_istruttore: int):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''SELECT a."IDallenamento"
+                   FROM "Tallenamenti" a
+                   JOIN "Tatleti" at ON a."IDatleta" = at."IDatleta"
+                   WHERE at."IDistruttore" = %s''',
+                (id_istruttore,)
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
