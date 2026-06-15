@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Dettaglio Allenamento</title>
+  <link rel="stylesheet" href="Materiali.css" />
+  <style>
+    .selettore-box {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      background: #1a1a1a;
+      border-left: 5px solid #c0392b;
+      border-radius: 4px;
+      padding: 20px 24px;
+    }
+    .selettore-box .field { margin-bottom: 0; min-width: 140px; }
+    .selettore-box select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 2px;
+      color: white;
+      font-size: 0.88rem;
+      font-family: inherit;
+    }
+    .selettore-box select:focus { outline: none; border-color: #c0392b; }
+
+    .label-sett-sed {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      color: #c0392b;
+      margin-bottom: 20px;
+    }
+
+    .sezione-det {
+      background: #1a1a1a;
+      border-left: 5px solid #c0392b;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .sezione-det-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .sezione-det-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+    }
+
+    .tabella-det {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .tabella-det th {
+      background: #111;
+      color: #888;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .tabella-det td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #1e1e1e;
+      color: #ccc;
+      vertical-align: middle;
+    }
+    .tabella-det tr:hover td { background: #1e1e1e; }
+    .td-actions { white-space: nowrap; }
+    .td-actions .btn { margin-right: 4px; }
+    .empty-row { text-align: center; color: #555; padding: 20px !important; }
+
+    .nota-box {
+      background: #1a1a1a;
+      border-left: 5px solid #c0392b;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .nota-box textarea {
+      width: 100%;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 2px;
+      color: #f0f0f0;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+      outline: none;
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+    .nota-box textarea:focus { border-color: #c0392b; }
+
+    .field select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 2px;
+      color: white;
+      font-size: 0.88rem;
+      font-family: inherit;
+    }
+    .field select:focus { outline: none; border-color: #c0392b; }
+
+    .giorni-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .giorni-grid .field { margin-bottom: 0; }
+
+    @media (max-width: 900px) {
+      .giorni-grid { grid-template-columns: repeat(3, 1fr); }
+      .tabella-det { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Dettaglio Allenamento</span>
+      <strong id="titoloAtleta">—</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="btn-logout" onclick="tornaAllenamenti()">← Allenamenti</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Area Istruttore</div>
+    <h1 id="titoloAtleta2">Dettaglio Allenamento</h1>
+  </div>
+
+  <div class="msg-box" id="pageMsgBox"></div>
+
+  <!-- SELETTORE SETTIMANA / SEDUTA -->
+  <div class="selettore-box">
+    <div class="field">
+      <label>Settimana</label>
+      <select id="selSettimana">
+        <option value="">— seleziona —</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Seduta</label>
+      <select id="selSeduta">
+        <option value="">— seleziona —</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+      </select>
+    </div>
+    <button class="btn btn-red" onclick="caricaSeduta()">Carica</button>
+  </div>
+
+  <!-- SEZIONI DETTAGLIO (nascoste finché non si clicca Carica) -->
+  <div id="sezioniDettaglio" style="display:none">
+
+    <div class="label-sett-sed" id="labelSettSed"></div>
+
+    <!-- 1. RISCALDAMENTO -->
+    <div class="sezione-det">
+      <div class="sezione-det-head">
+        <div class="sezione-det-title">Riscaldamento</div>
+        <button class="btn btn-red btn-sm" onclick="apriModaleRiscaldamento(null)">+ Aggiungi riga</button>
+      </div>
+      <table class="tabella-det">
+        <thead>
+          <tr>
+            <th>Esercizio</th>
+            <th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyRiscaldamento">
+          <tr><td colspan="9" class="empty-row">Nessuna riga</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 2. TECNICA-FORZA-COORDINAZIONE -->
+    <div class="sezione-det">
+      <div class="sezione-det-head">
+        <div class="sezione-det-title">Tecnica – Forza – Coordinazione</div>
+        <button class="btn btn-red btn-sm" onclick="apriModaleTecForCor(null)">+ Aggiungi riga</button>
+      </div>
+      <table class="tabella-det">
+        <thead>
+          <tr>
+            <th>Pos. Piedi</th>
+            <th>Distanza</th>
+            <th>Targa</th>
+            <th>Descrizione</th>
+            <th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyTecForCor">
+          <tr><td colspan="12" class="empty-row">Nessuna riga</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3. STRETCHING -->
+    <div class="sezione-det">
+      <div class="sezione-det-head">
+        <div class="sezione-det-title">Stretching</div>
+        <button class="btn btn-red btn-sm" onclick="apriModaleStretching(null)">+ Aggiungi riga</button>
+      </div>
+      <table class="tabella-det">
+        <thead>
+          <tr>
+            <th>Esercizio</th>
+            <th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyStretching">
+          <tr><td colspan="9" class="empty-row">Nessuna riga</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4. ALLENAMENTO FISICO - FORZA E RESISTENZA -->
+    <div class="sezione-det">
+      <div class="sezione-det-head">
+        <div class="sezione-det-title">Allenamento Fisico – Forza e Resistenza</div>
+        <button class="btn btn-red btn-sm" onclick="apriModaleAllFisForRes(null)">+ Aggiungi riga</button>
+      </div>
+      <table class="tabella-det">
+        <thead>
+          <tr>
+            <th>Tabella n°</th>
+            <th>Descrizione</th>
+            <th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyAllFisForRes">
+          <tr><td colspan="10" class="empty-row">Nessuna riga</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5. ALLENAMENTO FISICO - COORDINAZIONE -->
+    <div class="sezione-det">
+      <div class="sezione-det-head">
+        <div class="sezione-det-title">Allenamento Fisico – Coordinazione</div>
+        <button class="btn btn-red btn-sm" onclick="apriModaleAllFisCor(null)">+ Aggiungi riga</button>
+      </div>
+      <table class="tabella-det">
+        <thead>
+          <tr>
+            <th>Attrezzo</th>
+            <th>Descrizione</th>
+            <th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyAllFisCor">
+          <tr><td colspan="10" class="empty-row">Nessuna riga</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 6. NOTE PER L'ATLETA -->
+    <div class="nota-box">
+      <div class="sezione-det-title">Note per l'Atleta</div>
+      <textarea id="notaTextarea" rows="4" placeholder="Inserisci note per questa settimana..."></textarea>
+      <div class="msg-box" id="notaMsgBox"></div>
+      <button class="btn btn-red" onclick="salvaNota()">Salva Nota</button>
+    </div>
+
+  </div><!-- fine sezioniDettaglio -->
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL UNICO: form per tutte le sezioni
+══════════════════════════════════════════ -->
+<div class="overlay" id="formModal">
+  <div class="modal modal-wide">
+    <div class="modal-pill" id="formModalPill">Nuova riga</div>
+    <h2 id="formModalTitle">Aggiungi</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="formMsgBox"></div>
+
+    <!-- CAMPI RISCALDAMENTO -->
+    <div id="campiRiscaldamento">
+      <div class="field">
+        <label>Esercizio</label>
+        <select id="fRiscEsercizio"></select>
+      </div>
+      <div class="giorni-grid">
+        <div class="field"><label>Lunedì</label>   <input type="text" id="fRisc_lunedi" /></div>
+        <div class="field"><label>Martedì</label>  <input type="text" id="fRisc_martedi" /></div>
+        <div class="field"><label>Mercoledì</label><input type="text" id="fRisc_mercoledi" /></div>
+        <div class="field"><label>Giovedì</label>  <input type="text" id="fRisc_giovedi" /></div>
+        <div class="field"><label>Venerdì</label>  <input type="text" id="fRisc_venerdi" /></div>
+        <div class="field"><label>Sabato</label>   <input type="text" id="fRisc_sabato" /></div>
+        <div class="field"><label>Domenica</label> <input type="text" id="fRisc_domenica" /></div>
+      </div>
+    </div>
+
+    <!-- CAMPI TEC FOR COR -->
+    <div id="campiTecForCor" style="display:none">
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 16px;">
+        <div class="field">
+          <label>Posizione Piedi</label>
+          <input type="text" id="fTecPosizionePiedi" />
+        </div>
+        <div class="field">
+          <label>Distanza</label>
+          <select id="fTecDistanza"></select>
+        </div>
+        <div class="field">
+          <label>Targa</label>
+          <select id="fTecTarga"></select>
+        </div>
+        <div class="field">
+          <label>Descrizione Esercizio</label>
+          <select id="fTecDesEsercizio"></select>
+        </div>
+      </div>
+      <div class="giorni-grid">
+        <div class="field"><label>Lunedì</label>   <input type="text" id="fTec_lunedi" /></div>
+        <div class="field"><label>Martedì</label>  <input type="text" id="fTec_martedi" /></div>
+        <div class="field"><label>Mercoledì</label><input type="text" id="fTec_mercoledi" /></div>
+        <div class="field"><label>Giovedì</label>  <input type="text" id="fTec_giovedi" /></div>
+        <div class="field"><label>Venerdì</label>  <input type="text" id="fTec_venerdi" /></div>
+        <div class="field"><label>Sabato</label>   <input type="text" id="fTec_sabato" /></div>
+        <div class="field"><label>Domenica</label> <input type="text" id="fTec_domenica" /></div>
+      </div>
+    </div>
+
+    <!-- CAMPI STRETCHING -->
+    <div id="campiStretching" style="display:none">
+      <div class="field">
+        <label>Esercizio</label>
+        <select id="fStrEsercizio"></select>
+      </div>
+      <div class="giorni-grid">
+        <div class="field"><label>Lunedì</label>   <input type="text" id="fStr_lunedi" /></div>
+        <div class="field"><label>Martedì</label>  <input type="text" id="fStr_martedi" /></div>
+        <div class="field"><label>Mercoledì</label><input type="text" id="fStr_mercoledi" /></div>
+        <div class="field"><label>Giovedì</label>  <input type="text" id="fStr_giovedi" /></div>
+        <div class="field"><label>Venerdì</label>  <input type="text" id="fStr_venerdi" /></div>
+        <div class="field"><label>Sabato</label>   <input type="text" id="fStr_sabato" /></div>
+        <div class="field"><label>Domenica</label> <input type="text" id="fStr_domenica" /></div>
+      </div>
+    </div>
+
+    <!-- CAMPI ALL FIS FOR RES -->
+    <div id="campiAllFisForRes" style="display:none">
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 2fr;gap:0 16px;">
+        <div class="field">
+          <label>Tabella n°</label>
+          <select id="fFRTabellaN"></select>
+        </div>
+        <div class="field">
+          <label>Descrizione Esercizio</label>
+          <select id="fFRDescrizione"></select>
+        </div>
+      </div>
+      <div class="giorni-grid">
+        <div class="field"><label>Lunedì</label>   <input type="text" id="fFR_lunedi" /></div>
+        <div class="field"><label>Martedì</label>  <input type="text" id="fFR_martedi" /></div>
+        <div class="field"><label>Mercoledì</label><input type="text" id="fFR_mercoledi" /></div>
+        <div class="field"><label>Giovedì</label>  <input type="text" id="fFR_giovedi" /></div>
+        <div class="field"><label>Venerdì</label>  <input type="text" id="fFR_venerdi" /></div>
+        <div class="field"><label>Sabato</label>   <input type="text" id="fFR_sabato" /></div>
+        <div class="field"><label>Domenica</label> <input type="text" id="fFR_domenica" /></div>
+      </div>
+    </div>
+
+    <!-- CAMPI ALL FIS COR -->
+    <div id="campiAllFisCor" style="display:none">
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 2fr;gap:0 16px;">
+        <div class="field">
+          <label>Attrezzo</label>
+          <select id="fCOAttrezzo"></select>
+        </div>
+        <div class="field">
+          <label>Descrizione Esercizio</label>
+          <select id="fCODescrizione"></select>
+        </div>
+      </div>
+      <div class="giorni-grid">
+        <div class="field"><label>Lunedì</label>   <input type="text" id="fCO_lunedi" /></div>
+        <div class="field"><label>Martedì</label>  <input type="text" id="fCO_martedi" /></div>
+        <div class="field"><label>Mercoledì</label><input type="text" id="fCO_mercoledi" /></div>
+        <div class="field"><label>Giovedì</label>  <input type="text" id="fCO_giovedi" /></div>
+        <div class="field"><label>Venerdì</label>  <input type="text" id="fCO_venerdi" /></div>
+        <div class="field"><label>Sabato</label>   <input type="text" id="fCO_sabato" /></div>
+        <div class="field"><label>Domenica</label> <input type="text" id="fCO_domenica" /></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
+      <button class="btn btn-red" onclick="salvaRiga()">Salva</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="DettaglioAllenamento.js"></script>
+</body>
+</html>

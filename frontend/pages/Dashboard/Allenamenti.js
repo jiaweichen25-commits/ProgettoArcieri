@@ -140,6 +140,7 @@ function renderList() {
         <span><strong>Obiettivi:</strong> ${escHtml(a.obiettivi) || "—"}</span>
       </div>
       <div class="materiale-actions">
+        <button class="btn btn-sm btn-outline" type="button" data-dettaglio="${a.IDallenamento}">Dettaglio Sedute</button>
         <button class="btn btn-sm btn-outline" type="button" data-gare="${a.IDallenamento}">Piano Gare</button>
         <button class="btn btn-sm btn-outline" type="button" data-edit="${a.IDallenamento}">Modifica</button>
         <button class="btn btn-sm btn-red" type="button" data-delete="${a.IDallenamento}">Elimina</button>
@@ -171,6 +172,23 @@ function renderList() {
         }
       });
     });
+
+  list.querySelectorAll("[data-dettaglio]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const a = allenamentoCache.find((x) => x.IDallenamento === Number(btn.dataset.dettaglio));
+    if (a) {
+      const q = new URLSearchParams({
+        allenamento: a.IDallenamento,
+        atleta: ID_ATLETA,
+        nome: NOME_ATLETA,
+        cognome: COGNOME_ATLETA,
+        inizio: a.data_inizio,
+        fine: a.data_fine,
+      });
+      window.location.href = `DettaglioAllenamento.html?${q.toString()}`;
+    }
+  });
+});
 
   list.querySelectorAll("[data-delete]").forEach((btn) => {
     btn.addEventListener("click", () => {
