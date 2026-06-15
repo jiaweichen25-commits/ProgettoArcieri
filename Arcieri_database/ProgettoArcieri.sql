@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public."Tistruttori"
     "Cognome"           character varying NOT NULL,
     "Qualifica"         character varying,
     "Cellulare"         character varying,
-    "E-mail"            character varying,
+    "E-mail"            character varying NOT NULLL UNIQUE,
     PRIMARY KEY ("IDistruttore")
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public."Tatleti"
     "Codice_Fiscale"        character varying NOT NULL UNIQUE,
     "Telefono"              character varying,
     "Cellulare"             character varying,
-    "E-mail"                character varying,
+    "E-mail"                character varying NOT NULL UNIQUE,
     "DataNascita"           date,
     "Foto"                  text,
     PRIMARY KEY ("IDatleta")

@@ -37,3 +37,15 @@ def create_istruttore(id_utente: int, nome: str, cognome: str, email: str, quali
             )
     finally:
         conn.close()
+
+def delete_user(id_utente: int):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'DELETE FROM "Tutenti" WHERE "IDutente" = %s',
+                (id_utente,)
+            )
+            return cur.rowcount > 0
+    finally:
+        conn.close()

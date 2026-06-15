@@ -1,4 +1,5 @@
 from config.database import get_db_conn
+from psycopg2.errors import UniqueViolation
 
 def get_atleti_by_istruttore(id_istruttore: int):
     conn = get_db_conn()
@@ -90,6 +91,8 @@ def modifica_atleta(id_atleta: int, id_istruttore: int, dati: dict):
                 )
             )
             return cur.rowcount > 0
+    except UniqueViolation:
+        raise ValueError("Email o Codice Fiscale già in uso da un altro atleta")
     finally:
         conn.close()
 
@@ -98,9 +101,10 @@ def elimina_atleta(id_atleta: int, id_istruttore: int):
     try:
         with conn, conn.cursor() as cur:
             cur.execute(
-                'DELETE FROM "Tatleti" WHERE "IDatleta" = %s AND "IDistruttore" = %s',
+                'DELETE FROM "Tatleti" WHERE "IDatleta" = %s AND "IDistruttore" = %s RETURNING "IDutente"',
                 (id_atleta, id_istruttore)
             )
-            return cur.rowcount > 0
+            row = cur.fetchone()
+            return row[0] if row else None
     finally:
         conn.close()

@@ -75,7 +75,14 @@ def crea_atleta(id_utente: int, dati: dict):
 def modifica_atleta(id_atleta: int, id_utente: int, dati: dict):
     id_istruttore = _get_istruttore_or_404(id_utente)
     
-    ok = atleti_repository.modifica_atleta(id_atleta, id_istruttore, dati)
+    try:
+        ok = atleti_repository.modifica_atleta(id_atleta, id_istruttore, dati)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
     if not ok:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -86,11 +93,13 @@ def modifica_atleta(id_atleta: int, id_utente: int, dati: dict):
 def elimina_atleta(id_atleta: int, id_utente: int):
     id_istruttore = _get_istruttore_or_404(id_utente)
     
-    ok = atleti_repository.elimina_atleta(id_atleta, id_istruttore)
-    if not ok:
+    id_utente_atleta = atleti_repository.elimina_atleta(id_atleta, id_istruttore)
+    if not id_utente_atleta:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Atleta non trovato o non appartiene a questo istruttore"
         )
+        
+    user_repository.delete_user(id_utente_atleta)
     return {"message": "Atleta eliminato con successo"}
 
