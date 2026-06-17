@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public."Tistruttori"
     "Cognome"           character varying NOT NULL,
     "Qualifica"         character varying,
     "Cellulare"         character varying,
-    "E-mail"            character varying NOT NULLL UNIQUE,
+    "E-mail"            character varying NOT NULL UNIQUE,
     PRIMARY KEY ("IDistruttore")
 );
 
