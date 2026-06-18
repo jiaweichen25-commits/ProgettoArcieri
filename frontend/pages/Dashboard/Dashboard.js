@@ -135,8 +135,11 @@ function renderTable(lista) {
 
   rows.forEach((atleta) => {
     const id = atleta.IDatleta;
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
+
+    // Riga 1: dati dell'atleta
+    const trData = document.createElement("tr");
+    trData.classList.add("atleta-data-row");
+    trData.innerHTML = `
       <td>${id}</td>
       <td><strong>${escHtml(atleta.nome)}</strong></td>
       <td><strong>${escHtml(atleta.cognome)}</strong></td>
@@ -148,16 +151,25 @@ function renderTable(lista) {
       <td>${escHtml(atleta.cellulare) || "—"}</td>
       <td>${atleta.email ? `<a href="mailto:${escHtml(atleta.email)}">${escHtml(atleta.email)}</a>` : "—"}</td>
       <td>${formatDate(atleta.data_nascita)}</td>
-      <td class="actions-cell">
-        <button class="btn btn-sm btn-outline" type="button" data-materiali="${id}">Materiali</button>
-        <button class="btn btn-sm btn-outline" type="button" data-visite="${id}">Visite</button>
-        <button class="btn btn-sm btn-outline" type="button" data-antidoping="${id}">Antidoping</button>
-        <button class="btn btn-sm btn-outline" type="button" data-allenamenti="${id}">Allenamenti</button>
-        <button class="btn btn-sm btn-outline" type="button" data-edit="${id}">Modifica</button>
-        <button class="btn btn-sm btn-red" type="button" data-delete="${id}">Elimina</button>
+    `;
+    tbody.appendChild(trData);
+
+    // Riga 2: bottoni azione sotto i dati
+    const trActions = document.createElement("tr");
+    trActions.classList.add("atleta-actions-row");
+    trActions.innerHTML = `
+      <td colspan="11" class="actions-cell">
+        <div class="actions-bar">
+          <button class="btn btn-sm btn-outline" type="button" data-materiali="${id}">Materiali</button>
+          <button class="btn btn-sm btn-outline" type="button" data-visite="${id}">Visite</button>
+          <button class="btn btn-sm btn-outline" type="button" data-antidoping="${id}">Antidoping</button>
+          <button class="btn btn-sm btn-outline" type="button" data-allenamenti="${id}">Allenamenti</button>
+          <button class="btn btn-sm btn-outline" type="button" data-edit="${id}">Modifica</button>
+          <button class="btn btn-sm btn-red" type="button" data-delete="${id}">Elimina</button>
+        </div>
       </td>
     `;
-    tbody.appendChild(tr);
+    tbody.appendChild(trActions);
   });
 
   tbody.querySelectorAll("[data-materiali]").forEach((btn) => {

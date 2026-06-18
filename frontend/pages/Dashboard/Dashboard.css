@@ -266,7 +266,24 @@ tbody a:hover {
 }
 
 .actions-cell {
-  white-space: nowrap;
+  padding: 6px 12px 14px !important;
+  border-bottom: 2px solid #333 !important;
+}
+
+.actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.atleta-data-row td {
+  border-bottom: none !important;
+}
+
+.atleta-actions-row:hover,
+.atleta-data-row:hover {
+  background: rgba(192, 57, 43, 0.05);
 }
 
 .empty-state {

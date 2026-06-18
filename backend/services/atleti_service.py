@@ -61,6 +61,11 @@ def crea_atleta(id_utente: int, dati: dict):
     # Controlla se esiste già un account con questa email
     existing = user_repository.get_user_by_email(email_atleta)
     if existing:
+        if existing[1] != "atleta":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Questa email è già registrata come istruttore"
+            )
         id_utente_atleta = existing[2]
     else:
         # Crea account con password temporanea
