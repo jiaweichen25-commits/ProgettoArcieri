@@ -3,106 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arcieri Vicenza – Allenamenti</title>
-  <link rel="stylesheet" href="Materiali.css" />
+  <title>Allenamenti</title>
+  <link rel="stylesheet" href="DettaglioSedute.css" />
+  <style>
+    .action-btns { display:flex; gap:8px; align-items:center; }
+    .btn-action {
+      background:transparent; border:1px solid #2a2a2a; color:#888;
+      padding:6px 14px; border-radius:6px; font-size:.75rem; font-weight:700;
+      letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
+      transition:border-color .2s, color .2s;
+    }
+    .btn-action:hover:not(:disabled) { border-color:#888; color:#f0f0f0; }
+    .btn-action:disabled { opacity:.3; cursor:not-allowed; }
+    .btn-action-red { border-color:rgba(197,48,48,.5); color:#c53030; }
+    .btn-action-red:hover:not(:disabled) { background:rgba(197,48,48,.1); border-color:#c53030; }
+    .empty-allenamento { padding:48px 24px; text-align:center; color:#555; font-size:.9rem; }
+
+    .m-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:1000; align-items:center; justify-content:center; }
+    .m-overlay.open { display:flex; }
+    .m-box { background:#161616; border:1px solid #2a2a2a; border-radius:8px; padding:28px; width:90%; max-width:480px; }
+    .m-title { font-size:1rem; font-weight:900; text-transform:uppercase; letter-spacing:.05em; margin-bottom:20px; color:#f0f0f0; }
+    .m-row { margin-bottom:14px; }
+    .m-row label { display:block; font-size:.65rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px; }
+    .m-row input[type=date], .m-row textarea {
+      width:100%; padding:8px 10px; background:#1e1e1e; border:1px solid #2a2a2a;
+      border-radius:5px; color:#f0f0f0; font-size:.88rem; font-family:inherit; outline:none; color-scheme:dark;
+    }
+    .m-row textarea { resize:vertical; min-height:70px; }
+    .m-row input:focus, .m-row textarea:focus { border-color:#c53030; }
+    .m-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+    .m-btn { padding:8px 18px; border-radius:6px; font-size:.78rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; border:1px solid #2a2a2a; background:transparent; color:#888; transition:all .15s; }
+    .m-btn:hover { border-color:#888; color:#f0f0f0; }
+    .m-btn-red { background:#c53030; border-color:#c53030; color:#fff; }
+    .m-btn-red:hover { background:#a82828; }
+    .m-msg { font-size:.8rem; color:#e53e3e; margin-bottom:12px; display:none; }
+    .m-msg.show { display:block; }
+    .m-confirm-text { color:#888; font-size:.88rem; margin-bottom:20px; }
+
+    .form-row input[type="date"]:disabled,
+    .form-row textarea:disabled { opacity:.85; cursor:default; }
+  </style>
 </head>
 <body>
 
-<nav>
+<nav class="top-nav">
   <div class="brand">
     <div class="brand-accent"></div>
     <div class="brand-text">
       <span>Allenamenti</span>
-      <strong id="titoloAtleta">—</strong>
+      <strong id="atletaName">...</strong>
     </div>
   </div>
   <div class="nav-right">
-    <button class="btn-logout" onclick="tornaDashboard()">← Dashboard</button>
+    <div class="action-btns">
+      <button class="btn-action" id="btnNuovo"     onclick="openAddModal()">+ Nuovo</button>
+      <button class="btn-action" id="btnPianoGare" onclick="goPianoGare()" disabled>Piano Gare</button>
+      <button class="btn-action" id="btnModifica"  onclick="openModificaModal()" disabled>Modifica</button>
+      <button class="btn-action btn-action-red" id="btnElimina" onclick="openEliminaModal()" disabled>Elimina</button>
+    </div>
+    <div class="nav-area">
+      <span class="nav-counter" id="navCounter">— / —</span>
+      <button class="nav-btn" id="btnPrecedente" onclick="navPrecedente()" title="Allenamento Precedente" disabled>&#9664;</button>
+      <button class="nav-btn" id="btnSuccessivo" onclick="navSuccessivo()" title="Allenamento Successivo" disabled>&#9654;</button>
+    </div>
+    <button class="back-btn" onclick="tornaDashboard()">&#8592; Dashboard</button>
   </div>
 </nav>
 
-<div class="page">
-  <div class="page-header">
-    <div class="pill">Area Istruttore</div>
-    <h1 id="titoloAtleta2">Allenamenti</h1>
+<main>
+  <div id="emptyState" class="empty-allenamento" style="display:none;">
+    Nessun allenamento trovato. Clicca "+ Nuovo" per aggiungere il primo.
   </div>
 
-  <div class="msg-box" id="pageMsgBox"></div>
-
-  <div class="section">
-    <div class="section-head">
-      <div class="section-title">Elenco Allenamenti</div>
-      <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Allenamento</button>
-    </div>
-
-    <div id="allenamentoList"></div>
-
-    <div class="empty-state" id="emptyState">
-      <p>Nessun allenamento registrato. Aggiungi il primo!</p>
-    </div>
-  </div>
-</div>
-
-
-<!-- ══════════════════════════════════════════
-     MODAL: Aggiungi / Modifica Allenamento
-══════════════════════════════════════════ -->
-<div class="overlay" id="formModal">
-  <div class="modal">
-    <div class="modal-pill" id="formModalPill">Nuovo Allenamento</div>
-    <h2 id="formModalTitle">Aggiungi allenamento</h2>
-    <div class="modal-divider"></div>
-
-    <div class="msg-box" id="formMsgBox"></div>
-
-    <input type="hidden" id="editAllenamentoId" />
-
-    <div class="form-row">
-      <div class="field">
-        <label>Data Inizio <span class="required">*</span></label>
-        <input type="date" id="fDataInizio" />
+  <div id="allenamentoDetail">
+    <div class="form-card">
+      <div class="form-row">
+        <label>Data Inizio</label>
+        <input type="date" id="dataInizio" disabled />
       </div>
-      <div class="field">
-        <label>Data Fine <span class="required">*</span></label>
-        <input type="date" id="fDataFine" />
+      <div class="form-row">
+        <label>Data Fine</label>
+        <input type="date" id="dataFine" disabled />
+      </div>
+      <div class="form-row" style="align-items:flex-start;">
+        <label style="padding-top:6px;">Obiettivi</label>
+        <textarea id="obiettivi" disabled placeholder="Obiettivi generali..."></textarea>
       </div>
     </div>
 
-    <div class="field">
+    <div class="table-card">
+      <div class="table-card-head">
+        <span>Settimane</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th class="td-num">Settimana</th>
+            <th>Obiettivo</th>
+            <th class="td-actions"></th>
+          </tr>
+        </thead>
+        <tbody id="settimaneBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Modal: Nuovo Allenamento -->
+<div class="m-overlay" id="addModal" onclick="chiudiSeFuori(event,'addModal')">
+  <div class="m-box">
+    <div class="m-title">Nuovo Allenamento</div>
+    <div class="m-msg" id="addMsg"></div>
+    <div class="m-row">
+      <label>Data Inizio <span style="color:#c53030">*</span></label>
+      <input type="date" id="addInizio" />
+    </div>
+    <div class="m-row">
+      <label>Data Fine <span style="color:#c53030">*</span></label>
+      <input type="date" id="addFine" />
+    </div>
+    <div class="m-row">
       <label>Obiettivi</label>
-      <textarea id="fObiettivi" rows="3"
-        placeholder="es. Migliorare la tecnica di tiro..."
-        style="width:100%;background:#1e1e1e;border:1px solid #2a2a2a;color:#f0f0f0;
-               padding:8px;font-family:inherit;font-size:0.88rem;border-radius:4px;
-               outline:none;resize:vertical;">
-      </textarea>
+      <textarea id="addObiettivi" placeholder="es. Migliorare la tecnica..."></textarea>
     </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
-      <button class="btn btn-red" onclick="salvaAllenamento()">Salva</button>
+    <div class="m-actions">
+      <button class="m-btn" onclick="chiudiModal('addModal')">Annulla</button>
+      <button class="m-btn m-btn-red" onclick="salvaNuovo()">Salva</button>
     </div>
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     MODAL: Conferma Eliminazione
-══════════════════════════════════════════ -->
-<div class="overlay" id="deleteModal">
-  <div class="modal modal-small">
-    <div class="modal-pill">Attenzione</div>
-    <h2>Elimina Allenamento</h2>
-    <div class="modal-divider"></div>
-    <p id="deleteMsg">Sei sicuro di voler eliminare questo allenamento?</p>
-    <input type="hidden" id="deleteAllenamentoId" />
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
-      <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
+<!-- Modal: Modifica Allenamento -->
+<div class="m-overlay" id="modificaModal" onclick="chiudiSeFuori(event,'modificaModal')">
+  <div class="m-box">
+    <div class="m-title">Modifica Allenamento</div>
+    <div class="m-msg" id="modificaMsg"></div>
+    <div class="m-row">
+      <label>Data Inizio <span style="color:#c53030">*</span></label>
+      <input type="date" id="modInizio" />
+    </div>
+    <div class="m-row">
+      <label>Data Fine <span style="color:#c53030">*</span></label>
+      <input type="date" id="modFine" />
+    </div>
+    <div class="m-row">
+      <label>Obiettivi</label>
+      <textarea id="modObiettivi" placeholder="es. Migliorare la tecnica..."></textarea>
+    </div>
+    <div class="m-actions">
+      <button class="m-btn" onclick="chiudiModal('modificaModal')">Annulla</button>
+      <button class="m-btn m-btn-red" onclick="salvaModifica()">Salva</button>
     </div>
   </div>
 </div>
 
+<!-- Modal: Elimina Allenamento -->
+<div class="m-overlay" id="eliminaModal" onclick="chiudiSeFuori(event,'eliminaModal')">
+  <div class="m-box">
+    <div class="m-title">Elimina Allenamento</div>
+    <p class="m-confirm-text" id="eliminaMsg">Sei sicuro di voler eliminare questo allenamento?</p>
+    <div class="m-actions">
+      <button class="m-btn" onclick="chiudiModal('eliminaModal')">Annulla</button>
+      <button class="m-btn m-btn-red" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Dettagli Seduta -->
+<div id="modal-dettagli" class="modal-overlay" onclick="chiudiModaleSeFuori(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span>Dettagli Seduta</span>
+      <button class="modal-close-btn" onclick="chiudiDettagliModal()">&#10005;</button>
+    </div>
+    <iframe id="modal-iframe" src="" frameborder="0"></iframe>
+  </div>
+</div>
 
 <script src="Allenamenti.js"></script>
 </body>

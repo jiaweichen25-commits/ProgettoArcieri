@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmazione Settimana di Allenamento</title>
+    <link rel="stylesheet" href="Riscaldamenti.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Header Blu -->
+    <div class="header-blue">
+        <span>Programmazione Settimana di Allenamento</span>
+        <div class="header-buttons">
+            <button>🖨️</button>
+            <button>📋</button>
+        </div>
+    </div>
+
+    <!-- Riga Informazioni -->
+    <div class="info-row">
+        <div class="info-box">
+            <label>SETTIMANA</label>
+            <input type="text" class="w-small" value="1" readonly>
+        </div>
+        <div class="info-box">
+            <label>ATLETA</label>
+            <input type="text" class="w-medium" value="Pietro Trevisiol" readonly>
+        </div>
+        <div class="info-box w-large">
+            <label>OBIETTIVO</label>
+            <input type="text" class="w-large" value="" readonly>
+        </div>
+    </div>
+
+    <!-- Tabella Totale Frecce -->
+    <div class="main-grid">
+        <table class="frecce-table">
+            <tr>
+                <th colspan="6" class="bg-light-gray font-bold">TOTALE FRECCE</th>
+            </tr>
+            <tr>
+                <td colspan="6" class="text-big" id="totalFrecceTotale">0</td>
+            </tr>
+            <tr>
+                <th colspan="6" class="bg-light-gray font-bold">Giornate di Allenamento</th>
+            </tr>
+            <tr class="bg-light-gray">
+                <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td>
+            </tr>
+            <tr id="freccePerGiorno">
+                <td><input type="number" class="frecce-input" value="0" min="0"></td>
+                <td><input type="number" class="frecce-input" value="0" min="0"></td>
+                <td><input type="number" class="frecce-input" value="0" min="0"></td>
+                <td><input type="number" class="frecce-input" value="0" min="0"></td>
+                <td><input type="number" class="frecce-input" value="0" min="0"></td>
+                <td><input type="number" class="frecce-input" value="0" min="0"></td>
+            </tr>
+            <tr>
+                <td colspan="6" class="font-bold" style="text-align: right; padding-right: 5px;">N° Frecce per Seduta</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Sezione Riscaldamento -->
+    <div class="section-title">
+        <span>RISCALDAMENTO</span>
+        <div style="display: flex; gap: 5px; align-items: center;">
+            <div class="dropdown-container" style="position: relative;">
+                <button id="dropdownBtn" style="background:none; border:1px solid #ccc; cursor:pointer; padding: 2px 5px;">▼ Esercizi</button>
+                <div id="dropdownList" class="dropdown-list" style="display: none; position: absolute; top: 100%; right: 0; background: white; min-width: 250px;"></div>
+            </div>
+            <button id="openPopupBtn" style="background:none; border:1px solid #ccc; cursor:pointer; padding: 2px 5px;">📋</button>
+        </div>
+    </div>
+    <div id="dynamicColumnsContainer"></div>
+    <div class="list-container" id="mainExerciseList"></div>
+</div>
+
+<!-- Finestra Pop-up Esercizi Riscaldamento -->
+<div class="modal-overlay" id="exerciseModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>Esercizi Riscaldamento</span>
+            <button class="modal-close" id="closePopupBtn">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="popup-table" id="popupTable">
+                <thead>
+                    <tr>
+                        <th>Esercizio</th>
+                        <th class="col-azione">Azione</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" value="Corsa leggera 3 minuti"></td>
+                        <td class="col-azione"><button class="btn-delete">×</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="Collo, spalle, braccia, polsi, mani, tronco, gambe (vedi Tabella Esercizi)"></td>
+                        <td class="col-azione"><button class="btn-delete">×</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="Corsa in salita due minuti"></td>
+                        <td class="col-azione"><button class="btn-delete">×</button></td>
+                    </tr>
+                    <tr id="rowAddNew">
+                        <td><input type="text" id="inputNewExercise" placeholder="Digita un nuovo esercizio..."></td>
+                        <td class="col-azione text-auto">Auto</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="Riscaldamenti.js"></script>
+</body>
+</html>

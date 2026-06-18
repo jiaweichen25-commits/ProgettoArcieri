@@ -1,0 +1,7 @@
+.git
+*.md
+index.txt
+assets/README.txt
+components/README.txt
+pages/README.txt
+services/README.txt

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tecnica - Forza - Coordinazione</title>
+    <link rel="stylesheet" href="AllenamentiTFC.css">
+</head>
+<body>
+
+    <div class="training-container">
+        <h2 class="table-title">TECNICA - FORZA - COORDINAZIONE</h2>
+
+        <table class="main-table" id="dynamicTechTable">
+            <thead>
+                <tr>
+                    <th class="col-piedi">
+                        <div class="th-header">
+                            <span>Posizione Piedi</span>
+                            <button class="icon-btn-modal" id="piediPopBtn">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-distanza">
+                        <div class="th-header">
+                            <span>Distanza</span>
+                            <button class="icon-btn-modal" id="distanzaPopBtn">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-targa">
+                        <div class="th-header">
+                            <span>Targa</span>
+                            <button class="icon-btn-modal" id="targaPopTrigger">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-serie-num">1</th>
+                    <th class="col-serie-num">2</th>
+                    <th class="col-serie-num">3</th>
+                    <th class="col-serie-num">4</th>
+                    <th class="col-serie-num">5</th>
+                    <th class="col-serie-num">6</th>
+                    <th class="col-serie-popup">
+                        <button class="icon-btn-modal" id="seriePopBtn">📋</button>
+                    </th>
+                    <th class="col-desc">
+                        <div class="th-header">
+                            <span>Descrizione Esercizio</span>
+                            <button class="icon-btn-modal" id="descrizionePopBtn">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-azione">Azione</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Modale Posizione Piedi -->
+    <div id="piediModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Posizione Piedi</h3>
+                <button class="modal-close-btn" id="closePiediBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Posizione</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-piedi-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-piedi-input" placeholder="Digita una nuova posizione...">
+                    <button id="add-piedi-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Distanza -->
+    <div id="distanzaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Distanza</h3>
+                <button class="modal-close-btn" id="closeDistanzaBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Distanza</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-distanza-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-distanza-input" placeholder="Digita una nuova distanza...">
+                    <button id="add-distanza-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Targa -->
+    <div id="targaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Targa</h3>
+                <button class="modal-close-btn" id="closeTargaBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Targa</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-targa-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-targa-input" placeholder="Digita un nuovo tipo targa...">
+                    <button id="add-targa-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Serie -->
+    <div id="serieModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Serie</h3>
+                <button class="modal-close-btn" id="closeSerieBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Serie</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-serie-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-serie-input" placeholder="Digita una nuova serie (es. 3x6)...">
+                    <button id="add-serie-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Descrizione Esercizio -->
+    <div id="descrizioneModal" class="modal">
+        <div class="modal-content modal-content-wide">
+            <div class="modal-header">
+                <h3>Descrizione Esercizio</h3>
+                <button class="modal-close-btn" id="closeDescrizioneBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Descrizione</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-descrizione-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-descrizione-input" placeholder="Digita una nuova descrizione...">
+                    <button id="add-descrizione-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="AllenamentiTFC.js"></script>
+</body>
+</html>

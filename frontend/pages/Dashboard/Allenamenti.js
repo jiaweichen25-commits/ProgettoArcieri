@@ -1,300 +1,333 @@
 const API_URL = "http://localhost:8000";
-
 const params = new URLSearchParams(window.location.search);
 const ID_ATLETA = Number(params.get("atleta"));
 const NOME_ATLETA = params.get("nome") || "";
 const COGNOME_ATLETA = params.get("cognome") || "";
 
 let allenamentoCache = [];
+let currentIdx = 0;
 
-function getToken() {
-  return localStorage.getItem("access_token");
-}
-
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getToken()}`,
-  };
-}
+function getToken() { return localStorage.getItem("access_token"); }
+function authHeaders() { return { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` }; }
 
 function requireAuth() {
   const token = getToken();
-  if (!token) {
-    window.location.href = "../Autenticazione/Istruttore.html";
-    return false;
-  }
+  if (!token) { window.location.href = "../Autenticazione/Istruttore.html"; return false; }
   try {
-    const payload = JSON.parse(
-      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
-    );
-    if (payload.ruolo !== "istruttore") {
-      localStorage.clear();
-      window.location.href = "../Autenticazione/Istruttore.html";
-      return false;
-    }
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+    if (payload.ruolo !== "istruttore") { localStorage.clear(); window.location.href = "../Autenticazione/Istruttore.html"; return false; }
     return true;
-  } catch {
-    window.location.href = "../Autenticazione/Istruttore.html";
-    return false;
-  }
+  } catch { window.location.href = "../Autenticazione/Istruttore.html"; return false; }
 }
 
-function tornaDashboard() {
-  window.location.href = "Dashboard.html";
-}
+function tornaDashboard() { window.location.href = "Dashboard.html"; }
+function toInputDate(iso) { if (!iso) return ""; return String(iso).slice(0,10); }
 
-function logout() {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("currentUser");
-  window.location.href = "../Autenticazione/Istruttore.html";
-}
+// ── API HELPERS ─────────────────────────────────────────────────────────────
+function apiSett(allenamentoID)        { return `${API_URL}/allenamenti/${allenamentoID}/settimane/`; }
+function apiNota(allenamentoID, sett)  { return `${API_URL}/allenamenti/${allenamentoID}/settimane/${sett}/nota/`; }
+function apiIniz(allenamentoID, sett)  { return `${API_URL}/allenamenti/${allenamentoID}/settimane/${sett}/sedute/1/inizializza`; }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("it-IT");
-}
-
-function toInputDate(iso) {
-  if (!iso) return "";
-  return String(iso).slice(0, 10);
-}
-
-function showMsg(boxId, testo, tipo) {
-  const box = document.getElementById(boxId);
-  if (!box) return;
-  box.textContent = testo;
-  box.className = "msg-box " + tipo;
-}
-
-function clearMsg(boxId) {
-  const box = document.getElementById(boxId);
-  if (box) box.className = "msg-box";
-}
-
-function escHtml(str) {
-  if (str == null || str === "") return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function openModal(id) {
-  document.getElementById(id).classList.add("open");
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove("open");
-  clearMsg("formMsgBox");
-}
-
+// ── API ─────────────────────────────────────────────────────────────────────
 async function caricaAllenamenti() {
   try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/`, {
-      headers: authHeaders(),
-    });
-    if (res.status === 401) { logout(); return; }
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      showMsg("pageMsgBox", err.detail || "Errore nel caricamento.", "error");
-      return;
-    }
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/`, { headers: authHeaders() });
+    if (res.status === 401) { localStorage.clear(); window.location.href = "../Autenticazione/Istruttore.html"; return; }
+    if (!res.ok) return;
     allenamentoCache = await res.json();
-    renderList();
-  } catch {
-    showMsg("pageMsgBox", "Impossibile contattare il server.", "error");
-  }
+    currentIdx = allenamentoCache.length > 0 ? allenamentoCache.length - 1 : 0;
+    renderCurrent();
+  } catch {}
 }
 
-function renderList() {
-  const list = document.getElementById("allenamentoList");
-  const empty = document.getElementById("emptyState");
-  list.innerHTML = "";
+// ── RENDER ──────────────────────────────────────────────────────────────────
+async function renderCurrent() {
+  const detail = document.getElementById("allenamentoDetail");
+  const empty  = document.getElementById("emptyState");
 
-  if (!allenamentoCache.length) {
-    empty.style.display = "block";
+  if (allenamentoCache.length === 0) {
+    detail.style.display = "none";
+    empty.style.display  = "block";
+    document.getElementById("navCounter").textContent = "— / —";
+    ["btnPrecedente","btnSuccessivo","btnPianoGare","btnModifica","btnElimina"].forEach(id => {
+      document.getElementById(id).disabled = true;
+    });
     return;
   }
-  empty.style.display = "none";
 
-  allenamentoCache.forEach((a) => {
-    const oggi = new Date();
-    const fine = new Date(a.data_fine);
-    const inCorso = fine >= oggi;
-    const card = document.createElement("div");
-    card.className = "materiale-card" + (inCorso ? " in-uso" : "");
-    card.innerHTML = `
-      <div>
-        <div class="materiale-data">${formatDate(a.data_inizio)} → ${formatDate(a.data_fine)}</div>
-        <span class="materiale-badge" style="background:${inCorso ? "#276749" : "#c53030"}">
-          ${inCorso ? "In corso" : "Concluso"}
-        </span>
-      </div>
-      <div class="materiale-summary">
-        <span><strong>Inizio:</strong> ${formatDate(a.data_inizio)}</span>
-        <span><strong>Fine:</strong> ${formatDate(a.data_fine)}</span>
-        <span><strong>Obiettivi:</strong> ${escHtml(a.obiettivi) || "—"}</span>
-      </div>
-      <div class="materiale-actions">
-        <button class="btn btn-sm btn-outline" type="button" data-dettaglio="${a.IDallenamento}">Dettaglio Sedute</button>
-        <button class="btn btn-sm btn-outline" type="button" data-gare="${a.IDallenamento}">Piano Gare</button>
-        <button class="btn btn-sm btn-outline" type="button" data-edit="${a.IDallenamento}">Modifica</button>
-        <button class="btn btn-sm btn-red" type="button" data-delete="${a.IDallenamento}">Elimina</button>
-      </div>
-    `;
-    list.appendChild(card);
-  });
+  detail.style.display = "block";
+  empty.style.display  = "none";
 
-  list.querySelectorAll("[data-edit]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const a = allenamentoCache.find((x) => x.IDallenamento === Number(btn.dataset.edit));
-      if (a) openEditModal(a);
-    });
-  });
+  const a = allenamentoCache[currentIdx];
+  document.getElementById("navCounter").textContent = `${currentIdx + 1} / ${allenamentoCache.length}`;
+  document.getElementById("dataInizio").value = toInputDate(a.data_inizio);
+  document.getElementById("dataFine").value   = toInputDate(a.data_fine);
+  document.getElementById("obiettivi").value  = a.obiettivi || "";
 
-  list.querySelectorAll("[data-gare]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const a = allenamentoCache.find((x) => x.IDallenamento === Number(btn.dataset.gare));
-        if (a) {
-          const q = new URLSearchParams({
-            allenamento: a.IDallenamento,
-            atleta: ID_ATLETA,
-            nome: NOME_ATLETA,
-            cognome: COGNOME_ATLETA,
-            inizio: a.data_inizio,
-            fine: a.data_fine,
-          });
-          window.location.href = `PianoGare.html?${q.toString()}`;
-        }
-      });
-    });
+  document.getElementById("btnPrecedente").disabled = currentIdx <= 0;
+  document.getElementById("btnSuccessivo").disabled = currentIdx >= allenamentoCache.length - 1;
+  document.getElementById("btnPianoGare").disabled  = false;
+  document.getElementById("btnModifica").disabled   = false;
+  document.getElementById("btnElimina").disabled    = false;
 
-  list.querySelectorAll("[data-dettaglio]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const a = allenamentoCache.find((x) => x.IDallenamento === Number(btn.dataset.dettaglio));
-    if (a) {
-      const q = new URLSearchParams({
-        allenamento: a.IDallenamento,
-        atleta: ID_ATLETA,
-        nome: NOME_ATLETA,
-        cognome: COGNOME_ATLETA,
-        inizio: a.data_inizio,
-        fine: a.data_fine,
-      });
-      window.location.href = `DettaglioAllenamento.html?${q.toString()}`;
-    }
-  });
-});
-
-  list.querySelectorAll("[data-delete]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const a = allenamentoCache.find((x) => x.IDallenamento === Number(btn.dataset.delete));
-      if (a) openDeleteModal(a);
-    });
-  });
+  await renderSettimane(a.IDallenamento);
 }
+
+// ── NAVIGAZIONE ─────────────────────────────────────────────────────────────
+function navPrecedente() { if (currentIdx > 0) { currentIdx--; renderCurrent(); } }
+function navSuccessivo() { if (currentIdx < allenamentoCache.length - 1) { currentIdx++; renderCurrent(); } }
+
+// ── PIANO GARE ───────────────────────────────────────────────────────────────
+function goPianoGare() {
+  const a = allenamentoCache[currentIdx];
+  if (!a) return;
+  const q = new URLSearchParams({
+    allenamento: a.IDallenamento,
+    atleta:  ID_ATLETA,
+    nome:    NOME_ATLETA,
+    cognome: COGNOME_ATLETA,
+    inizio:  a.data_inizio,
+    fine:    a.data_fine,
+  });
+  window.location.href = `Pianogare.html?${q.toString()}`;
+}
+
+// ── MODALI ───────────────────────────────────────────────────────────────────
+function chiudiModal(id) { document.getElementById(id).classList.remove("open"); }
+function chiudiSeFuori(e, id) { if (e.target.id === id) chiudiModal(id); }
 
 function openAddModal() {
-  clearMsg("formMsgBox");
-  document.getElementById("editAllenamentoId").value = "";
-  document.getElementById("fDataInizio").value = "";
-  document.getElementById("fDataFine").value = "";
-  document.getElementById("fObiettivi").value = "";
-  document.getElementById("formModalPill").textContent = "Nuovo Allenamento";
-  document.getElementById("formModalTitle").textContent = "Aggiungi allenamento";
-  openModal("formModal");
+  document.getElementById("addInizio").value   = "";
+  document.getElementById("addFine").value     = "";
+  document.getElementById("addObiettivi").value = "";
+  document.getElementById("addMsg").className  = "m-msg";
+  document.getElementById("addModal").classList.add("open");
 }
 
-function openEditModal(a) {
-  clearMsg("formMsgBox");
-  document.getElementById("editAllenamentoId").value = a.IDallenamento;
-  document.getElementById("fDataInizio").value = toInputDate(a.data_inizio);
-  document.getElementById("fDataFine").value = toInputDate(a.data_fine);
-  document.getElementById("fObiettivi").value = a.obiettivi || "";
-  document.getElementById("formModalPill").textContent = "Modifica";
-  document.getElementById("formModalTitle").textContent = "Modifica allenamento";
-  openModal("formModal");
+function openModificaModal() {
+  const a = allenamentoCache[currentIdx];
+  if (!a) return;
+  document.getElementById("modInizio").value    = toInputDate(a.data_inizio);
+  document.getElementById("modFine").value      = toInputDate(a.data_fine);
+  document.getElementById("modObiettivi").value = a.obiettivi || "";
+  document.getElementById("modificaMsg").className = "m-msg";
+  document.getElementById("modificaModal").classList.add("open");
 }
 
-function openDeleteModal(a) {
-  document.getElementById("deleteAllenamentoId").value = a.IDallenamento;
-  document.getElementById("deleteMsg").textContent =
-    `Eliminare l'allenamento dal ${formatDate(a.data_inizio)} al ${formatDate(a.data_fine)}?`;
-  openModal("deleteModal");
+function openEliminaModal() {
+  const a = allenamentoCache[currentIdx];
+  if (!a) return;
+  document.getElementById("eliminaMsg").textContent =
+    `Eliminare l'allenamento dal ${toInputDate(a.data_inizio)} al ${toInputDate(a.data_fine)}?`;
+  document.getElementById("eliminaModal").classList.add("open");
 }
 
-async function salvaAllenamento() {
-  clearMsg("formMsgBox");
-  const data_inizio = document.getElementById("fDataInizio").value;
-  const data_fine = document.getElementById("fDataFine").value;
-  const obiettivi = document.getElementById("fObiettivi").value.trim() || null;
+// ── SALVA NUOVO ──────────────────────────────────────────────────────────────
+async function salvaNuovo() {
+  const data_inizio = document.getElementById("addInizio").value;
+  const data_fine   = document.getElementById("addFine").value;
+  const obiettivi   = document.getElementById("addObiettivi").value.trim() || null;
+  const msgEl       = document.getElementById("addMsg");
 
   if (!data_inizio || !data_fine) {
-    showMsg("formMsgBox", "Le date di inizio e fine sono obbligatorie.", "error");
-    return;
+    msgEl.textContent = "Le date sono obbligatorie."; msgEl.className = "m-msg show"; return;
   }
-
   if (data_fine <= data_inizio) {
-    showMsg("formMsgBox", "La data di fine deve essere successiva alla data di inizio.", "error");
-    return;
+    msgEl.textContent = "La data fine deve essere successiva all'inizio."; msgEl.className = "m-msg show"; return;
   }
-
-  const id = document.getElementById("editAllenamentoId").value;
-  const isEdit = !!id;
-  const url = isEdit
-    ? `${API_URL}/atleti/${ID_ATLETA}/allenamenti/${id}`
-    : `${API_URL}/atleti/${ID_ATLETA}/allenamenti/`;
-
   try {
-    const res = await fetch(url, {
-      method: isEdit ? "PUT" : "POST",
-      headers: authHeaders(),
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/`, {
+      method: "POST", headers: authHeaders(),
       body: JSON.stringify({ data_inizio, data_fine, obiettivi }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      showMsg("formMsgBox", err.detail || "Errore nel salvataggio.", "error");
-      return;
+      msgEl.textContent = err.detail || "Errore."; msgEl.className = "m-msg show"; return;
     }
-    closeModal("formModal");
+    chiudiModal("addModal");
     await caricaAllenamenti();
-  } catch {
-    showMsg("formMsgBox", "Impossibile contattare il server.", "error");
-  }
+  } catch { msgEl.textContent = "Impossibile contattare il server."; msgEl.className = "m-msg show"; }
 }
 
-async function confermaElimina() {
-  const id = document.getElementById("deleteAllenamentoId").value;
+// ── SALVA MODIFICA ───────────────────────────────────────────────────────────
+async function salvaModifica() {
+  const a           = allenamentoCache[currentIdx];
+  const data_inizio = document.getElementById("modInizio").value;
+  const data_fine   = document.getElementById("modFine").value;
+  const obiettivi   = document.getElementById("modObiettivi").value.trim() || null;
+  const msgEl       = document.getElementById("modificaMsg");
+
+  if (!data_inizio || !data_fine) {
+    msgEl.textContent = "Le date sono obbligatorie."; msgEl.className = "m-msg show"; return;
+  }
+  if (data_fine <= data_inizio) {
+    msgEl.textContent = "La data fine deve essere successiva all'inizio."; msgEl.className = "m-msg show"; return;
+  }
   try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/${id}`, {
-      method: "DELETE",
-      headers: authHeaders(),
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/${a.IDallenamento}`, {
+      method: "PUT", headers: authHeaders(),
+      body: JSON.stringify({ data_inizio, data_fine, obiettivi }),
     });
-    if (!res.ok && res.status !== 204) {
+    if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      alert(err.detail || "Errore nell'eliminazione.");
-      return;
+      msgEl.textContent = err.detail || "Errore."; msgEl.className = "m-msg show"; return;
     }
-    closeModal("deleteModal");
+    chiudiModal("modificaModal");
     await caricaAllenamenti();
-  } catch {
-    alert("Impossibile contattare il server.");
-  }
+  } catch { msgEl.textContent = "Impossibile contattare il server."; msgEl.className = "m-msg show"; }
 }
 
+// ── CONFERMA ELIMINA ─────────────────────────────────────────────────────────
+async function confermaElimina() {
+  const a = allenamentoCache[currentIdx];
+  try {
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/${a.IDallenamento}`, {
+      method: "DELETE", headers: authHeaders(),
+    });
+    if (!res.ok && res.status !== 204) { alert("Errore nell'eliminazione."); return; }
+    chiudiModal("eliminaModal");
+    await caricaAllenamenti();
+  } catch { alert("Impossibile contattare il server."); }
+}
+
+// ── SETTIMANE ────────────────────────────────────────────────────────────────
+async function renderSettimane(allenamentoID) {
+  const tbody = document.getElementById("settimaneBody");
+  tbody.innerHTML = "";
+
+  let settimane = [];
+  try {
+    const res = await fetch(apiSett(allenamentoID), { headers: authHeaders() });
+    if (res.ok) settimane = await res.json();
+  } catch {}
+
+  settimane.forEach(s => {
+    const tr = document.createElement("tr");
+    tr.dataset.sett = s.IDsettimana;
+    tr.innerHTML = `
+      <td class="td-num">
+        <input class="sett-num" type="number" value="${s.IDsettimana}" placeholder="N°" readonly style="background:transparent;border:none;cursor:default;">
+      </td>
+      <td>
+        <input class="sett-obj" type="text" value="${escHtml(s.obiettivo || "")}" placeholder="Obiettivo settimana..."
+          onblur="saveRow(this.closest('tr'), ${allenamentoID})"
+          onkeydown="if(event.key==='Enter'){ saveRow(this.closest('tr'), ${allenamentoID}); nextEmptyRow(); }">
+      </td>
+      <td class="td-actions">
+        <button class="sett-btn sett-btn-det" onclick="apriDettagliSettimana(${s.IDsettimana}, ${allenamentoID})" title="Dettagli Seduta">&#128203;</button>
+        <button class="sett-btn sett-btn-del" onclick="eliminaSettimana(${s.IDsettimana}, ${allenamentoID})" title="Elimina">&#10005;</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  addEmptyInputRow(tbody, allenamentoID);
+}
+
+function addEmptyInputRow(tbody, allenamentoID) {
+  const tr = document.createElement("tr");
+  tr.className = "empty-input-row";
+  tr.innerHTML = `
+    <td class="td-num">
+      <input class="sett-num" type="number" placeholder="N°"
+        onblur="checkNewRow(this.closest('tr'), ${allenamentoID})">
+    </td>
+    <td>
+      <input class="sett-obj" type="text" placeholder=""
+        onblur="checkNewRow(this.closest('tr'), ${allenamentoID})"
+        onkeydown="if(event.key==='Enter') checkNewRow(this.closest('tr'), ${allenamentoID})">
+    </td>
+    <td class="td-actions">
+      <button class="sett-btn sett-btn-det" disabled>&#128203;</button>
+      <button class="sett-btn sett-btn-del" disabled>&#10005;</button>
+    </td>`;
+  tbody.appendChild(tr);
+}
+
+async function checkNewRow(tr, allenamentoID) {
+  const numVal = tr.querySelector(".sett-num").value.trim();
+  const objVal = tr.querySelector(".sett-obj").value.trim();
+  if (!numVal) return;
+  const numSett = parseInt(numVal);
+  if (!numSett || numSett < 1) return;
+  try {
+    await fetch(apiIniz(allenamentoID, numSett), { method: "POST", headers: authHeaders() });
+    if (objVal) {
+      await fetch(apiNota(allenamentoID, numSett), {
+        method: "POST", headers: authHeaders(),
+        body: JSON.stringify({ nota: JSON.stringify({ obiettivo: objVal }) }),
+      });
+    }
+  } catch {}
+  renderSettimane(allenamentoID);
+}
+
+async function saveRow(tr, allenamentoID) {
+  const numSett = Number(tr.dataset.sett);
+  if (!numSett) return;
+  const objVal = tr.querySelector(".sett-obj").value.trim();
+  try {
+    let existing = {};
+    const r = await fetch(apiNota(allenamentoID, numSett), { headers: authHeaders() });
+    if (r.ok) {
+      const row = await r.json();
+      if (row?.nota) { try { existing = JSON.parse(row.nota); } catch {} }
+    }
+    existing.obiettivo = objVal;
+    await fetch(apiNota(allenamentoID, numSett), {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify({ nota: JSON.stringify(existing) }),
+    });
+  } catch {}
+}
+
+async function eliminaSettimana(numSett, allenamentoID) {
+  try {
+    await fetch(`${API_URL}/allenamenti/${allenamentoID}/settimane/${numSett}/`, {
+      method: "DELETE", headers: authHeaders(),
+    });
+  } catch {}
+  renderSettimane(allenamentoID);
+}
+
+function apriDettagliSettimana(numSett, allenamentoID) {
+  const a = allenamentoCache[currentIdx];
+  const q = new URLSearchParams({
+    allenamento: allenamentoID,
+    atleta:    ID_ATLETA,
+    nome:      NOME_ATLETA,
+    cognome:   COGNOME_ATLETA,
+    inizio:    a.data_inizio,
+    fine:      a.data_fine,
+    settimana: numSett,
+    seduta:    1,
+  });
+  document.getElementById("modal-iframe").src = `Allenamento.FC/ProgrammazioneSettimana.html?${q.toString()}`;
+  document.getElementById("modal-dettagli").classList.add("open");
+}
+
+function chiudiDettagliModal() {
+  document.getElementById("modal-dettagli").classList.remove("open");
+  document.getElementById("modal-iframe").src = "";
+}
+
+function chiudiModaleSeFuori(e) {
+  if (e.target === document.getElementById("modal-dettagli")) chiudiDettagliModal();
+}
+
+function nextEmptyRow() {
+  const empty = document.querySelector(".empty-input-row .sett-obj");
+  if (empty) empty.focus();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
-  if (!ID_ATLETA) {
-    window.location.href = "Dashboard.html";
-    return;
-  }
-  const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
-  document.getElementById("titoloAtleta").textContent = titolo || "—";
-  document.getElementById("titoloAtleta2").textContent =
-    titolo ? `Allenamenti: ${titolo}` : "Allenamenti";
+  if (!ID_ATLETA) { window.location.href = "Dashboard.html"; return; }
+  const nome = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
+  document.getElementById("atletaName").textContent = nome || "—";
   caricaAllenamenti();
 });

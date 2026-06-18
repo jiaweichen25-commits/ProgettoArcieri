@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public."Tistruttori"
     "Cognome"           character varying NOT NULL,
     "Qualifica"         character varying,
     "Cellulare"         character varying,
-    "E-mail"            character varying NOT NULLL UNIQUE,
+    "E-mail"            character varying NOT NULL UNIQUE,
     PRIMARY KEY ("IDistruttore")
 );
 
@@ -265,6 +265,13 @@ CREATE TABLE IF NOT EXISTS public."TSdesEsercizioAllFisCor"
     "DescrizioneEsercizio"                          character varying,
     "EsText"                                        text,
     PRIMARY KEY ("IDdescrizioneEsercizioAllFisCor")
+);
+
+CREATE TABLE IF NOT EXISTS public."TStempiFisCor"
+(
+    "IDtempoFisCor"     serial NOT NULL,
+    "Valore"            character varying,
+    PRIMARY KEY ("IDtempoFisCor")
 );
 
 CREATE TABLE IF NOT EXISTS public."TdetNoteAtleta"

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allenamento Fisico</title>
+    <link rel="stylesheet" href="AllenamentiTFR.css">
+</head>
+<body>
+
+    <!-- Sezione principale della tabella -->
+    <div class="training-container">
+        <h2 class="table-title">ALLENAMENTO FISICO - FORZA RESISTENZA</h2>
+
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th class="col-tabella">
+                        <div class="tabella-header-content">
+                            <span>Tabella n°</span>
+                            <div class="tabella-header-controls">
+                                <select id="exercise-select" class="styled-select">
+                                    <option value="" selected>Seleziona un esercizio...</option>
+                                </select>
+                                <button id="open-modal-btn" class="icon-btn-modal" title="Gestisci Esercizi">📋</button>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="col-serie">1</th>
+                    <th class="col-serie">2</th>
+                    <th class="col-serie">3</th>
+                    <th class="col-serie">4</th>
+                    <th class="col-serie">5</th>
+                    <th class="col-serie">6</th>
+                    <th class="col-tempi">
+                        <button id="open-tempi-modal-btn" class="icon-btn-modal" title="Gestisci Tempi">📋</button>
+                    </th>
+                    <th class="col-desc">
+                        <div class="tabella-header-content">
+                            <span>Descrizione Esercizio</span>
+                            <div class="tabella-header-controls">
+                                <select id="ripetizioni-select" class="styled-select">
+                                    <option value="" selected>Seleziona Descrizione...</option>
+                                </select>
+                                <button id="open-ripetizioni-modal-btn" class="icon-btn-modal" title="Gestisci Ripetizioni">📋</button>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="col-azione">Azione</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Le righe dinamiche vengono aggiunte qui -->
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Modale Esercizi -->
+    <div id="exercise-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Esercizi</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Esercizio</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-exercises-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-exercise-input" placeholder="Digita un nuovo esercizio...">
+                    <button id="add-exercise-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Tempi -->
+    <div id="tempi-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tempi</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Tempo</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-tempi-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-tempo-input" placeholder="Digita un nuovo tempo (es. 3')...">
+                    <button id="add-tempo-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Ripetizioni -->
+    <div id="ripetizioni-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ripetizioni</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Ripetizione</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-ripetizioni-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-ripetizione-input" placeholder="Digita una nuova descrizione...">
+                    <button id="add-ripetizione-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="AllenamentiTFR.js"></script>
+</body>
+</html>

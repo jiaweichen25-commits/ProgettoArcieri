@@ -111,15 +111,15 @@ function buildSelect(options, valueKey, labelKey, selectedVal) {
 
 async function caricaLookup() {
   const endpoints = [
-    { url: "/allenamenti/lookup/stretching/",           key: "stretching" },
-    { url: "/allenamenti/lookup/riscaldamento/",        key: "riscaldamento" },
-    { url: "/allenamenti/lookup/distanza/",             key: "distanza" },
-    { url: "/allenamenti/lookup/targa/",                key: "targa" },
-    { url: "/allenamenti/lookup/descrizione-esercizio/", key: "desEsercizio" },
-    { url: "/allenamenti/lookup/tabella-numero/",       key: "tabellaN" },
-    { url: "/allenamenti/lookup/allfisforres-descrizione/", key: "desFisForRes" },
-    { url: "/allenamenti/lookup/attrezzi/",             key: "attrezzi" },
-    { url: "/allenamenti/lookup/allfiscor-descrizione/", key: "desFisCor" },
+    { url: "/allenamenti/lookup/stretching-list/",           key: "stretching" },
+    { url: "/allenamenti/lookup/riscaldamento-list/",        key: "riscaldamento" },
+    { url: "/allenamenti/lookup/distanza-list/",             key: "distanza" },
+    { url: "/allenamenti/lookup/targa-list/",                key: "targa" },
+    { url: "/allenamenti/lookup/descrizione-esercizio-list/", key: "desEsercizio" },
+    { url: "/allenamenti/lookup/tabella-numero-list/",       key: "tabellaN" },
+    { url: "/allenamenti/lookup/allfisforres-descrizione-list/", key: "desFisForRes" },
+    { url: "/allenamenti/lookup/attrezzi-list/",             key: "attrezzi" },
+    { url: "/allenamenti/lookup/allfiscor-descrizione-list/", key: "desFisCor" },
   ];
 
   await Promise.all(endpoints.map(async ({ url, key }) => {
@@ -562,4 +562,14 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("titoloAtleta2").textContent = titolo ? `Dettaglio Allenamento: ${titolo}` : "Dettaglio Allenamento";
 
   await caricaLookup();
+
+  // Auto-carica se settimana e seduta sono già nei params (apertura da iframe)
+  const autoSett  = Number(params.get("settimana"));
+  const autoSeduta = Number(params.get("seduta"));
+  if (autoSett && autoSeduta) {
+    document.getElementById("selSettimana").value = autoSett;
+    document.getElementById("selSeduta").value    = autoSeduta;
+    document.querySelector(".selettore-box").style.display = "none";
+    await caricaSeduta();
+  }
 });

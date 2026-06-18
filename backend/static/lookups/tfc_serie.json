@@ -1,0 +1,23 @@
+[
+  {"IDtabella_n": 1, "NumeroTabella": "1x3"},
+  {"IDtabella_n": 2, "NumeroTabella": "3x1"},
+  {"IDtabella_n": 3, "NumeroTabella": "3x2"},
+  {"IDtabella_n": 4, "NumeroTabella": "1x6"},
+  {"IDtabella_n": 5, "NumeroTabella": "2x3"},
+  {"IDtabella_n": 6, "NumeroTabella": "6x1"},
+  {"IDtabella_n": 7, "NumeroTabella": "3x3"},
+  {"IDtabella_n": 8, "NumeroTabella": "2x6"},
+  {"IDtabella_n": 9, "NumeroTabella": "1x12"},
+  {"IDtabella_n": 10, "NumeroTabella": "6x2"},
+  {"IDtabella_n": 11, "NumeroTabella": "3x6"},
+  {"IDtabella_n": 12, "NumeroTabella": "6x3"},
+  {"IDtabella_n": 13, "NumeroTabella": "12x2"},
+  {"IDtabella_n": 14, "NumeroTabella": "2x12"},
+  {"IDtabella_n": 15, "NumeroTabella": "10x3"},
+  {"IDtabella_n": 16, "NumeroTabella": "12x3"},
+  {"IDtabella_n": 17, "NumeroTabella": "6x6"},
+  {"IDtabella_n": 18, "NumeroTabella": "3x12"},
+  {"IDtabella_n": 19, "NumeroTabella": "10x4"},
+  {"IDtabella_n": 20, "NumeroTabella": "20x3"},
+  {"IDtabella_n": 21, "NumeroTabella": "12x6"}
+]

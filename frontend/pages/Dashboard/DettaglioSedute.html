@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Allenamenti</title>
+  <link rel="stylesheet" href="DettaglioSedute.css" />
+</head>
+<body>
+
+<!-- HEADER -->
+<nav class="top-nav">
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Settimane Allenamento</span>
+      <strong id="atletaName">...</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="back-btn" id="backBtn">&#8592; I miei Atleti</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- SETTIMANE -->
+  <div class="table-card">
+    <div class="table-card-head">
+      <span>Settimane</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="td-num">Settimana</th>
+          <th>Obiettivo</th>
+          <th class="td-actions"></th>
+        </tr>
+      </thead>
+      <tbody id="settimaneBody"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- MODAL: Dettagli Seduta -->
+<div id="modal-dettagli" class="modal-overlay" onclick="chiudiModaleSeFuori(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span>Dettagli Seduta</span>
+      <button class="modal-close-btn" onclick="chiudiDettagliModal()">✕</button>
+    </div>
+    <iframe id="modal-iframe" src="" frameborder="0"></iframe>
+  </div>
+</div>
+
+<script src="DettaglioSedute.js"></script>
+</body>
+</html>

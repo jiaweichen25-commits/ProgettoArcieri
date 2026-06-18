@@ -582,3 +582,43 @@ def crea_seduta_se_non_esiste(id_allenamento: int, id_settimana: int, id_seduta:
             )
     finally:
         conn.close()
+
+
+def get_settimane_by_allenamento(id_allenamento: int):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''SELECT DISTINCT da."IDsettimana", na."Nota"
+                   FROM "TdetAllenamenti" da
+                   LEFT JOIN "TdetNoteAtleta" na
+                     ON na."IDallenamento" = da."IDallenamento"
+                    AND na."IDsettimana"   = da."IDsettimana"
+                   WHERE da."IDallenamento" = %s
+                   ORDER BY da."IDsettimana"''',
+                (id_allenamento,)
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
+
+
+def elimina_settimana_completa(id_allenamento: int, id_settimana: int):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            for table in (
+                '"TdetNoteAtleta"',
+                '"TdetAllFisCor"',
+                '"TdetAllFisForRes"',
+                '"TdetTecForCor"',
+                '"TdetRiscaldamento"',
+                '"TdetStretching"',
+                '"TdetAllenamenti"',
+            ):
+                cur.execute(
+                    f'DELETE FROM {table} WHERE "IDallenamento" = %s AND "IDsettimana" = %s',
+                    (id_allenamento, id_settimana)
+                )
+    finally:
+        conn.close()

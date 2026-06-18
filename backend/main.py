@@ -13,6 +13,7 @@ from controllers import antidoping_controller
 from controllers import allenamenti_controller
 from controllers import pianogare_controller
 from controllers import dettaglioallenamenti_controller
+from controllers import lookup_controller
 
 
 # Carica le variabili d'ambiente dal file .env
@@ -23,7 +24,13 @@ app = FastAPI(title="API Arcieri Vicenza")
 # Configurazione del Middleware CORS (perfetto per lo sviluppo)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], #da sostituire con url
+    allow_origins=[
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,6 +46,7 @@ app.include_router(antidoping_controller.router)
 app.include_router(allenamenti_controller.router)
 app.include_router(pianogare_controller.router)
 app.include_router(dettaglioallenamenti_controller.router)
+app.include_router(lookup_controller.router)
 
 
 @app.get("/")

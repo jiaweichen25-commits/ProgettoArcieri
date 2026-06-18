@@ -1,3 +1,5 @@
+import json
+
 from repositories import dettaglioallenamenti_repository as repo
 from fastapi import HTTPException, status
 
@@ -285,3 +287,21 @@ def get_lookup_desc_esercizio_all_fis_cor():
 
 def crea_seduta_se_non_esiste(id_allenamento: int, id_settimana: int, id_seduta: int):
     repo.crea_seduta_se_non_esiste(id_allenamento, id_settimana, id_seduta)
+
+
+def get_settimane(id_allenamento: int):
+    righe = repo.get_settimane_by_allenamento(id_allenamento)
+    result = []
+    for r in righe:
+        obiettivo = ""
+        if r[1]:
+            try:
+                obiettivo = json.loads(r[1]).get("obiettivo", "")
+            except Exception:
+                pass
+        result.append({"IDsettimana": r[0], "obiettivo": obiettivo})
+    return result
+
+
+def elimina_settimana(id_allenamento: int, id_settimana: int):
+    repo.elimina_settimana_completa(id_allenamento, id_settimana)

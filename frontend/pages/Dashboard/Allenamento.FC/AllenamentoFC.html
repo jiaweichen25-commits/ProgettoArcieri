@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allenamento Fisico - Coordinazione</title>
+    <link rel="stylesheet" href="AllenamentoFC.css">
+</head>
+<body>
+
+    <!-- Sezione principale della tabella -->
+    <div class="training-container">
+        <h2 class="table-title">ALLENAMENTO FISICO - COORDINAZIONE</h2>
+
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th class="col-atrezzo">
+                        <div class="tabella-header-content">
+                            <span>Atrezzo</span>
+                            <div class="tabella-header-controls">
+                                <select id="atrezzo-select" class="styled-select">
+                                    <option value="" selected>Seleziona un atrezzo...</option>
+                                </select>
+                                <button id="open-atrezzo-modal-btn" class="icon-btn-modal" title="Gestisci Atrezzi">📋</button>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="col-tempi-serie">Tempi 1</th>
+                    <th class="col-tempi-serie">Tempi 2</th>
+                    <th class="col-tempi-serie">Tempi 3</th>
+                    <th class="col-tempi-serie">Tempi 4</th>
+                    <th class="col-tempi-serie">Tempi 5</th>
+                    <th class="col-tempi-serie">Tempi 6</th>
+                    <th class="col-tempi-popup">
+                        <button id="open-tempi-modal-btn" class="icon-btn-modal" title="Gestisci Tempi">📋</button>
+                    </th>
+                    <th class="col-desc">
+                        <div class="tabella-header-content">
+                            <span>Descrizione Esercizio</span>
+                            <div class="tabella-header-controls">
+                                <select id="descrizione-select" class="styled-select">
+                                    <option value="" selected>Seleziona Descrizione...</option>
+                                </select>
+                                <button id="open-descrizione-modal-btn" class="icon-btn-modal" title="Gestisci Descrizioni">📋</button>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="col-azione">Azione</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Le righe dinamiche vengono aggiunte qui -->
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Modale Atrezzi -->
+    <div id="atrezzo-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Esercizi Coordinazione</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Atrezzo</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-atrezzo-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-atrezzo-input" placeholder="Digita un nuovo atrezzo...">
+                    <button id="add-atrezzo-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Tempi -->
+    <div id="tempi-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tempi</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Tempo</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-tempi-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-tempo-input" placeholder="Digita un nuovo tempo (es. 5')...">
+                    <button id="add-tempo-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Descrizione -->
+    <div id="descrizione-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Descrizione Esercizio</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-table-header">
+                    <span class="lbl-es">Descrizione</span>
+                    <span class="lbl-az">Azione</span>
+                </div>
+                <div id="modal-descrizione-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="new-descrizione-input" placeholder="Digita una nuova descrizione...">
+                    <button id="add-descrizione-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="AllenamentoFC.js"></script>
+</body>
+</html>

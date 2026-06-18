@@ -1,0 +1,280 @@
+/* Stili generali */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    margin: 20px;
+    color: #333;
+}
+
+.training-container {
+    background: #fff;
+    border: 1px solid #d3d3d3;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.table-title {
+    background-color: #f1f1f1;
+    margin: 0;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+/* Tabella principale */
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.main-table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #d3d3d3;
+    border-right: 1px solid #e0e0e0;
+    padding: 8px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.main-table td {
+    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+    padding: 6px;
+    vertical-align: middle;
+}
+
+.col-piedi       { width: 14%; }
+.col-distanza    { width: 7%; }
+.col-targa       { width: 9%; }
+.col-serie-num   { width: 5%; text-align: center !important; }
+.col-serie-popup { width: 4%; text-align: center; }
+.col-desc        { width: 33%; }
+.col-azione      { width: 4%; text-align: center; }
+
+/* Intestazione colonne con pulsante */
+.th-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+/* Pulsante icona modale */
+.icon-btn-modal {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.icon-btn-modal:hover {
+    background: #f0f0f0;
+}
+
+/* Celle con input cliccabili (stessa altezza dei select di TFR) */
+.cell-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.cell-wrapper input[type="text"] {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 6px 20px 6px 6px;
+    font-size: 13px;
+    box-sizing: border-box;
+    background-color: #fff;
+    cursor: pointer;
+    caret-color: transparent;
+    border-radius: 3px;
+}
+
+.cell-wrapper input[type="text"]:focus {
+    outline: none;
+    border-color: #4a75a0;
+}
+
+.inside-arrow {
+    position: absolute;
+    right: 6px;
+    font-size: 9px;
+    color: #666;
+    pointer-events: none;
+}
+
+/* Pulsante elimina riga */
+.btn-row-delete {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+}
+
+.btn-row-delete:hover {
+    background-color: #ff1a1a;
+}
+
+/* Pulsante elimina nei modali (stesso stile TFR) */
+.delete-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background-color: #ff1a1a;
+}
+
+/* --- FINESTRA POP-UP MODALE --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    width: 500px;
+    max-height: 80vh;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-content-wide {
+    width: 650px;
+}
+
+.modal-header {
+    background-color: #3b629b;
+    color: white;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.modal-close-btn {
+    background: white;
+    color: #333;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2px;
+}
+
+.modal-close-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.modal-body {
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Header sezione nel modale */
+.modal-table-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    font-size: 13px;
+}
+
+/* Riga voce nel modale */
+.modal-exercise-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+}
+
+.modal-exercise-row input {
+    width: 82%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.modal-exercise-row input:hover {
+    background-color: #e6eef4;
+    border-color: #4a75a0;
+}
+
+/* Riga aggiunta nuova voce */
+.modal-input-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.modal-input-row input {
+    width: 78%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-style: italic;
+    font-size: 13px;
+}
+
+.auto-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.auto-btn:hover {
+    background-color: #e0e0e0;
+}

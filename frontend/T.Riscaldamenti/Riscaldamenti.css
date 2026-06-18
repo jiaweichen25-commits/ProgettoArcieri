@@ -1,0 +1,276 @@
+* { box-sizing: border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ccc;
+}
+
+/* ====== HEADER ====== */
+.header-blue {
+    background-color: #4a75a0;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-buttons button {
+    background: #fff;
+    border: 1px solid #999;
+    padding: 2px 8px;
+    cursor: pointer;
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+/* ====== RIGA INFORMAZIONI ====== */
+.info-row {
+    display: flex;
+    background-color: #e6eef4;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ccc;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.info-box {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.info-box label { margin-right: 5px; }
+
+.info-box input {
+    border: 1px solid #bcbcbc;
+    padding: 3px 5px;
+    background: white;
+}
+
+.w-small { width: 30px; text-align: center; }
+.w-medium { width: 150px; }
+.w-large { flex-grow: 1; }
+
+/* ====== TABELLA FRECCE ====== */
+.main-grid {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.frecce-table {
+    border-collapse: collapse;
+    font-size: 11px;
+    text-align: center;
+    width: 250px;
+}
+
+.frecce-table th,
+.frecce-table td {
+    border: 1px solid #aaa;
+    padding: 4px;
+}
+
+.bg-light-gray { background-color: #f2f2f2; }
+.text-big { font-size: 24px; font-weight: bold; padding: 10px 0; }
+.font-bold { font-weight: bold; }
+
+.frecce-input {
+    width: 85%;
+    padding: 3px;
+    border: 1px solid #ccc;
+    text-align: center;
+    font-size: 11px;
+}
+
+/* ====== SEZIONE RISCALDAMENTO ====== */
+.section-title {
+    background-color: #f0f0f0;
+    padding: 6px 10px;
+    font-weight: bold;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-container {
+    border: 1px solid #ddd;
+    border-top: none;
+}
+
+.list-item {
+    padding: 10px;
+    font-size: 13px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+.list-item:last-child { border-bottom: none; }
+.text-muted { color: #777; }
+
+/* ====== DROPDOWN ====== */
+.dropdown-list {
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+}
+
+.dropdown-item:hover { background-color: #e6eef4; }
+.dropdown-item:last-child { border-bottom: none; }
+
+/* ====== COLONNE DINAMICHE ====== */
+.dynamic-column {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-top: none;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+    font-size: 12px;
+}
+
+.dynamic-column-name {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.dynamic-column-close {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 2px;
+    font-size: 11px;
+}
+
+.dynamic-column-close:hover { background-color: #e60000; }
+
+/* ====== FINESTRA POP-UP ====== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-box {
+    background-color: #fff;
+    width: 600px;
+    border: 1px solid #4a75a0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    background-color: #3b628c;
+    color: white;
+    padding: 12px 15px;
+    font-weight: bold;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-close {
+    background: white;
+    color: #333;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-weight: bold;
+    width: 24px; height: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-body { padding: 15px; }
+
+/* ====== TABELLA POP-UP ====== */
+.popup-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.popup-table th,
+.popup-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.popup-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.popup-table td input[type="text"] {
+    width: 95%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+}
+
+.popup-table td input::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+.col-azione {
+    width: 60px;
+    text-align: center !important;
+}
+
+.btn-delete {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.btn-delete:hover { background-color: #e60000; }
+
+.text-auto {
+    color: #999;
+    font-size: 12px;
+}

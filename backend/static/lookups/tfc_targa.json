@@ -1,0 +1,17 @@
+[
+  {"IDtarga": 1, "NomeTarga": "TipoTarga"},
+  {"IDtarga": 2, "NomeTarga": "40"},
+  {"IDtarga": 3, "NomeTarga": "60"},
+  {"IDtarga": 4, "NomeTarga": "80"},
+  {"IDtarga": 5, "NomeTarga": "120"},
+  {"IDtarga": 6, "NomeTarga": "riga O"},
+  {"IDtarga": 7, "NomeTarga": "riga V"},
+  {"IDtarga": 8, "NomeTarga": "Croce"},
+  {"IDtarga": 9, "NomeTarga": "Tripla"},
+  {"IDtarga": 10, "NomeTarga": "Paglia"},
+  {"IDtarga": 11, "NomeTarga": "Spot 12"},
+  {"IDtarga": 12, "NomeTarga": "Spot B.F."},
+  {"IDtarga": 13, "NomeTarga": "Spot 4"},
+  {"IDtarga": 14, "NomeTarga": "Spot 8"},
+  {"IDtarga": 15, "NomeTarga": "Spot 24"}
+]

@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from repositories import atleti_repository, user_repository
 import bcrypt
+import psycopg2
 
 # --- FUNZIONI UTILITÀ PRIVATE ---
 
@@ -69,7 +70,13 @@ def crea_atleta(id_utente: int, dati: dict):
         nuovo_utente = user_repository.get_user_by_email(email_atleta)
         id_utente_atleta = nuovo_utente[2]
 
-    new_id = atleti_repository.crea_atleta(id_istruttore, id_utente_atleta, dati)
+    try:
+        new_id = atleti_repository.crea_atleta(id_istruttore, id_utente_atleta, dati)
+    except psycopg2.errors.UniqueViolation:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Esiste già un atleta con questo codice fiscale"
+        )
     return {"IDatleta": new_id, "message": "Atleta creato con successo"}
 
 def modifica_atleta(id_atleta: int, id_utente: int, dati: dict):

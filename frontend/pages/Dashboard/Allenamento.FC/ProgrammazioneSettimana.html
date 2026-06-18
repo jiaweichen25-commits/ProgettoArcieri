@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmazione Settimana</title>
+    <link rel="stylesheet" href="ProgrammazioneSettimana.css">
+</head>
+<body>
+
+<!-- ========================================================
+     HEADER PAGINA
+     ======================================================== -->
+<div class="ph-bar">
+    <div class="ph-top">
+        <span class="ph-title">PROGRAMMAZIONE SETTIMANA DI ALLENAMENTO</span>
+        <div class="ph-top-buttons">
+            <button id="btn-stampa-pagina" class="ph-btn" title="Stampa">🖨️</button>
+            <button id="btn-scarica-pdf" class="ph-btn" title="Scarica PDF">📥</button>
+            <button id="btn-duplica-seduta" class="ph-btn" title="Duplica Seduta">📋</button>
+        </div>
+    </div>
+    <div class="ph-info">
+        <div class="ph-field">
+            <span class="ph-label">SETTIMANA</span>
+            <input type="text" id="page-settimana" class="ph-input-tiny">
+        </div>
+        <div class="ph-field">
+            <span class="ph-label">ATLETA</span>
+            <input type="text" id="page-atleta" class="ph-input-name">
+        </div>
+        <div class="ph-field ph-field-grow">
+            <span class="ph-label">Obiettivo</span>
+            <input type="text" id="page-obiettivo" class="ph-input-grow">
+        </div>
+    </div>
+</div>
+
+<!-- Tabella Totale Frecce -->
+<div class="risc-frecce-top">
+    <table class="risc-frecce-table">
+        <tr>
+            <th colspan="7" class="risc-bg-light-gray risc-font-bold">TOTALE FRECCE</th>
+        </tr>
+        <tr>
+            <td colspan="7" class="risc-text-big" id="totaleFrecceTxt">0</td>
+        </tr>
+        <tr>
+            <th colspan="7" class="risc-bg-light-gray risc-font-bold">Giornate di Allenamento</th>
+        </tr>
+        <tr class="risc-bg-light-gray">
+            <td>Lun</td><td>Mar</td><td>Mer</td><td>Gio</td><td>Ven</td><td>Sab</td><td>Dom</td>
+        </tr>
+        <tr id="risc-freccePerGiorno">
+            <td><input type="number" id="f_lun" class="risc-frecce-input" value="0" min="0" onchange="updateFrecce()"></td>
+            <td><input type="number" id="f_mar" class="risc-frecce-input" value="0" min="0" onchange="updateFrecce()"></td>
+            <td><input type="number" id="f_mer" class="risc-frecce-input" value="0" min="0" onchange="updateFrecce()"></td>
+            <td><input type="number" id="f_gio" class="risc-frecce-input" value="0" min="0" onchange="updateFrecce()"></td>
+            <td><input type="number" id="f_ven" class="risc-frecce-input" value="0" min="0" onchange="updateFrecce()"></td>
+            <td><input type="number" id="f_sab" class="risc-frecce-input" value="0" min="0" onchange="updateFrecce()"></td>
+            <td><input type="number" id="f_dom" class="risc-frecce-input" value="0" min="0" onchange="updateFrecce()"></td>
+        </tr>
+        <tr>
+            <td colspan="7" class="risc-font-bold" style="text-align: right; padding-right: 5px;">N° Frecce per Seduta</td>
+        </tr>
+    </table>
+</div>
+
+<!-- ========================================================
+     SEZIONE 6: RISCALDAMENTO
+     ======================================================== -->
+<div id="risc-section" class="section-block">
+    <div class="training-container">
+        <h2 class="table-title">RISCALDAMENTO</h2>
+
+        <!-- Sezione Esercizi Riscaldamento -->
+        <div class="risc-section-title">
+            <span>RISCALDAMENTO</span>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <div style="position: relative;">
+                    <button id="risc-dropdown-btn" onclick="toggleRiscDropdown(event)" style="background:none; border:1px solid var(--border); cursor:pointer; padding: 2px 5px; color:var(--text);">▼ Esercizi</button>
+                    <div id="risc-dropdown-list" class="risc-dropdown-list" style="position: absolute; top: 100%; right: 0; min-width: 250px; z-index: 100;"></div>
+                </div>
+                <button id="risc-openPopupBtn" onclick="openRiscListModal()" style="background:none; border:1px solid var(--border); cursor:pointer; padding: 2px 5px; color:var(--text);">📋</button>
+            </div>
+        </div>
+        <div id="risc-dynamic-columns"></div>
+        <div class="risc-list-container" id="risc-mainExerciseList"></div>
+    </div>
+
+    <div id="riscModal" class="modal">
+        <div class="modal-content modal-content-wide">
+            <div class="modal-header">
+                <h3>Dettagli Riscaldamento</h3>
+                <button class="modal-close-btn" onclick="closeRiscModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="risc-popup-table">
+                    <thead>
+                        <tr>
+                            <th>Giorno</th>
+                            <th>Attività</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Lunedì</td><td><input id="rm_lun" type="text" placeholder="Inserisci attività..." /></td></tr>
+                        <tr><td>Martedì</td><td><input id="rm_mar" type="text" placeholder="Inserisci attività..." /></td></tr>
+                        <tr><td>Mercoledì</td><td><input id="rm_mer" type="text" placeholder="Inserisci attività..." /></td></tr>
+                        <tr><td>Giovedì</td><td><input id="rm_gio" type="text" placeholder="Inserisci attività..." /></td></tr>
+                        <tr><td>Venerdì</td><td><input id="rm_ven" type="text" placeholder="Inserisci attività..." /></td></tr>
+                        <tr><td>Sabato</td><td><input id="rm_sab" type="text" placeholder="Inserisci attività..." /></td></tr>
+                        <tr><td>Domenica</td><td><input id="rm_dom" type="text" placeholder="Inserisci attività..." /></td></tr>
+                    </tbody>
+                </table>
+                <div class="modal-input-row" style="justify-content:flex-end; padding-top:12px;">
+                    <button class="auto-btn" type="button" onclick="saveRiscModal()">Salva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================
+     SEZIONE 1: TECNICA - FORZA - COORDINAZIONE
+     ======================================================== -->
+<div id="tfc-section" class="section-block">
+    <div class="training-container">
+        <div class="table-title">
+            <span>TECNICA - FORZA - COORDINAZIONE</span>
+        </div>
+        <table class="main-table" id="tfc-tech-table">
+            <thead>
+                <tr>
+                    <th class="col-piedi">
+                        <div class="th-header">
+                            <span>Posizione Piedi</span>
+                            <button class="icon-btn-modal" id="tfc-piedi-pop-btn">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-distanza">
+                        <div class="th-header">
+                            <span>Distanza</span>
+                            <button class="icon-btn-modal" id="tfc-distanza-pop-btn">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-targa">
+                        <div class="th-header">
+                            <span>Targa</span>
+                            <button class="icon-btn-modal" id="tfc-targa-pop-trigger">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-serie-num">Lun</th>
+                    <th class="col-serie-num">Mar</th>
+                    <th class="col-serie-num">Mer</th>
+                    <th class="col-serie-num">Gio</th>
+                    <th class="col-serie-num">Ven</th>
+                    <th class="col-serie-num">Sab</th>
+                    <th class="col-serie-num">Dom</th>
+                    <th class="col-serie-popup">
+                        <button class="icon-btn-modal" id="tfc-serie-pop-btn">📋</button>
+                    </th>
+                    <th class="col-desc">
+                        <div class="th-header">
+                            <span>Descrizione Esercizio</span>
+                            <button class="icon-btn-modal" id="tfc-descrizione-pop-btn">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-azione">Azione</th>
+                </tr>
+            </thead>
+            <tbody id="tfcBody"></tbody>
+        </table>
+    </div>
+
+    <div id="tfc-piedi-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Posizione Piedi</h3><button class="modal-close-btn" id="tfc-close-piedi">&times;</button></div>
+            <div class="modal-body">
+                <div class="modal-table-header"><span class="lbl-es">Posizione</span><span class="lbl-az">Azione</span></div>
+                <div id="tfc-modal-piedi-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="tfc-new-piedi-input" placeholder="Digita una nuova posizione...">
+                    <button id="tfc-add-piedi-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tfc-distanza-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Distanza</h3><button class="modal-close-btn" id="tfc-close-distanza">&times;</button></div>
+            <div class="modal-body">
+                <div class="modal-table-header"><span class="lbl-es">Distanza</span><span class="lbl-az">Azione</span></div>
+                <div id="tfc-modal-distanza-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="tfc-new-distanza-input" placeholder="Digita una nuova distanza...">
+                    <button id="tfc-add-distanza-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tfc-targa-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Targa</h3><button class="modal-close-btn" id="tfc-close-targa">&times;</button></div>
+            <div class="modal-body">
+                <div class="modal-table-header"><span class="lbl-es">Targa</span><span class="lbl-az">Azione</span></div>
+                <div id="tfc-modal-targa-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="tfc-new-targa-input" placeholder="Digita un nuovo tipo targa...">
+                    <button id="tfc-add-targa-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tfc-serie-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Serie</h3><button class="modal-close-btn" id="tfc-close-serie">&times;</button></div>
+            <div class="modal-body">
+                <div class="modal-table-header"><span class="lbl-es">Serie</span><span class="lbl-az">Azione</span></div>
+                <div id="tfc-modal-serie-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="tfc-new-serie-input" placeholder="Digita una nuova serie (es. 3x6)...">
+                    <button id="tfc-add-serie-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tfc-descrizione-modal" class="modal">
+        <div class="modal-content modal-content-wide">
+            <div class="modal-header"><h3>Descrizione Esercizio</h3><button class="modal-close-btn" id="tfc-close-descrizione">&times;</button></div>
+            <div class="modal-body">
+                <div class="modal-table-header"><span class="lbl-es">Descrizione</span><span class="lbl-az">Azione</span></div>
+                <div id="tfc-modal-descrizione-list"></div>
+                <div class="modal-input-row">
+                    <input type="text" id="tfc-new-descrizione-input" placeholder="Digita una nuova descrizione...">
+                    <button id="tfc-add-descrizione-btn" class="auto-btn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================
+     SEZIONE 4: STRETCHING
+     ======================================================== -->
+<div id="str-section" class="section-block">
+    <div class="stretching-card">
+        <div class="card-header">
+            <div class="card-title">Stretching</div>
+            <button class="doc-icon-btn" id="str-open-modal-btn" title="Gestisci Tempi">
+                <svg width="14" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="str-days-header">
+                <div class="str-days-slots">
+                    <span>Lunedì</span>
+                    <span>Martedì</span>
+                    <span>Mercoledì</span>
+                    <span>Giovedì</span>
+                    <span>Venerdì</span>
+                    <span>Sabato</span>
+                    <span>Domenica</span>
+                </div>
+                <div class="str-days-spacer"></div>
+            </div>
+            <div id="str-rows-wrapper" class="rows-wrapper"></div>
+        </div>
+    </div>
+
+    <div class="str-modal-overlay" id="str-modal-overlay">
+        <div class="str-modal-box">
+            <div class="modal-header">
+                <h3>Tempi Stretching</h3>
+                <button class="btn-close-str-modal" id="str-close-modal-btn">x</button>
+            </div>
+            <div class="str-table-container">
+                <table class="str-tempi-table">
+                    <thead>
+                        <tr>
+                            <th>Tempo</th>
+                            <th class="col-azione-str">Azione</th>
+                        </tr>
+                    </thead>
+                    <tbody id="str-table-body"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td><input type="text" class="str-input-new-time" id="str-new-time-input" placeholder="Digita nuovo tempo (es. 15')..."></td>
+                            <td class="str-cell-action"><span class="str-txt-auto">Auto</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================
+     SEZIONE 2: ALLENAMENTO FISICO - FORZA RESISTENZA
+     ======================================================== -->
+<div id="forza-section" class="section-block">
+    <div class="training-container">
+        <h2 class="table-title">ALLENAMENTO FISICO - FORZA RESISTENZA</h2>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th class="col-atrezzo">Tabella n°</th>
+                    <th class="col-tempi-serie">Lun</th>
+                    <th class="col-tempi-serie">Mar</th>
+                    <th class="col-tempi-serie">Mer</th>
+                    <th class="col-tempi-serie">Gio</th>
+                    <th class="col-tempi-serie">Ven</th>
+                    <th class="col-tempi-serie">Sab</th>
+                    <th class="col-tempi-serie">Dom</th>
+                    <th class="col-tempi-popup">
+                        <button class="icon-btn-modal" type="button" onclick="openTfrTempiModal()">📋</button>
+                    </th>
+                    <th class="col-desc">Descrizione Esercizio</th>
+                    <th class="col-azione">Azione</th>
+                </tr>
+                <tr class="tfr-dropdown-row">
+                    <td style="position:relative;padding:6px 8px;">
+                        <div style="display:flex;gap:4px;align-items:center;">
+                            <div style="position:relative;">
+                                <button class="icon-btn-modal" id="tfr-esercizio-btn" onclick="toggleTfrEserciziDropdown(event)" style="font-size:11px;white-space:nowrap;">▼ Esercizio</button>
+                                <div id="tfr-esercizi-dropdown" class="risc-dropdown-list" style="position:absolute;top:100%;left:0;min-width:200px;z-index:300;"></div>
+                            </div>
+                            <button class="icon-btn-modal" onclick="openForzaEserciziModal()" style="font-size:13px;">📋</button>
+                        </div>
+                    </td>
+                    <td colspan="8"></td>
+                    <td style="padding:6px 8px;">
+                        <div style="display:flex;gap:4px;align-items:center;">
+                            <div style="position:relative;">
+                                <button class="icon-btn-modal" id="tfr-descrizione-btn" onclick="toggleTfrDescrizioneDropdown(event)" style="font-size:11px;white-space:nowrap;">▼ Descrizione</button>
+                                <div id="tfr-descrizione-dropdown" class="risc-dropdown-list" style="position:absolute;top:100%;right:0;min-width:220px;z-index:300;"></div>
+                            </div>
+                            <button class="icon-btn-modal" onclick="openForzaRipetizioniModal()" style="font-size:13px;">📋</button>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody id="forzaBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================================
+     SEZIONE 3: ALLENAMENTO FISICO - COORDINAZIONE
+     ======================================================== -->
+<div id="coord-section" class="section-block">
+    <div class="training-container">
+        <div class="table-title">
+            <span>ALLENAMENTO FISICO - COORDINAZIONE</span>
+        </div>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th class="col-atrezzo">
+                        <div class="th-header">
+                            <span>Atrezzo</span>
+                            <button class="icon-btn-modal" type="button" onclick="openCoordAtrezziModal()">📋</button>
+                        </div>
+                    </th>
+                    <th class="col-tempi-serie">Lunedì</th>
+                    <th class="col-tempi-serie">Martedì</th>
+                    <th class="col-tempi-serie">Mercoledì</th>
+                    <th class="col-tempi-serie">Giovedì</th>
+                    <th class="col-tempi-serie">Venerdì</th>
+                    <th class="col-tempi-serie">Sabato</th>
+                    <th class="col-tempi-serie">Domenica</th>
+                    <th class="col-tempi-popup"><button class="icon-btn-modal" type="button" onclick="openCoordTempiModal()">📋</button></th>
+                    <th class="col-desc">Descrizione Esercizio</th>
+                    <th class="col-azione">Azione</th>
+                </tr>
+            </thead>
+            <tbody id="coordBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================================
+     SEZIONE 5: NOTE PER L'ATLETA
+     ======================================================== -->
+<div id="note-section" class="section-block">
+    <div class="sezione-note">
+        <div class="titolo-note">NOTE PER L'ATLETA</div>
+        <textarea id="note-atleta" class="textarea-note" placeholder="Inserisci qui le note per l'atleta..."></textarea>
+    </div>
+</div>
+
+<div id="riscListModal" class="modal">
+    <div class="modal-content modal-content-wide">
+        <div class="modal-header"><h3>Esercizi Riscaldamento</h3><button class="modal-close-btn" onclick="closeRiscListModal()">&times;</button></div>
+        <div class="modal-body">
+            <table class="risc-popup-table"><tbody id="riscListUl"></tbody></table>
+        </div>
+    </div>
+</div>
+
+<div id="forzaEserciziModal" class="modal">
+    <div class="modal-content modal-content-wide">
+        <div class="modal-header"><h3>Esercizi Forza Resistenza</h3><button class="modal-close-btn" onclick="closeForzaEserciziModal()">&times;</button></div>
+        <div class="modal-body">
+            <table class="risc-popup-table"><tbody id="forzaEserciziUl"></tbody></table>
+        </div>
+    </div>
+</div>
+
+<div id="forzaRipetizioniModal" class="modal">
+    <div class="modal-content modal-content-wide">
+        <div class="modal-header"><h3>Descrizioni Forza Resistenza</h3><button class="modal-close-btn" onclick="closeForzaRipetizioniModal()">&times;</button></div>
+        <div class="modal-body">
+            <table class="risc-popup-table"><tbody id="forzaRipetizioniUl"></tbody></table>
+        </div>
+    </div>
+</div>
+
+<div id="tfrTempiModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Tempi</h3>
+            <button class="modal-close-btn" onclick="closeTfrTempiModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-table-header"><span class="lbl-es">Tempo</span><span class="lbl-az">Azione</span></div>
+            <div id="tfr-tempi-list"></div>
+            <div class="modal-input-row">
+                <input type="text" id="tfr-new-tempo-input" placeholder="Digita nuovo tempo (es. 10')...">
+                <button class="auto-btn" onclick="addTfrTempoItem()">Aggiungi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="coord-giorno-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Tempi</h3>
+            <button class="modal-close-btn" onclick="closeCoordGiornoModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-table-header"><span class="lbl-es">Tempo</span><span class="lbl-az">Azione</span></div>
+            <div id="coord-giorno-modal-list"></div>
+        </div>
+    </div>
+</div>
+
+<div id="coord-atrezzi-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Attrezzi</h3>
+            <button class="modal-close-btn" onclick="closeCoordAtrezziModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-table-header"><span class="lbl-es">Attrezzo</span><span class="lbl-az">Azione</span></div>
+            <div id="coord-atrezzi-list"></div>
+            <div class="modal-input-row">
+                <input type="text" id="coord-new-atrezzo-input" placeholder="Digita un nuovo attrezzo...">
+                <button class="auto-btn" onclick="addCoordAtrezzo()">Aggiungi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="coord-tempi-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Tempi Coordinazione</h3>
+            <button class="modal-close-btn" onclick="closeCoordTempiModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-table-header"><span class="lbl-es">Tempo</span><span class="lbl-az">Azione</span></div>
+            <div id="coord-tempi-list"></div>
+            <div class="modal-input-row">
+                <input type="text" id="coord-new-tempo-input" placeholder="Digita nuovo tempo (es. 30')...">
+                <button class="auto-btn" onclick="addCoordTempo()">Aggiungi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="ProgrammazioneSettimana.js"></script>
+</body>
+</html>

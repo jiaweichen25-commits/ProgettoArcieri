@@ -1,0 +1,219 @@
+/* Stili generali */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    margin: 20px;
+    color: #333;
+}
+
+.training-container {
+    background: #fff;
+    border: 1px solid #d3d3d3;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.table-title {
+    background-color: #f1f1f1;
+    margin: 0;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+/* Tabella principale */
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.main-table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #d3d3d3;
+    border-right: 1px solid #e0e0e0;
+    padding: 8px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.main-table td {
+    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+    padding: 6px;
+    vertical-align: middle;
+}
+
+.col-atrezzo      { width: 18%; }
+.col-tempi-serie  { width: 5%; text-align: center !important; }
+.col-tempi-popup  { width: 4%; text-align: center; }
+.col-desc         { width: 40%; }
+.col-azione       { width: 5%; text-align: center; }
+
+/* Intestazione colonna Atrezzo */
+.tabella-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tabella-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.styled-select {
+    flex: 1;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* Input e select nelle righe dati */
+.table-select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+    font-size: 13px;
+}
+
+/* Pulsante icona modale */
+.icon-btn-modal {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.icon-btn-modal:hover {
+    background: #f0f0f0;
+}
+
+/* Pulsante elimina (rosso) */
+.delete-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background-color: #ff1a1a;
+}
+
+/* --- FINESTRA POP-UP MODALE --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    width: 500px;
+    max-height: 80vh;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    background-color: #3b629b;
+    color: white;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.close-modal {
+    font-size: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.modal-body {
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-table-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    font-size: 13px;
+}
+
+.modal-exercise-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+}
+
+.modal-exercise-row input {
+    width: 82%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.modal-input-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.modal-input-row input {
+    width: 78%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-style: italic;
+    font-size: 13px;
+}
+
+.auto-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.auto-btn:hover {
+    background-color: #e0e0e0;
+}
