@@ -24,7 +24,7 @@ let luForzaEsercizi   = [];
 let luForzaRipetizioni = [];
 let luFcTempi         = [];
 
-// Data model
+// Data model — arrays include dbId per row for normalized table tracking
 let data = {
   riscaldamento: [],
   tfc: [],
@@ -70,33 +70,271 @@ function authHeaders() { return { "Content-Type": "application/json", Authorizat
 
 function requireAuth() {
   const token = getToken();
-  if (!token) return true;
+  const loginUrl = "../Autenticazione/Istruttore.html";
+  const redirect = () => { localStorage.clear(); window.top.location.href = loginUrl; };
+  if (!token) { redirect(); return false; }
   try {
     const p = JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
-    if (p.ruolo !== "istruttore") { localStorage.clear(); window.location.href = "../Autenticazione/Istruttore.html"; return false; }
+    if (p.ruolo !== "istruttore") { redirect(); return false; }
+    if (p.exp && Date.now() / 1000 > p.exp) { redirect(); return false; }
     return true;
-  } catch { window.location.href = "../Autenticazione/Istruttore.html"; return false; }
+  } catch { redirect(); return false; }
 }
 
-// ── DB STORAGE ────────────────────────────────────────────────────────────────
+// ── API ENDPOINTS ─────────────────────────────────────────────────────────────
 
-const API_INIZIALIZZA = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${NUM_SETTIMANA}/sedute/${NUM_SEDUTA}/inizializza`;
+const API_BASE_SEDUTA = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${NUM_SETTIMANA}/sedute/${NUM_SEDUTA}`;
+const API_RISC        = `${API_BASE_SEDUTA}/riscaldamento/`;
+const API_STR         = `${API_BASE_SEDUTA}/stretching/`;
+const API_TFC         = `${API_BASE_SEDUTA}/tecforcor/`;
+const API_FORZA       = `${API_BASE_SEDUTA}/allfisforres/`;
+const API_COORD       = `${API_BASE_SEDUTA}/allfiscor/`;
+const API_INIZIALIZZA = `${API_BASE_SEDUTA}/inizializza`;
 const API_NOTA        = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${NUM_SETTIMANA}/nota/`;
 
+// ── DB LOAD ───────────────────────────────────────────────────────────────────
+
 async function loadFromDb() {
-  try {
-    await fetch(API_INIZIALIZZA, { method: "POST", headers: authHeaders() });
-  } catch {}
+  try { await fetch(API_INIZIALIZZA, { method: "POST", headers: authHeaders() }); } catch {}
+
+  // Scalar fields from nota
   try {
     const res = await fetch(API_NOTA, { headers: authHeaders() });
     if (res.ok) {
       const row = await res.json();
       if (row?.nota) {
-        try { data = { ...data, ...JSON.parse(row.nota) }; } catch {}
+        try {
+          const parsed = JSON.parse(row.nota);
+          data.obiettivo = parsed.obiettivo || "";
+          data.note      = parsed.note      || "";
+          data.frecce    = parsed.frecce    || { lun:0, mar:0, mer:0, gio:0, ven:0, sab:0, dom:0 };
+        } catch {}
       }
     }
   } catch {}
+
+  // Normalized sections — load in parallel
+  await Promise.all([
+    (async () => {
+      try {
+        const res = await fetch(API_RISC, { headers: authHeaders() });
+        if (res.ok) {
+          data.riscaldamento = (await res.json()).map(r => ({
+            dbId: r.IDdetRiscaldamento,
+            esercizioId: r.id_esercizio_riscaldamento,
+            giorni: { lun: r.lunedi||"", mar: r.martedi||"", mer: r.mercoledi||"", gio: r.giovedi||"", ven: r.venerdi||"", sab: r.sabato||"", dom: r.domenica||"" },
+          }));
+        }
+      } catch {}
+    })(),
+    (async () => {
+      try {
+        const res = await fetch(API_STR, { headers: authHeaders() });
+        if (res.ok) {
+          data.stretching = (await res.json()).map(r => ({
+            dbId: r.IDdetStretching,
+            lun: r.lunedi    ? (parseInt(r.lunedi)    || null) : null,
+            mar: r.martedi   ? (parseInt(r.martedi)   || null) : null,
+            mer: r.mercoledi ? (parseInt(r.mercoledi) || null) : null,
+            gio: r.giovedi   ? (parseInt(r.giovedi)   || null) : null,
+            ven: r.venerdi   ? (parseInt(r.venerdi)   || null) : null,
+            sab: r.sabato    ? (parseInt(r.sabato)    || null) : null,
+            dom: r.domenica  ? (parseInt(r.domenica)  || null) : null,
+          }));
+        }
+      } catch {}
+    })(),
+    (async () => {
+      try {
+        const res = await fetch(API_TFC, { headers: authHeaders() });
+        if (res.ok) {
+          data.tfc = (await res.json()).map(r => ({
+            dbId: r.IDdetTecForCor,
+            posizionePiedi: r.posizione_piedi || "",
+            distanzaId: r.id_distanza,
+            targaId:    r.id_targa,
+            desId:      r.id_descrizione_esercizio,
+            giorni: { lun: r.lunedi||"", mar: r.martedi||"", mer: r.mercoledi||"", gio: r.giovedi||"", ven: r.venerdi||"", sab: r.sabato||"", dom: r.domenica||"" },
+          }));
+        }
+      } catch {}
+    })(),
+    (async () => {
+      try {
+        const res = await fetch(API_FORZA, { headers: authHeaders() });
+        if (res.ok) {
+          data.forza = (await res.json()).map(r => ({
+            dbId: r.IDdetAllFisForRes,
+            tabellaKey:    r.id_tabella_n ? `es_${r.id_tabella_n}` : null,
+            ripetizioneId: r.id_descrizione_esercizio_all_fis_for_res ? String(r.id_descrizione_esercizio_all_fis_for_res) : null,
+            giorni: { lun: r.lunedi||"", mar: r.martedi||"", mer: r.mercoledi||"", gio: r.giovedi||"", ven: r.venerdi||"", sab: r.sabato||"", dom: r.domenica||"" },
+          }));
+        }
+      } catch {}
+    })(),
+    (async () => {
+      try {
+        const res = await fetch(API_COORD, { headers: authHeaders() });
+        if (res.ok) {
+          data.coord = (await res.json()).map(r => ({
+            dbId: r.IDdetAllFisCor,
+            atrezzoId: r.id_attrezzo,
+            desId:     r.id_descrizione_esercizio_all_fis_cor,
+            giorni: { lun: r.lunedi||"", mar: r.martedi||"", mer: r.mercoledi||"", gio: r.giovedi||"", ven: r.venerdi||"", sab: r.sabato||"", dom: r.domenica||"" },
+          }));
+        }
+      } catch {}
+    })(),
+  ]);
 }
+
+// ── SECTION SYNC ──────────────────────────────────────────────────────────────
+
+const _sectionTimers = {};
+function scheduleSync(key, fn) {
+  clearTimeout(_sectionTimers[key]);
+  _sectionTimers[key] = setTimeout(fn, 800);
+}
+
+function riscHasData(row)  { return row.esercizioId || Object.values(row.giorni || {}).some(v => v); }
+function strHasData(row)   { return GIORNI.some(g => row[g]); }
+function tfcHasData(row)   { return row.posizionePiedi || row.distanzaId || row.targaId || row.desId || Object.values(row.giorni || {}).some(v => v); }
+function forzaHasData(row) { return row.tabellaKey || row.ripetizioneId || Object.values(row.giorni || {}).some(v => v); }
+function coordHasData(row) { return row.atrezzoId || row.desId || Object.values(row.giorni || {}).some(v => v); }
+
+async function syncRisc() {
+  for (let i = 0; i < data.riscaldamento.length; i++) {
+    const row = data.riscaldamento[i];
+    if (!row.dbId && !riscHasData(row)) continue;
+    const body = {
+      id_esercizio_riscaldamento: row.esercizioId || null,
+      lunedi:    row.giorni?.lun || null,
+      martedi:   row.giorni?.mar || null,
+      mercoledi: row.giorni?.mer || null,
+      giovedi:   row.giorni?.gio || null,
+      venerdi:   row.giorni?.ven || null,
+      sabato:    row.giorni?.sab || null,
+      domenica:  row.giorni?.dom || null,
+    };
+    try {
+      if (row.dbId) {
+        await fetch(`${API_RISC}${row.dbId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+      } else {
+        const res = await fetch(API_RISC, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        if (res.ok) { const d = await res.json(); data.riscaldamento[i].dbId = d.IDdetRiscaldamento; }
+      }
+    } catch {}
+  }
+}
+
+async function syncStr() {
+  for (let i = 0; i < data.stretching.length; i++) {
+    const row = data.stretching[i];
+    if (!row.dbId && !strHasData(row)) continue;
+    const body = {
+      id_esercizio_stretching: null,
+      lunedi:    row.lun ? String(row.lun) : null,
+      martedi:   row.mar ? String(row.mar) : null,
+      mercoledi: row.mer ? String(row.mer) : null,
+      giovedi:   row.gio ? String(row.gio) : null,
+      venerdi:   row.ven ? String(row.ven) : null,
+      sabato:    row.sab ? String(row.sab) : null,
+      domenica:  row.dom ? String(row.dom) : null,
+    };
+    try {
+      if (row.dbId) {
+        await fetch(`${API_STR}${row.dbId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+      } else {
+        const res = await fetch(API_STR, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        if (res.ok) { const d = await res.json(); data.stretching[i].dbId = d.IDdetStretching; }
+      }
+    } catch {}
+  }
+}
+
+async function syncTfc() {
+  for (let i = 0; i < data.tfc.length; i++) {
+    const row = data.tfc[i];
+    if (!row.dbId && !tfcHasData(row)) continue;
+    const body = {
+      posizione_piedi:          row.posizionePiedi || null,
+      id_distanza:              row.distanzaId ? Number(row.distanzaId) : null,
+      id_targa:                 row.targaId    ? Number(row.targaId)    : null,
+      id_descrizione_esercizio: row.desId      ? Number(row.desId)      : null,
+      lunedi:    row.giorni?.lun || null,
+      martedi:   row.giorni?.mar || null,
+      mercoledi: row.giorni?.mer || null,
+      giovedi:   row.giorni?.gio || null,
+      venerdi:   row.giorni?.ven || null,
+      sabato:    row.giorni?.sab || null,
+      domenica:  row.giorni?.dom || null,
+    };
+    try {
+      if (row.dbId) {
+        await fetch(`${API_TFC}${row.dbId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+      } else {
+        const res = await fetch(API_TFC, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        if (res.ok) { const d = await res.json(); data.tfc[i].dbId = d.IDdetTecForCor; }
+      }
+    } catch {}
+  }
+}
+
+async function syncForza() {
+  for (let i = 0; i < data.forza.length; i++) {
+    const row = data.forza[i];
+    if (!row.dbId && !forzaHasData(row)) continue;
+    const tabellaId     = row.tabellaKey    ? parseInt(String(row.tabellaKey).replace("es_","")) || null : null;
+    const ripetizioneId = row.ripetizioneId ? Number(row.ripetizioneId) : null;
+    const body = {
+      id_tabella_n: tabellaId,
+      id_descrizione_esercizio_all_fis_for_res: ripetizioneId,
+      lunedi:    row.giorni?.lun || null,
+      martedi:   row.giorni?.mar || null,
+      mercoledi: row.giorni?.mer || null,
+      giovedi:   row.giorni?.gio || null,
+      venerdi:   row.giorni?.ven || null,
+      sabato:    row.giorni?.sab || null,
+      domenica:  row.giorni?.dom || null,
+    };
+    try {
+      if (row.dbId) {
+        await fetch(`${API_FORZA}${row.dbId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+      } else {
+        const res = await fetch(API_FORZA, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        if (res.ok) { const d = await res.json(); data.forza[i].dbId = d.IDdetAllFisForRes; }
+      }
+    } catch {}
+  }
+}
+
+async function syncCoord() {
+  for (let i = 0; i < data.coord.length; i++) {
+    const row = data.coord[i];
+    if (!row.dbId && !coordHasData(row)) continue;
+    const body = {
+      id_attrezzo:                         row.atrezzoId ? Number(row.atrezzoId) : null,
+      id_descrizione_esercizio_all_fis_cor: row.desId    ? Number(row.desId)     : null,
+      lunedi:    row.giorni?.lun || null,
+      martedi:   row.giorni?.mar || null,
+      mercoledi: row.giorni?.mer || null,
+      giovedi:   row.giorni?.gio || null,
+      venerdi:   row.giorni?.ven || null,
+      sabato:    row.giorni?.sab || null,
+      domenica:  row.giorni?.dom || null,
+    };
+    try {
+      if (row.dbId) {
+        await fetch(`${API_COORD}${row.dbId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+      } else {
+        const res = await fetch(API_COORD, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        if (res.ok) { const d = await res.json(); data.coord[i].dbId = d.IDdetAllFisCor; }
+      }
+    } catch {}
+  }
+}
+
+// ── SCALAR SAVE (obiettivo, note, frecce only) ────────────────────────────────
 
 let _saveTimer = null;
 
@@ -116,7 +354,7 @@ async function persistToDb() {
     await fetch(API_NOTA, {
       method:  "POST",
       headers: authHeaders(),
-      body:    JSON.stringify({ nota: JSON.stringify(data) }),
+      body:    JSON.stringify({ nota: JSON.stringify({ obiettivo: data.obiettivo, note: data.note, frecce: data.frecce }) }),
     });
   } catch {}
 }
@@ -166,11 +404,21 @@ function renderRiscDropdown() {
     const div = document.createElement("div");
     div.className = "ps-risc-dropdown-item";
     div.textContent = ex.NomeEsercizio;
-    div.addEventListener("click", () => {
-      data.riscaldamento.push({ esercizioId: ex.IDesercizioRiscaldamento, giorni: {} });
-      autoSave();
+    div.addEventListener("click", async () => {
+      const newRow = { esercizioId: ex.IDesercizioRiscaldamento, giorni: {} };
+      data.riscaldamento.push(newRow);
       renderRiscaldamento();
       document.getElementById("risc-dropdown-list").classList.remove("open");
+      // POST immediately so the row gets a dbId before the user edits days
+      const idx = data.riscaldamento.length - 1;
+      const body = {
+        id_esercizio_riscaldamento: ex.IDesercizioRiscaldamento,
+        lunedi: null, martedi: null, mercoledi: null, giovedi: null, venerdi: null, sabato: null, domenica: null,
+      };
+      try {
+        const res = await fetch(API_RISC, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        if (res.ok) { const d = await res.json(); data.riscaldamento[idx].dbId = d.IDdetRiscaldamento; }
+      } catch {}
     });
     list.appendChild(div);
   });
@@ -196,9 +444,12 @@ function renderRiscaldamento() {
   });
 }
 
-function deleteRiscRow(idx) {
+async function deleteRiscRow(idx) {
+  const row = data.riscaldamento[idx];
+  if (row?.dbId) {
+    try { await fetch(`${API_RISC}${row.dbId}`, { method: "DELETE", headers: authHeaders() }); } catch {}
+  }
   data.riscaldamento.splice(idx, 1);
-  autoSave();
   renderRiscaldamento();
 }
 
@@ -241,7 +492,7 @@ function calcolaFrecceTFC() {
 function updateRisc(idx, key, val) {
   if (!data.riscaldamento[idx]) return;
   data.riscaldamento[idx][key] = val || null;
-  autoSave();
+  scheduleSync("risc", syncRisc);
 }
 
 function openRiscModal(idx) {
@@ -264,7 +515,7 @@ function saveRiscModal() {
   const g = {};
   GIORNI.forEach(d => { g[d] = document.getElementById("rm_" + d)?.value || ""; });
   data.riscaldamento[riscModalIdx].giorni = g;
-  autoSave();
+  scheduleSync("risc", syncRisc);
   closeRiscModal();
 }
 
@@ -377,24 +628,30 @@ function renderTfc() {
 
 function addTfcRow() {
   data.tfc.push({ posizionePiedi:"", distanzaId:null, targaId:null, giorni:{}, desId:null });
-  autoSave(); renderTfc();
+  renderTfc();
 }
 
-function deleteTfcRow(idx) {
+async function deleteTfcRow(idx) {
+  const row = data.tfc[idx];
+  if (row?.dbId) {
+    try { await fetch(`${API_TFC}${row.dbId}`, { method: "DELETE", headers: authHeaders() }); } catch {}
+  }
   data.tfc.splice(idx, 1);
   if (data.tfc.length === 0) data.tfc.push({ posizionePiedi:"", distanzaId:null, targaId:null, giorni:{}, desId:null });
-  autoSave(); renderTfc();
+  renderTfc();
 }
 
 function updateTfcField(idx, key, val) {
   if (!data.tfc[idx]) return;
-  data.tfc[idx][key] = val || null; autoSave();
+  data.tfc[idx][key] = val || null;
+  scheduleSync("tfc", syncTfc);
 }
 
 function updateTfcGiorno(idx, g, val) {
   if (!data.tfc[idx]) return;
   if (!data.tfc[idx].giorni) data.tfc[idx].giorni = {};
-  data.tfc[idx].giorni[g] = val; autoSave();
+  data.tfc[idx].giorni[g] = val;
+  scheduleSync("tfc", syncTfc);
 }
 
 // ── TFC MODAL SYSTEM ─────────────────────────────────────────────────────────
@@ -447,7 +704,6 @@ function selectTfcVal(value) {
   }
   if (idx === data.tfc.length - 1) {
     data.tfc.push({ posizionePiedi:"", distanzaId:null, targaId:null, giorni:{}, desId:null });
-    autoSave();
   }
   closeTfcAllModals();
   renderTfc();
@@ -635,22 +891,25 @@ function renderStretching() {
 
 function addStretchingRow() {
   data.stretching.push({ lun:null, mar:null, mer:null, gio:null, ven:null, sab:null, dom:null });
-  autoSave(); renderStretching();
+  renderStretching();
 }
 
-function deleteStrRow(idx) {
+async function deleteStrRow(idx) {
+  const row = data.stretching[idx];
+  if (row?.dbId) {
+    try { await fetch(`${API_STR}${row.dbId}`, { method: "DELETE", headers: authHeaders() }); } catch {}
+  }
   data.stretching.splice(idx, 1);
   if (data.stretching.length === 0) data.stretching.push({ lun:null, mar:null, mer:null, gio:null, ven:null, sab:null, dom:null });
-  autoSave(); renderStretching();
+  renderStretching();
 }
 
 function updateStrGiorno(idx, g, val) {
   if (!data.stretching[idx]) return;
   data.stretching[idx][g] = val || null;
-  autoSave();
+  scheduleSync("str", syncStr);
   if (idx === data.stretching.length - 1 && val) {
     data.stretching.push({ lun:null, mar:null, mer:null, gio:null, ven:null, sab:null, dom:null });
-    autoSave();
     renderStretching();
   }
 }
@@ -755,21 +1014,30 @@ function renderForza() {
 
 function addForzaRow() {
   data.forza.push({ tabellaKey: null, giorni: {}, ripetizioneId: null });
-  autoSave(); renderForza();
+  renderForza();
 }
-function deleteForzaRow(idx) {
+
+async function deleteForzaRow(idx) {
+  const row = data.forza[idx];
+  if (row?.dbId) {
+    try { await fetch(`${API_FORZA}${row.dbId}`, { method: "DELETE", headers: authHeaders() }); } catch {}
+  }
   data.forza.splice(idx, 1);
   if (data.forza.length === 0) data.forza.push({ tabellaKey: null, giorni: {}, ripetizioneId: null });
-  autoSave(); renderForza();
+  renderForza();
 }
+
 function updateForzaField(idx, key, val) {
   if (!data.forza[idx]) return;
-  data.forza[idx][key] = val || null; autoSave();
+  data.forza[idx][key] = val || null;
+  scheduleSync("forza", syncForza);
 }
+
 function updateForzaGiorno(idx, g, val) {
   if (!data.forza[idx]) return;
   if (!data.forza[idx].giorni) data.forza[idx].giorni = {};
-  data.forza[idx].giorni[g] = val; autoSave();
+  data.forza[idx].giorni[g] = val;
+  scheduleSync("forza", syncForza);
 }
 
 // ── COORDINAZIONE ─────────────────────────────────────────────────────────────
@@ -802,21 +1070,30 @@ function renderCoord() {
 
 function addCoordRow() {
   data.coord.push({ atrezzoId: null, giorni: {}, desId: null });
-  autoSave(); renderCoord();
+  renderCoord();
 }
-function deleteCoordRow(idx) {
+
+async function deleteCoordRow(idx) {
+  const row = data.coord[idx];
+  if (row?.dbId) {
+    try { await fetch(`${API_COORD}${row.dbId}`, { method: "DELETE", headers: authHeaders() }); } catch {}
+  }
   data.coord.splice(idx, 1);
   if (data.coord.length === 0) data.coord.push({ atrezzoId: null, giorni: {}, desId: null });
-  autoSave(); renderCoord();
+  renderCoord();
 }
+
 function updateCoordField(idx, key, val) {
   if (!data.coord[idx]) return;
-  data.coord[idx][key] = val || null; autoSave();
+  data.coord[idx][key] = val || null;
+  scheduleSync("coord", syncCoord);
 }
+
 function updateCoordGiorno(idx, g, val) {
   if (!data.coord[idx]) return;
   if (!data.coord[idx].giorni) data.coord[idx].giorni = {};
-  data.coord[idx].giorni[g] = val; autoSave();
+  data.coord[idx].giorni[g] = val;
+  scheduleSync("coord", syncCoord);
 }
 
 let coordActiveRow = -1;
@@ -947,7 +1224,6 @@ function selectCoordVal(value) {
   updateCoordGiorno(coordActiveRow, coordActiveGiorno, value);
   if (coordActiveRow === data.coord.length - 1 && value) {
     data.coord.push({ atrezzoId: null, giorni: {}, desId: null });
-    autoSave();
   }
   closeCoordGiornoModal();
   renderCoord();
@@ -1079,11 +1355,22 @@ function renderTfrEserciziDropdown() {
     const div = document.createElement("div");
     div.className = "risc-dropdown-item";
     div.textContent = item.valore || "";
-    div.addEventListener("click", () => {
-      data.forza.push({ tabellaKey: `es_${item.id}`, giorni: {}, ripetizioneId: null });
-      autoSave();
+    div.addEventListener("click", async () => {
+      const newRow = { tabellaKey: `es_${item.id}`, giorni: {}, ripetizioneId: null };
+      data.forza.push(newRow);
       renderForza();
       dd.classList.remove("open");
+      // POST immediately
+      const idx = data.forza.length - 1;
+      const body = {
+        id_tabella_n: item.id,
+        id_descrizione_esercizio_all_fis_for_res: null,
+        lunedi: null, martedi: null, mercoledi: null, giovedi: null, venerdi: null, sabato: null, domenica: null,
+      };
+      try {
+        const res = await fetch(API_FORZA, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        if (res.ok) { const d = await res.json(); data.forza[idx].dbId = d.IDdetAllFisForRes; }
+      } catch {}
     });
     dd.appendChild(div);
   });
@@ -1110,7 +1397,7 @@ function renderTfrDescrizioneDropdown() {
     div.addEventListener("click", () => {
       if (data.forza.length > 0) {
         data.forza[data.forza.length - 1].ripetizioneId = String(item.id);
-        autoSave();
+        scheduleSync("forza", syncForza);
         renderForza();
       }
       dd.classList.remove("open");

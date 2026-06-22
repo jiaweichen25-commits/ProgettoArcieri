@@ -253,38 +253,6 @@ def salva_nota(id_allenamento: int, id_settimana: int, dati: dict):
         repo.modifica_nota(esistente[0], dati)
         return {"IDnota": esistente[0]}
 
-
-# ─────────────────────────────────────────
-# LOOKUP TABLES
-# ─────────────────────────────────────────
-
-def get_lookup_stretching():
-    return [{"IDesercizioStretching": r[0], "NomeEsercizio": r[1]} for r in repo.get_lookup_stretching()]
-
-def get_lookup_riscaldamento():
-    return [{"IDesercizioRiscaldamento": r[0], "NomeEsercizio": r[1]} for r in repo.get_lookup_riscaldamento()]
-
-def get_lookup_distanza():
-    return [{"IDdistanza": r[0], "NomeEsercizio": r[1]} for r in repo.get_lookup_distanza()]
-
-def get_lookup_targa():
-    return [{"IDtarga": r[0], "NomeTarga": r[1]} for r in repo.get_lookup_targa()]
-
-def get_lookup_descrizione_esercizio():
-    return [{"IDdescrizioneEsercizio": r[0], "NomeEsercizio": r[1]} for r in repo.get_lookup_descrizione_esercizio()]
-
-def get_lookup_tabella_numero():
-    return [{"IDtabella_n": r[0], "NumeroTabella": r[1]} for r in repo.get_lookup_tabella_numero()]
-
-def get_lookup_desc_esercizio_all_fis_for_res():
-    return [{"IDdescrizioneEsercizioAllFisForRes": r[0], "DescrizioneEsercizio": r[1]} for r in repo.get_lookup_desc_esercizio_all_fis_for_res()]
-
-def get_lookup_attrezzi():
-    return [{"IDattrezzo": r[0], "AttrezzoDes": r[1]} for r in repo.get_lookup_attrezzi()]
-
-def get_lookup_desc_esercizio_all_fis_cor():
-    return [{"IDdescrizioneEsercizioAllFisCor": r[0], "DescrizioneEsercizio": r[1]} for r in repo.get_lookup_desc_esercizio_all_fis_cor()]
-
 def crea_seduta_se_non_esiste(id_allenamento: int, id_settimana: int, id_seduta: int):
     repo.crea_seduta_se_non_esiste(id_allenamento, id_settimana, id_seduta)
 

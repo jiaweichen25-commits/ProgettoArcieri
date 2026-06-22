@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
       POSTGRES_DB: ${DB_NAME:-ProgettoArcieri}
+      PGDATA: /var/lib/postgresql/data/18/docker
     ports:
       - "5432:5432"
     volumes:
