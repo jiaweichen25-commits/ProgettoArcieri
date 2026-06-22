@@ -13,6 +13,7 @@ from controllers import antidoping_controller
 from controllers import allenamenti_controller
 from controllers import pianogare_controller
 from controllers import dettaglioallenamenti_controller
+from controllers import lookup_controller
 
 
 # Carica le variabili d'ambiente dal file .env
@@ -39,6 +40,7 @@ app.include_router(antidoping_controller.router)
 app.include_router(allenamenti_controller.router)
 app.include_router(pianogare_controller.router)
 app.include_router(dettaglioallenamenti_controller.router)
+app.include_router(lookup_controller.router)
 
 
 @app.get("/")

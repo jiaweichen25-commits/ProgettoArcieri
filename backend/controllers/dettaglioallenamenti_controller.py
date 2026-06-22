@@ -8,9 +8,6 @@ from schemas.dettaglioallenamenti_schemas import (
     AllFisForResCreate, AllFisForResUpdate, AllFisForResOut,
     AllFisCorCreate, AllFisCorUpdate, AllFisCorOut,
     NotaAtletaCreate, NotaAtletaOut,
-    LookupStretchingOut, LookupRiscaldamentoOut, LookupDistanzaOut,
-    LookupTargaOut, LookupDescrizioneEsercizioOut, LookupTabellaNumeroOut,
-    LookupDescEsercizioAllFisForResOut, LookupAttrezziOut, LookupDescEsercizioAllFisCorOut,
 )
 from services import dettaglioallenamenti_service as svc
 from dependencies.auth_deps import solo_istruttore
@@ -311,43 +308,4 @@ def salva_nota(
 ):
     return svc.salva_nota(id_allenamento, id_settimana, dati.model_dump())
 
-
-# ─────────────────────────────────────────
-# LOOKUP TABLES
-# ─────────────────────────────────────────
-
-@router.get("/lookup/stretching/", response_model=List[LookupStretchingOut])
-def lookup_stretching(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_stretching()
-
-@router.get("/lookup/riscaldamento/", response_model=List[LookupRiscaldamentoOut])
-def lookup_riscaldamento(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_riscaldamento()
-
-@router.get("/lookup/distanza/", response_model=List[LookupDistanzaOut])
-def lookup_distanza(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_distanza()
-
-@router.get("/lookup/targa/", response_model=List[LookupTargaOut])
-def lookup_targa(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_targa()
-
-@router.get("/lookup/descrizione-esercizio/", response_model=List[LookupDescrizioneEsercizioOut])
-def lookup_descrizione_esercizio(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_descrizione_esercizio()
-
-@router.get("/lookup/tabella-numero/", response_model=List[LookupTabellaNumeroOut])
-def lookup_tabella_numero(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_tabella_numero()
-
-@router.get("/lookup/allfisforres-descrizione/", response_model=List[LookupDescEsercizioAllFisForResOut])
-def lookup_desc_all_fis_for_res(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_desc_esercizio_all_fis_for_res()
-
-@router.get("/lookup/attrezzi/", response_model=List[LookupAttrezziOut])
-def lookup_attrezzi(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_attrezzi()
-
-@router.get("/lookup/allfiscor-descrizione/", response_model=List[LookupDescEsercizioAllFisCorOut])
-def lookup_desc_all_fis_cor(utente: dict = Depends(solo_istruttore)):
-    return svc.get_lookup_desc_esercizio_all_fis_cor()
+
