@@ -330,7 +330,11 @@
     <div id="campiRiscaldamento">
       <div class="field">
         <label>Esercizio</label>
-        <select id="fRiscEsercizio"></select>
+        <div style="display:flex; gap:8px;">
+          <select id="fRiscEsercizio" style="flex:1;"></select>
+          <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddLookup('riscaldamento')">+</button>
+          <button class="btn btn-red" style="padding:0 12px;" onclick="promptDeleteLookup('riscaldamento', 'fRiscEsercizio')">x</button>
+        </div>
       </div>
       <div class="giorni-grid">
         <div class="field"><label>Lunedì</label>   <input type="text" id="fRisc_lunedi" /></div>
@@ -348,19 +352,35 @@
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 16px;">
         <div class="field">
           <label>Posizione Piedi</label>
-          <select id="fTecPosizionePiedi"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fTecPosizionePiedi" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('posizione-piedi')">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('posizione-piedi', 'fTecPosizionePiedi')">x</button>
+          </div>
         </div>
         <div class="field">
           <label>Distanza</label>
-          <select id="fTecDistanza"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fTecDistanza" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('distanza')">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('distanza', 'fTecDistanza')">x</button>
+          </div>
         </div>
         <div class="field">
           <label>Targa</label>
-          <select id="fTecTarga"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fTecTarga" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('targa')">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('targa', 'fTecTarga')">x</button>
+          </div>
         </div>
         <div class="field">
           <label>Descrizione Esercizio</label>
-          <select id="fTecDesEsercizio"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fTecDesEsercizio" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('descrizione-esercizio')">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('descrizione-esercizio', 'fTecDesEsercizio')">x</button>
+          </div>
         </div>
       </div>
       <div class="giorni-grid">
@@ -378,7 +398,11 @@
     <div id="campiStretching" style="display:none">
       <div class="field">
         <label>Esercizio</label>
-        <select id="fStrEsercizio"></select>
+        <div style="display:flex; gap:8px;">
+          <select id="fStrEsercizio" style="flex:1;"></select>
+          <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddLookup('stretching')">+</button>
+          <button class="btn btn-red" style="padding:0 12px;" onclick="promptDeleteLookup('stretching', 'fStrEsercizio')">x</button>
+        </div>
       </div>
       <div class="giorni-grid">
         <div class="field"><label>Lunedì</label>   <input type="text" id="fStr_lunedi" /></div>
@@ -396,11 +420,19 @@
       <div class="form-row" style="display:grid;grid-template-columns:1fr 2fr;gap:0 16px;">
         <div class="field">
           <label>Tabella n°</label>
-          <select id="fFRTabellaN"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fFRTabellaN" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('tabella-numero', true)">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('tabella-numero', 'fFRTabellaN')">x</button>
+          </div>
         </div>
         <div class="field">
           <label>Descrizione Esercizio</label>
-          <select id="fFRDescrizione"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fFRDescrizione" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('allfisforres-descrizione')">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('allfisforres-descrizione', 'fFRDescrizione')">x</button>
+          </div>
         </div>
       </div>
       <div class="giorni-grid">
@@ -419,11 +451,19 @@
       <div class="form-row" style="display:grid;grid-template-columns:1fr 2fr;gap:0 16px;">
         <div class="field">
           <label>Attrezzo</label>
-          <select id="fCOAttrezzo"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fCOAttrezzo" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('attrezzi')">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('attrezzi', 'fCOAttrezzo')">x</button>
+          </div>
         </div>
         <div class="field">
           <label>Descrizione Esercizio</label>
-          <select id="fCODescrizione"></select>
+          <div style="display:flex; gap:4px;">
+            <select id="fCODescrizione" style="flex:1;"></select>
+            <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('allfiscor-descrizione')">+</button>
+            <button class="btn btn-red" style="padding:0 8px;" onclick="promptDeleteLookup('allfiscor-descrizione', 'fCODescrizione')">x</button>
+          </div>
         </div>
       </div>
       <div class="giorni-grid">

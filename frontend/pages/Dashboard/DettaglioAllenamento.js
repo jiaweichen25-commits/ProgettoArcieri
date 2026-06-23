@@ -551,6 +551,88 @@ async function salvaNota() {
 }
 
 // ─────────────────────────────────────────
+// GESTIONE LOOKUP TABLES DA FRONTEND
+// ─────────────────────────────────────────
+
+async function refreshOpenModalLookups() {
+  await caricaLookup();
+  if (modalSezione === "riscaldamento") {
+    document.getElementById("fRiscEsercizio").innerHTML = buildSelect(lookupRiscaldamento, "IDesercizioRiscaldamento", "NomeEsercizio", document.getElementById("fRiscEsercizio").value);
+  }
+  else if (modalSezione === "tecforcor") {
+    document.getElementById("fTecPosizionePiedi").innerHTML    = buildSelect(lookupPosizionePiedi, "IDposizionePiedi", "NomePosizione", document.getElementById("fTecPosizionePiedi").value);
+    document.getElementById("fTecDistanza").innerHTML          = buildSelect(lookupDistanza,     "IDdistanza",             "NomeEsercizio", document.getElementById("fTecDistanza").value);
+    document.getElementById("fTecTarga").innerHTML             = buildSelect(lookupTarga,        "IDtarga",                "NomeTarga", document.getElementById("fTecTarga").value);
+    document.getElementById("fTecDesEsercizio").innerHTML      = buildSelect(lookupDesEsercizio, "IDdescrizioneEsercizio", "NomeEsercizio", document.getElementById("fTecDesEsercizio").value);
+  }
+  else if (modalSezione === "stretching") {
+    document.getElementById("fStrEsercizio").innerHTML = buildSelect(lookupStretching, "IDesercizioStretching", "NomeEsercizio", document.getElementById("fStrEsercizio").value);
+  }
+  else if (modalSezione === "allfisforres") {
+    document.getElementById("fFRTabellaN").innerHTML   = buildSelect(lookupTabellaN,    "IDtabella_n", "NumeroTabella", document.getElementById("fFRTabellaN").value);
+    document.getElementById("fFRDescrizione").innerHTML = buildSelect(lookupDesFisForRes, "IDdescrizioneEsercizioAllFisForRes", "DescrizioneEsercizio", document.getElementById("fFRDescrizione").value);
+  }
+  else if (modalSezione === "allfiscor") {
+    document.getElementById("fCOAttrezzo").innerHTML    = buildSelect(lookupAttrezzi,  "IDattrezzo",                          "AttrezzoDes", document.getElementById("fCOAttrezzo").value);
+    document.getElementById("fCODescrizione").innerHTML = buildSelect(lookupDesFisCor, "IDdescrizioneEsercizioAllFisCor",     "DescrizioneEsercizio", document.getElementById("fCODescrizione").value);
+  }
+}
+
+async function promptAddLookup(endpointPath, isNumber = false) {
+  const val = prompt(`Inserisci il nuovo valore:`);
+  if (!val || !val.trim()) return;
+
+  const url = `${API_URL}/allenamenti/lookup/${endpointPath}/`;
+  const body = isNumber ? { numero: Number(val) } : { nome: val.trim() };
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.detail || "Errore nell'aggiunta del valore.");
+      return;
+    }
+    await refreshOpenModalLookups();
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
+}
+
+async function promptDeleteLookup(endpointPath, selectId) {
+  const selectEl = document.getElementById(selectId);
+  const val = selectEl.value;
+  if (!val) {
+    alert("Seleziona prima un elemento dalla tendina per eliminarlo.");
+    return;
+  }
+  
+  const text = selectEl.options[selectEl.selectedIndex].text;
+  if (!confirm(`Sei sicuro di voler eliminare "${text}"?`)) return;
+
+  const url = `${API_URL}/allenamenti/lookup/${endpointPath}/${val}`;
+
+  try {
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: authHeaders()
+    });
+    if (!res.ok && res.status !== 204) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.detail || "Errore nell'eliminazione o elemento già in uso in altre schede.");
+      return;
+    }
+    selectEl.value = ""; // Resetta
+    await refreshOpenModalLookups();
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
+}
+
+// ─────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────
 
