@@ -160,7 +160,6 @@ CREATE TABLE IF NOT EXISTS public."TdetTecForCor"
     "IDallenamento"             integer NOT NULL,
     "IDsettimana"               integer NOT NULL,
     "IDseduta"                  integer NOT NULL,
-    "PosizionePiedi"            character varying,
     "Lunedi"                    character varying,
     "Martedi"                   character varying,
     "Mercoledi"                 character varying,
@@ -171,6 +170,7 @@ CREATE TABLE IF NOT EXISTS public."TdetTecForCor"
     "IDdistanza"                integer,
     "IDtarga"                   integer,
     "IDdescrizioneEsercizio"    integer,
+    "IDposizionePiedi"          integer,
     PRIMARY KEY ("IDdetTecForCor")
 );
 
@@ -184,6 +184,17 @@ CREATE TABLE IF NOT EXISTS public."TStarga"
     "Descrizione"       text,
     PRIMARY KEY ("IDtarga")
 );
+
+CREATE TABLE IF NOT EXISTS public."TSposizionePiedi"
+(
+    "IDposizionePiedi"      serial NOT NULL,
+    "NomePosizione"         character varying,
+    "Descrizione"           character varying,
+    PRIMARY KEY ("IDposizionePiedi")
+);
+
+COMMENT ON TABLE public."TSposizionePiedi"
+    IS 'tabella lookup per TdetTecForCor - posizione piedi';
 
 CREATE TABLE IF NOT EXISTS public."TSdistanza"
 (
@@ -367,7 +378,9 @@ ALTER TABLE IF EXISTS public."TdetTecForCor"
     ADD FOREIGN KEY ("IDtarga")
     REFERENCES public."TStarga" ("IDtarga") ON UPDATE NO ACTION ON DELETE NO ACTION,
     ADD FOREIGN KEY ("IDdescrizioneEsercizio")
-    REFERENCES public."TSDescrizioneEsercizio" ("IDdescrizioneEsercizio") ON UPDATE NO ACTION ON DELETE NO ACTION;
+    REFERENCES public."TSDescrizioneEsercizio" ("IDdescrizioneEsercizio") ON UPDATE NO ACTION ON DELETE NO ACTION,
+    ADD FOREIGN KEY ("IDposizionePiedi")
+    REFERENCES public."TSposizionePiedi" ("IDposizionePiedi") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE IF EXISTS public."TdetAllFisForRes"
     ADD FOREIGN KEY ("IDallenamento", "IDsettimana", "IDseduta")
