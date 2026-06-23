@@ -43,6 +43,10 @@ class LookupDescEsercizioAllFisCorOut(BaseModel):
     IDdescrizioneEsercizioAllFisCor: int
     DescrizioneEsercizio: Optional[str] = None
 
+class LookupPosizionePiediOut(BaseModel):
+    IDposizionePiedi: int
+    NomePosizione: Optional[str] = None
+
 
 # ─────────────────────────────────────────
 # LOOKUP TABLES — Input (per il "+" sui dropdown)

@@ -4,7 +4,7 @@ from schemas.lookup_schemas import (
     LookupStretchingOut, LookupRiscaldamentoOut, LookupDistanzaOut,
     LookupTargaOut, LookupDescrizioneEsercizioOut, LookupTabellaNumeroOut,
     LookupDescEsercizioAllFisForResOut, LookupAttrezziOut, LookupDescEsercizioAllFisCorOut,
-    LookupNomeCreate, LookupNumeroCreate
+    LookupPosizionePiediOut, LookupNomeCreate, LookupNumeroCreate
 )
 from services import lookup_service as svc
 from dependencies.auth_deps import solo_istruttore
@@ -187,6 +187,26 @@ def crea_desc_all_fis_cor(dati: LookupNomeCreate, utente: dict = Depends(solo_is
 @router.delete("/allfiscor-descrizione/{id_}", status_code=status.HTTP_204_NO_CONTENT)
 def elimina_desc_all_fis_cor(id_: int, utente: dict = Depends(solo_istruttore)):
     ok = svc.elimina_lookup_desc_esercizio_all_fis_cor(id_)
+    if not ok:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Elemento non trovato")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# ─────────────────────────────────────────
+# POSIZIONE PIEDI
+# ─────────────────────────────────────────
+
+@router.get("/posizione-piedi/", response_model=List[LookupPosizionePiediOut])
+def get_posizione_piedi(utente: dict = Depends(solo_istruttore)):
+    return svc.get_lookup_posizione_piedi()
+
+@router.post("/posizione-piedi/", response_model=LookupPosizionePiediOut, status_code=status.HTTP_201_CREATED)
+def crea_posizione_piedi(dati: LookupNomeCreate, utente: dict = Depends(solo_istruttore)):
+    return svc.crea_lookup_posizione_piedi(dati.nome)
+
+@router.delete("/posizione-piedi/{id_}", status_code=status.HTTP_204_NO_CONTENT)
+def elimina_posizione_piedi(id_: int, utente: dict = Depends(solo_istruttore)):
+    ok = svc.elimina_lookup_posizione_piedi(id_)
     if not ok:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Elemento non trovato")
     return Response(status_code=status.HTTP_204_NO_CONTENT)

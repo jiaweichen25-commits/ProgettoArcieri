@@ -211,7 +211,7 @@ def get_tec_for_cor(id_allenamento: int, id_settimana: int, id_seduta: int):
         with conn.cursor() as cur:
             cur.execute(
                 '''SELECT "IDdetTecForCor", "IDallenamento", "IDsettimana", "IDseduta",
-                          "PosizionePiedi",
+                          "IDposizionePiedi",
                           "Lunedi", "Martedi", "Mercoledi", "Giovedi", "Venerdi", "Sabato", "Domenica",
                           "IDdistanza", "IDtarga", "IDdescrizioneEsercizio"
                    FROM "TdetTecForCor"
@@ -229,14 +229,14 @@ def crea_tec_for_cor(id_allenamento: int, id_settimana: int, id_seduta: int, dat
             cur.execute(
                 '''INSERT INTO "TdetTecForCor"
                    ("IDallenamento", "IDsettimana", "IDseduta",
-                    "PosizionePiedi",
+                    "IDposizionePiedi",
                     "Lunedi", "Martedi", "Mercoledi", "Giovedi", "Venerdi", "Sabato", "Domenica",
                     "IDdistanza", "IDtarga", "IDdescrizioneEsercizio")
                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                    RETURNING "IDdetTecForCor"''',
                 (
                     id_allenamento, id_settimana, id_seduta,
-                    dati.get("posizione_piedi"),
+                    dati.get("id_posizione_piedi"),
                     dati.get("lunedi"), dati.get("martedi"), dati.get("mercoledi"),
                     dati.get("giovedi"), dati.get("venerdi"), dati.get("sabato"),
                     dati.get("domenica"),
@@ -254,13 +254,13 @@ def modifica_tec_for_cor(id_det: int, dati: dict):
         with conn, conn.cursor() as cur:
             cur.execute(
                 '''UPDATE "TdetTecForCor"
-                   SET "PosizionePiedi" = %s,
+                   SET "IDposizionePiedi" = %s,
                        "Lunedi" = %s, "Martedi" = %s, "Mercoledi" = %s, "Giovedi" = %s,
                        "Venerdi" = %s, "Sabato" = %s, "Domenica" = %s,
                        "IDdistanza" = %s, "IDtarga" = %s, "IDdescrizioneEsercizio" = %s
                    WHERE "IDdetTecForCor" = %s''',
                 (
-                    dati.get("posizione_piedi"),
+                    dati.get("id_posizione_piedi"),
                     dati.get("lunedi"), dati.get("martedi"), dati.get("mercoledi"),
                     dati.get("giovedi"), dati.get("venerdi"), dati.get("sabato"),
                     dati.get("domenica"),

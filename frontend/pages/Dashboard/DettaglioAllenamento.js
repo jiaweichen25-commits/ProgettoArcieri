@@ -21,6 +21,7 @@ let lookupTabellaN     = [];
 let lookupDesFisForRes = [];
 let lookupAttrezzi     = [];
 let lookupDesFisCor    = [];
+let lookupPosizionePiedi = [];
 
 // Cache dati seduta corrente
 let cacheRiscaldamento = [];
@@ -115,6 +116,7 @@ async function caricaLookup() {
     { url: "/allenamenti/lookup/riscaldamento/",        key: "riscaldamento" },
     { url: "/allenamenti/lookup/distanza/",             key: "distanza" },
     { url: "/allenamenti/lookup/targa/",                key: "targa" },
+    { url: "/allenamenti/lookup/posizione-piedi/",      key: "posizionePiedi" },
     { url: "/allenamenti/lookup/descrizione-esercizio/", key: "desEsercizio" },
     { url: "/allenamenti/lookup/tabella-numero/",       key: "tabellaN" },
     { url: "/allenamenti/lookup/allfisforres-descrizione/", key: "desFisForRes" },
@@ -131,6 +133,7 @@ async function caricaLookup() {
       if (key === "riscaldamento") lookupRiscaldamento = data;
       if (key === "distanza")      lookupDistanza      = data;
       if (key === "targa")         lookupTarga         = data;
+      if (key === "posizionePiedi") lookupPosizionePiedi = data;
       if (key === "desEsercizio")  lookupDesEsercizio  = data;
       if (key === "tabellaN")      lookupTabellaN      = data;
       if (key === "desFisForRes")  lookupDesFisForRes  = data;
@@ -240,11 +243,12 @@ function renderTecForCor() {
   const tbody = document.getElementById("tbodyTecForCor");
   if (!cacheTecForCor.length) { tbody.innerHTML = `<tr><td colspan="12" class="empty-row">Nessuna riga</td></tr>`; return; }
   tbody.innerHTML = cacheTecForCor.map(r => {
+    const posPiedi = lookupPosizionePiedi.find(l => l.IDposizionePiedi === r.id_posizione_piedi)?.NomePosizione || "—";
     const dist = lookupDistanza.find(l => l.IDdistanza === r.id_distanza)?.NomeEsercizio || "—";
     const targ = lookupTarga.find(l => l.IDtarga === r.id_targa)?.NomeTarga || "—";
     const des  = lookupDesEsercizio.find(l => l.IDdescrizioneEsercizio === r.id_descrizione_esercizio)?.NomeEsercizio || "—";
     return `<tr>
-      <td>${escHtml(r.posizione_piedi)}</td>
+      <td>${escHtml(posPiedi)}</td>
       <td>${escHtml(dist)}</td>
       <td>${escHtml(targ)}</td>
       <td>${escHtml(des)}</td>
@@ -351,7 +355,7 @@ function apriModaleTecForCor(idRecord) {
   document.getElementById("campiAllFisForRes").style.display   = "none";
   document.getElementById("campiAllFisCor").style.display      = "none";
 
-  document.getElementById("fTecPosizionePiedi").value        = r?.posizione_piedi || "";
+  document.getElementById("fTecPosizionePiedi").innerHTML    = buildSelect(lookupPosizionePiedi, "IDposizionePiedi", "NomePosizione", r?.id_posizione_piedi);
   document.getElementById("fTecDistanza").innerHTML          = buildSelect(lookupDistanza,     "IDdistanza",             "NomeEsercizio",  r?.id_distanza);
   document.getElementById("fTecTarga").innerHTML             = buildSelect(lookupTarga,        "IDtarga",                "NomeTarga",      r?.id_targa);
   document.getElementById("fTecDesEsercizio").innerHTML      = buildSelect(lookupDesEsercizio, "IDdescrizioneEsercizio", "NomeEsercizio",  r?.id_descrizione_esercizio);
@@ -448,7 +452,7 @@ async function salvaRiga() {
 
   else if (modalSezione === "tecforcor") {
     body = {
-      posizione_piedi:          document.getElementById("fTecPosizionePiedi").value.trim() || null,
+      id_posizione_piedi:       Number(document.getElementById("fTecPosizionePiedi").value) || null,
       id_distanza:              Number(document.getElementById("fTecDistanza").value) || null,
       id_targa:                 Number(document.getElementById("fTecTarga").value) || null,
       id_descrizione_esercizio: Number(document.getElementById("fTecDesEsercizio").value) || null,

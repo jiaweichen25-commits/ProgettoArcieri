@@ -86,6 +86,15 @@ def get_lookup_desc_esercizio_all_fis_cor():
     finally:
         conn.close()
 
+def get_lookup_posizione_piedi():
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('SELECT "IDposizionePiedi", "NomePosizione" FROM "TSposizionePiedi" ORDER BY "NomePosizione"')
+            return cur.fetchall()
+    finally:
+        conn.close()
+
 
 # ─────────────────────────────────────────
 # Lookup tables — create / delete (gestite dall'istruttore in UI)
@@ -279,3 +288,24 @@ def elimina_lookup_desc_esercizio_all_fis_cor(id_: int):
             return cur.rowcount > 0
     finally:
         conn.close()
+
+def crea_lookup_posizione_piedi(nome: str):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'INSERT INTO "TSposizionePiedi" ("NomePosizione") VALUES (%s) RETURNING "IDposizionePiedi", "NomePosizione"',
+                (nome,)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
+def elimina_lookup_posizione_piedi(id_: int):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute('DELETE FROM "TSposizionePiedi" WHERE "IDposizionePiedi" = %s', (id_,))
+            return cur.rowcount > 0
+    finally:
+        conn.close()

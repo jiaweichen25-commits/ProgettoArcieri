@@ -69,7 +69,7 @@ class RiscaldamentoOut(RiscaldamentoCreate):
 # ─────────────────────────────────────────
 
 class TecForCorCreate(BaseModel):
-    posizione_piedi:         Optional[str] = None
+    id_posizione_piedi:      Optional[int] = None
     id_distanza:             Optional[int] = None
     id_targa:                Optional[int] = None
     id_descrizione_esercizio: Optional[int] = None

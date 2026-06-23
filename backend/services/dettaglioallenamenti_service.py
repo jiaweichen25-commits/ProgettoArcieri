@@ -116,7 +116,7 @@ def get_tec_for_cor(id_allenamento: int, id_settimana: int, id_seduta: int):
             "IDallenamento":             r[1],
             "IDsettimana":               r[2],
             "IDseduta":                  r[3],
-            "posizione_piedi":           r[4],
+            "id_posizione_piedi":        r[4],
             "lunedi":                    r[5],
             "martedi":                   r[6],
             "mercoledi":                 r[7],
