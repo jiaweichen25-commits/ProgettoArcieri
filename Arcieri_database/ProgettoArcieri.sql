@@ -330,6 +330,16 @@ CREATE TABLE IF NOT EXISTS public."Tpianogare"
     PRIMARY KEY ("IDpianogara")
 );
 
+CREATE TABLE IF NOT EXISTS public."TSserie"
+(
+    "IDserie"      serial NOT NULL,
+    "Serie"        character varying,
+    "NumeroFrecce" integer NOT NULL,
+    PRIMARY KEY ("IDserie")
+);
+
+COMMENT ON TABLE public."TSserie"
+    IS 'lookup serie di tiro (es. 6x12) con numero di frecce corrispondente, usata per il conteggio frecce in TdetTecForCor';
 
 -- ==========================================
 -- VINCOLI E CHIAVI ESTERNE (ALTER TABLES)
