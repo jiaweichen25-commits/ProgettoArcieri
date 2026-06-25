@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from repositories import atleti_repository, materiali_repository, allenamenti_repository, visitemed_repository, antidoping_repository
+from repositories import me_repository
 from services.materiali_service import _row_to_dict as _materiale_row_to_dict
 from services.allenamenti_service import _row_to_dict as _allenamento_row_to_dict
 from services.visitemed_service import _row_to_dict as _visita_row_to_dict
