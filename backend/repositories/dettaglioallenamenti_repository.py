@@ -282,6 +282,33 @@ def elimina_tec_for_cor(id_det: int):
     finally:
         conn.close()
 
+def get_totale_frecce(id_allenamento: int, id_settimana: int, id_seduta: int):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''SELECT
+                       COALESCE(SUM(s_lun."NumeroFrecce"), 0),
+                       COALESCE(SUM(s_mar."NumeroFrecce"), 0),
+                       COALESCE(SUM(s_mer."NumeroFrecce"), 0),
+                       COALESCE(SUM(s_gio."NumeroFrecce"), 0),
+                       COALESCE(SUM(s_ven."NumeroFrecce"), 0),
+                       COALESCE(SUM(s_sab."NumeroFrecce"), 0),
+                       COALESCE(SUM(s_dom."NumeroFrecce"), 0)
+                   FROM "TdetTecForCor" AS t
+                   LEFT JOIN "TSserie" s_lun ON s_lun."Serie" = t."Lunedi"
+                   LEFT JOIN "TSserie" s_mar ON s_mar."Serie" = t."Martedi"
+                   LEFT JOIN "TSserie" s_mer ON s_mer."Serie" = t."Mercoledi"
+                   LEFT JOIN "TSserie" s_gio ON s_gio."Serie" = t."Giovedi"
+                   LEFT JOIN "TSserie" s_ven ON s_ven."Serie" = t."Venerdi"
+                   LEFT JOIN "TSserie" s_sab ON s_sab."Serie" = t."Sabato"
+                   LEFT JOIN "TSserie" s_dom ON s_dom."Serie" = t."Domenica"
+                   WHERE t."IDallenamento" = %s AND t."IDsettimana" = %s AND t."IDseduta" = %s''',
+                (id_allenamento, id_settimana, id_seduta)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
 
 # ─────────────────────────────────────────
 # TdetAllFisForRes

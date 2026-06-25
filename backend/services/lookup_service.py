@@ -35,6 +35,8 @@ def get_lookup_desc_esercizio_all_fis_cor():
 def get_lookup_posizione_piedi():
     return [{"IDposizionePiedi": r[0], "NomePosizione": r[1]} for r in repo.get_lookup_posizione_piedi()]
 
+def get_lookup_serie():
+    return [{"IDserie": r[0], "Serie": r[1], "NumeroFrecce": r[2]} for r in repo.get_lookup_serie()]
 
 # ─────────────────────────────────────────
 # Lookup tables — create / delete
@@ -108,4 +110,11 @@ def crea_lookup_posizione_piedi(nome: str):
     return {"IDposizionePiedi": r[0], "NomePosizione": r[1]}
 
 def elimina_lookup_posizione_piedi(id_: int):
-    return repo.elimina_lookup_posizione_piedi(id_)
+    return repo.elimina_lookup_posizione_piedi(id_)
+
+def crea_lookup_serie(serie: str, numero_frecce: int):
+    r = repo.crea_lookup_serie(serie, numero_frecce)
+    return {"IDserie": r[0], "Serie": r[1], "NumeroFrecce": r[2]}
+
+def elimina_lookup_serie(id_: int):
+    return repo.elimina_lookup_serie(id_)

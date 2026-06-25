@@ -4,8 +4,8 @@ from schemas.lookup_schemas import (
     LookupStretchingOut, LookupRiscaldamentoOut, LookupDistanzaOut,
     LookupTargaOut, LookupDescrizioneEsercizioOut, LookupTabellaNumeroOut,
     LookupDescEsercizioAllFisForResOut, LookupAttrezziOut, LookupDescEsercizioAllFisCorOut,
-    LookupPosizionePiediOut, LookupNomeCreate, LookupNumeroCreate
-)
+    LookupPosizionePiediOut, LookupSerieOut, LookupNomeCreate, LookupNumeroCreate, LookupSerieCreate)
+
 from services import lookup_service as svc
 from dependencies.auth_deps import solo_istruttore
 
@@ -207,6 +207,26 @@ def crea_posizione_piedi(dati: LookupNomeCreate, utente: dict = Depends(solo_ist
 @router.delete("/posizione-piedi/{id_}", status_code=status.HTTP_204_NO_CONTENT)
 def elimina_posizione_piedi(id_: int, utente: dict = Depends(solo_istruttore)):
     ok = svc.elimina_lookup_posizione_piedi(id_)
+    if not ok:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Elemento non trovato")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# ─────────────────────────────────────────
+# SERIE
+# ─────────────────────────────────────────
+
+@router.get("/serie/", response_model=List[LookupSerieOut])
+def get_serie(utente: dict = Depends(solo_istruttore)):
+    return svc.get_lookup_serie()
+
+@router.post("/serie/", response_model=LookupSerieOut, status_code=status.HTTP_201_CREATED)
+def crea_serie(dati: LookupSerieCreate, utente: dict = Depends(solo_istruttore)):
+    return svc.crea_lookup_serie(dati.serie, dati.numero_frecce)
+
+@router.delete("/serie/{id_}", status_code=status.HTTP_204_NO_CONTENT)
+def elimina_serie(id_: int, utente: dict = Depends(solo_istruttore)):
+    ok = svc.elimina_lookup_serie(id_)
     if not ok:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Elemento non trovato")
     return Response(status_code=status.HTTP_204_NO_CONTENT)

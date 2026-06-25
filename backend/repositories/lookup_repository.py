@@ -95,6 +95,14 @@ def get_lookup_posizione_piedi():
     finally:
         conn.close()
 
+def get_lookup_serie():
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('SELECT "IDserie", "Serie", "NumeroFrecce" FROM "TSserie" ORDER BY "NumeroFrecce"')
+            return cur.fetchall()
+    finally:
+        conn.close()
 
 # ─────────────────────────────────────────
 # Lookup tables — create / delete (gestite dall'istruttore in UI)
@@ -308,4 +316,27 @@ def elimina_lookup_posizione_piedi(id_: int):
             cur.execute('DELETE FROM "TSposizionePiedi" WHERE "IDposizionePiedi" = %s', (id_,))
             return cur.rowcount > 0
     finally:
-        conn.close()
+        conn.close()
+
+def crea_lookup_serie(serie: str, numero_frecce: int):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'INSERT INTO "TSserie" ("Serie", "NumeroFrecce") VALUES (%s, %s) RETURNING "IDserie", "Serie", "NumeroFrecce"',
+                (serie, numero_frecce)
+                )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
+def elimina_lookup_serie(id_: int):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'DELETE FROM "TSserie" WHERE "IDserie" = %s', (id_,))
+            return cur.rowcount > 0
+    finally:
+        conn.close()
+            

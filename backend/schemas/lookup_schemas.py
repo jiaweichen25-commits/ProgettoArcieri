@@ -47,6 +47,11 @@ class LookupPosizionePiediOut(BaseModel):
     IDposizionePiedi: int
     NomePosizione: Optional[str] = None
 
+class LookupSerieOut(BaseModel):
+    IDserie: int
+    Serie: Optional[str] = None
+    NumeroFrecce: Optional[int] = None
+
 
 # ─────────────────────────────────────────
 # LOOKUP TABLES — Input (per il "+" sui dropdown)
@@ -57,3 +62,7 @@ class LookupNomeCreate(BaseModel):
 
 class LookupNumeroCreate(BaseModel):
     numero: int
+
+class LookupSerieCreate(BaseModel):
+    serie: str
+    numero_frecce: int    
