@@ -133,6 +133,20 @@
       .giorni-grid { grid-template-columns: repeat(3, 1fr); }
       .tabella-det { font-size: 0.7rem; }
     }
+
+    .totale-frecce-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #111;
+  border-radius: 2px;
+  font-size: 0.82rem;
+  color: #ccc;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.totale-frecce-box strong { color: #c0392b; }
+
   </style>
 </head>
 <body>
@@ -239,6 +253,7 @@
           <tr><td colspan="12" class="empty-row">Nessuna riga</td></tr>
         </tbody>
       </table>
+       <div class="totale-frecce-box" id="totaleFrecceBox">Totale frecce: —</div>
     </div>
 
     <!-- 3. STRETCHING -->
@@ -383,17 +398,24 @@
           </div>
         </div>
       </div>
+      <div class="field">
+        <label>Serie (gestione catalogo: es. 6x12, 1x3...)</label>
+        <div style="display:flex; gap:8px;">
+          <select id="fTecSerieRef" style="flex:1;"></select>
+          <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddSerie()">+</button>
+          <button class="btn btn-red" style="padding:0 12px;" onclick="promptDeleteLookup('serie', 'fTecSerieRef')">x</button>
+        </div>
+      </div>
       <div class="giorni-grid">
-        <div class="field"><label>Lunedì</label>   <input type="text" id="fTec_lunedi" /></div>
-        <div class="field"><label>Martedì</label>  <input type="text" id="fTec_martedi" /></div>
-        <div class="field"><label>Mercoledì</label><input type="text" id="fTec_mercoledi" /></div>
-        <div class="field"><label>Giovedì</label>  <input type="text" id="fTec_giovedi" /></div>
-        <div class="field"><label>Venerdì</label>  <input type="text" id="fTec_venerdi" /></div>
-        <div class="field"><label>Sabato</label>   <input type="text" id="fTec_sabato" /></div>
-        <div class="field"><label>Domenica</label> <input type="text" id="fTec_domenica" /></div>
+        <div class="field"><label>Lunedì</label>   <select id="fTec_lunedi"></select></div>
+        <div class="field"><label>Martedì</label>  <select id="fTec_martedi"></select></div>
+        <div class="field"><label>Mercoledì</label><select id="fTec_mercoledi"></select></div>
+        <div class="field"><label>Giovedì</label>  <select id="fTec_giovedi"></select></div>
+        <div class="field"><label>Venerdì</label>  <select id="fTec_venerdi"></select></div>
+        <div class="field"><label>Sabato</label>   <select id="fTec_sabato"></select></div>
+        <div class="field"><label>Domenica</label> <select id="fTec_domenica"></select></div>
       </div>
     </div>
-
     <!-- CAMPI STRETCHING -->
     <div id="campiStretching" style="display:none">
       <div class="field">

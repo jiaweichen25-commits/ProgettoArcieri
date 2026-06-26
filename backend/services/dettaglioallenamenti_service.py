@@ -253,3 +253,17 @@ def salva_nota(id_allenamento: int, id_settimana: int, dati: dict):
 
 def crea_seduta_se_non_esiste(id_allenamento: int, id_settimana: int, id_seduta: int):
     repo.crea_seduta_se_non_esiste(id_allenamento, id_settimana, id_seduta)
+
+def get_totale_frecce(id_allenamento: int, id_settimana: int, id_seduta: int):
+    r = repo.get_totale_frecce(id_allenamento, id_settimana, id_seduta)
+    giorni = {
+        "lunedi":    r[0],
+        "martedi":   r[1],
+        "mercoledi": r[2],
+        "giovedi":   r[3],
+        "venerdi":   r[4],
+        "sabato":    r[5],
+        "domenica":  r[6],
+    }
+    giorni["totale"] = sum(giorni.values())
+    return giorni

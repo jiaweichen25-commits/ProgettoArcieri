@@ -7,7 +7,7 @@ from schemas.dettaglioallenamenti_schemas import (
     TecForCorCreate, TecForCorUpdate, TecForCorOut,
     AllFisForResCreate, AllFisForResUpdate, AllFisForResOut,
     AllFisCorCreate, AllFisCorUpdate, AllFisCorOut,
-    NotaAtletaCreate, NotaAtletaOut,
+    NotaAtletaCreate, NotaAtletaOut, TotaleFrecceOut
 )
 from services import dettaglioallenamenti_service as svc
 from dependencies.auth_deps import solo_istruttore
@@ -194,6 +194,15 @@ def cancella_tec_for_cor(
     svc.elimina_tec_for_cor(id_det)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+@router.get("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/tecforcor/totale-frecce", response_model=TotaleFrecceOut)
+def get_totale_frecce(
+    id_allenamento: int,
+    id_settimana: int,
+    id_seduta: int,
+    utente: dict = Depends(solo_istruttore),
+):
+    return svc.get_totale_frecce(id_allenamento, id_settimana, id_seduta)
+
 
 # ─────────────────────────────────────────
 # TdetAllFisForRes
@@ -308,4 +317,4 @@ def salva_nota(
 ):
     return svc.salva_nota(id_allenamento, id_settimana, dati.model_dump())
 
-
+

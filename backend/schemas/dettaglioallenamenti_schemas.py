@@ -155,3 +155,13 @@ class NotaAtletaOut(NotaAtletaCreate):
     IDnota: int
     IDallenamento: int
     IDsettimana: int
+
+class TotaleFrecceOut(BaseModel):
+    lunedi: int
+    martedi: int
+    mercoledi: int
+    giovedi: int
+    venerdi: int
+    sabato: int
+    domenica: int
+    totale: int
