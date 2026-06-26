@@ -135,18 +135,17 @@
     }
 
     .totale-frecce-box {
-  margin-top: 10px;
-  padding: 10px 12px;
-  background: #111;
-  border-radius: 2px;
-  font-size: 0.82rem;
-  color: #ccc;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.totale-frecce-box strong { color: #c0392b; }
-
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #111;
+      border-radius: 2px;
+      font-size: 0.82rem;
+      color: #ccc;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .totale-frecce-box strong { color: #c0392b; }
   </style>
 </head>
 <body>
@@ -172,10 +171,9 @@
 
   <div class="msg-box" id="pageMsgBox"></div>
 
-  <!-- SELETTORE SETTIMANA / SEDUTA -->
   <div class="selettore-box">
     <div class="field">
-      <label>Settimana</label>
+      <label for="selSettimana">Settimana</label>
       <select id="selSettimana">
         <option value="">— seleziona —</option>
         <option value="1">1</option>
@@ -193,7 +191,7 @@
       </select>
     </div>
     <div class="field">
-      <label>Seduta</label>
+      <label for="selSeduta">Seduta</label>
       <select id="selSeduta">
         <option value="">— seleziona —</option>
         <option value="1">1</option>
@@ -207,12 +205,10 @@
     <button class="btn btn-red" onclick="caricaSeduta()">Carica</button>
   </div>
 
-  <!-- SEZIONI DETTAGLIO (nascoste finché non si clicca Carica) -->
   <div id="sezioniDettaglio" style="display:none">
 
     <div class="label-sett-sed" id="labelSettSed"></div>
 
-    <!-- 1. RISCALDAMENTO -->
     <div class="sezione-det">
       <div class="sezione-det-head">
         <div class="sezione-det-title">Riscaldamento</div>
@@ -232,7 +228,6 @@
       </table>
     </div>
 
-    <!-- 2. TECNICA-FORZA-COORDINAZIONE -->
     <div class="sezione-det">
       <div class="sezione-det-head">
         <div class="sezione-det-title">Tecnica – Forza – Coordinazione</div>
@@ -256,7 +251,6 @@
        <div class="totale-frecce-box" id="totaleFrecceBox">Totale frecce: —</div>
     </div>
 
-    <!-- 3. STRETCHING -->
     <div class="sezione-det">
       <div class="sezione-det-head">
         <div class="sezione-det-title">Stretching</div>
@@ -276,7 +270,6 @@
       </table>
     </div>
 
-    <!-- 4. ALLENAMENTO FISICO - FORZA E RESISTENZA -->
     <div class="sezione-det">
       <div class="sezione-det-head">
         <div class="sezione-det-title">Allenamento Fisico – Forza e Resistenza</div>
@@ -297,7 +290,6 @@
       </table>
     </div>
 
-    <!-- 5. ALLENAMENTO FISICO - COORDINAZIONE -->
     <div class="sezione-det">
       <div class="sezione-det-head">
         <div class="sezione-det-title">Allenamento Fisico – Coordinazione</div>
@@ -318,21 +310,18 @@
       </table>
     </div>
 
-    <!-- 6. NOTE PER L'ATLETA -->
     <div class="nota-box">
-      <div class="sezione-det-title">Note per l'Atleta</div>
+      <div class="sezione-det-title">
+          <label for="notaTextarea" style="cursor: pointer;">Note per l'Atleta</label>
+      </div>
       <textarea id="notaTextarea" rows="4" placeholder="Inserisci note per questa settimana..."></textarea>
       <div class="msg-box" id="notaMsgBox"></div>
       <button class="btn btn-red" onclick="salvaNota()">Salva Nota</button>
     </div>
 
-  </div><!-- fine sezioniDettaglio -->
-</div>
+  </div></div>
 
 
-<!-- ══════════════════════════════════════════
-     MODAL UNICO: form per tutte le sezioni
-══════════════════════════════════════════ -->
 <div class="overlay" id="formModal">
   <div class="modal modal-wide">
     <div class="modal-pill" id="formModalPill">Nuova riga</div>
@@ -341,10 +330,9 @@
 
     <div class="msg-box" id="formMsgBox"></div>
 
-    <!-- CAMPI RISCALDAMENTO -->
     <div id="campiRiscaldamento">
       <div class="field">
-        <label>Esercizio</label>
+        <label for="fRiscEsercizio">Esercizio</label>
         <div style="display:flex; gap:8px;">
           <select id="fRiscEsercizio" style="flex:1;"></select>
           <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddLookup('riscaldamento')">+</button>
@@ -352,21 +340,20 @@
         </div>
       </div>
       <div class="giorni-grid">
-        <div class="field"><label>Lunedì</label>   <input type="text" id="fRisc_lunedi" /></div>
-        <div class="field"><label>Martedì</label>  <input type="text" id="fRisc_martedi" /></div>
-        <div class="field"><label>Mercoledì</label><input type="text" id="fRisc_mercoledi" /></div>
-        <div class="field"><label>Giovedì</label>  <input type="text" id="fRisc_giovedi" /></div>
-        <div class="field"><label>Venerdì</label>  <input type="text" id="fRisc_venerdi" /></div>
-        <div class="field"><label>Sabato</label>   <input type="text" id="fRisc_sabato" /></div>
-        <div class="field"><label>Domenica</label> <input type="text" id="fRisc_domenica" /></div>
+        <div class="field"><label for="fRisc_lunedi">Lunedì</label>   <input type="text" id="fRisc_lunedi" /></div>
+        <div class="field"><label for="fRisc_martedi">Martedì</label>  <input type="text" id="fRisc_martedi" /></div>
+        <div class="field"><label for="fRisc_mercoledi">Mercoledì</label><input type="text" id="fRisc_mercoledi" /></div>
+        <div class="field"><label for="fRisc_giovedi">Giovedì</label>  <input type="text" id="fRisc_giovedi" /></div>
+        <div class="field"><label for="fRisc_venerdi">Venerdì</label>  <input type="text" id="fRisc_venerdi" /></div>
+        <div class="field"><label for="fRisc_sabato">Sabato</label>   <input type="text" id="fRisc_sabato" /></div>
+        <div class="field"><label for="fRisc_domenica">Domenica</label> <input type="text" id="fRisc_domenica" /></div>
       </div>
     </div>
 
-    <!-- CAMPI TEC FOR COR -->
     <div id="campiTecForCor" style="display:none">
       <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 16px;">
         <div class="field">
-          <label>Posizione Piedi</label>
+          <label for="fTecPosizionePiedi">Posizione Piedi</label>
           <div style="display:flex; gap:4px;">
             <select id="fTecPosizionePiedi" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('posizione-piedi')">+</button>
@@ -374,7 +361,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Distanza</label>
+          <label for="fTecDistanza">Distanza</label>
           <div style="display:flex; gap:4px;">
             <select id="fTecDistanza" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('distanza')">+</button>
@@ -382,7 +369,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Targa</label>
+          <label for="fTecTarga">Targa</label>
           <div style="display:flex; gap:4px;">
             <select id="fTecTarga" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('targa')">+</button>
@@ -390,7 +377,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Descrizione Esercizio</label>
+          <label for="fTecDesEsercizio">Descrizione Esercizio</label>
           <div style="display:flex; gap:4px;">
             <select id="fTecDesEsercizio" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('descrizione-esercizio')">+</button>
@@ -399,7 +386,7 @@
         </div>
       </div>
       <div class="field">
-        <label>Serie (gestione catalogo: es. 6x12, 1x3...)</label>
+        <label for="fTecSerieRef">Serie (gestione catalogo: es. 6x12, 1x3...)</label>
         <div style="display:flex; gap:8px;">
           <select id="fTecSerieRef" style="flex:1;"></select>
           <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddSerie()">+</button>
@@ -407,19 +394,19 @@
         </div>
       </div>
       <div class="giorni-grid">
-        <div class="field"><label>Lunedì</label>   <select id="fTec_lunedi"></select></div>
-        <div class="field"><label>Martedì</label>  <select id="fTec_martedi"></select></div>
-        <div class="field"><label>Mercoledì</label><select id="fTec_mercoledi"></select></div>
-        <div class="field"><label>Giovedì</label>  <select id="fTec_giovedi"></select></div>
-        <div class="field"><label>Venerdì</label>  <select id="fTec_venerdi"></select></div>
-        <div class="field"><label>Sabato</label>   <select id="fTec_sabato"></select></div>
-        <div class="field"><label>Domenica</label> <select id="fTec_domenica"></select></div>
+        <div class="field"><label for="fTec_lunedi">Lunedì</label>   <select id="fTec_lunedi"></select></div>
+        <div class="field"><label for="fTec_martedi">Martedì</label>  <select id="fTec_martedi"></select></div>
+        <div class="field"><label for="fTec_mercoledi">Mercoledì</label><select id="fTec_mercoledi"></select></div>
+        <div class="field"><label for="fTec_giovedi">Giovedì</label>  <select id="fTec_giovedi"></select></div>
+        <div class="field"><label for="fTec_venerdi">Venerdì</label>  <select id="fTec_venerdi"></select></div>
+        <div class="field"><label for="fTec_sabato">Sabato</label>   <select id="fTec_sabato"></select></div>
+        <div class="field"><label for="fTec_domenica">Domenica</label> <select id="fTec_domenica"></select></div>
       </div>
     </div>
-    <!-- CAMPI STRETCHING -->
+    
     <div id="campiStretching" style="display:none">
       <div class="field">
-        <label>Esercizio</label>
+        <label for="fStrEsercizio">Esercizio</label>
         <div style="display:flex; gap:8px;">
           <select id="fStrEsercizio" style="flex:1;"></select>
           <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddLookup('stretching')">+</button>
@@ -427,21 +414,20 @@
         </div>
       </div>
       <div class="giorni-grid">
-        <div class="field"><label>Lunedì</label>   <input type="text" id="fStr_lunedi" /></div>
-        <div class="field"><label>Martedì</label>  <input type="text" id="fStr_martedi" /></div>
-        <div class="field"><label>Mercoledì</label><input type="text" id="fStr_mercoledi" /></div>
-        <div class="field"><label>Giovedì</label>  <input type="text" id="fStr_giovedi" /></div>
-        <div class="field"><label>Venerdì</label>  <input type="text" id="fStr_venerdi" /></div>
-        <div class="field"><label>Sabato</label>   <input type="text" id="fStr_sabato" /></div>
-        <div class="field"><label>Domenica</label> <input type="text" id="fStr_domenica" /></div>
+        <div class="field"><label for="fStr_lunedi">Lunedì</label>   <input type="text" id="fStr_lunedi" /></div>
+        <div class="field"><label for="fStr_martedi">Martedì</label>  <input type="text" id="fStr_martedi" /></div>
+        <div class="field"><label for="fStr_mercoledi">Mercoledì</label><input type="text" id="fStr_mercoledi" /></div>
+        <div class="field"><label for="fStr_giovedi">Giovedì</label>  <input type="text" id="fStr_giovedi" /></div>
+        <div class="field"><label for="fStr_venerdi">Venerdì</label>  <input type="text" id="fStr_venerdi" /></div>
+        <div class="field"><label for="fStr_sabato">Sabato</label>   <input type="text" id="fStr_sabato" /></div>
+        <div class="field"><label for="fStr_domenica">Domenica</label> <input type="text" id="fStr_domenica" /></div>
       </div>
     </div>
 
-    <!-- CAMPI ALL FIS FOR RES -->
     <div id="campiAllFisForRes" style="display:none">
       <div class="form-row" style="display:grid;grid-template-columns:1fr 2fr;gap:0 16px;">
         <div class="field">
-          <label>Tabella n°</label>
+          <label for="fFRTabellaN">Tabella n°</label>
           <div style="display:flex; gap:4px;">
             <select id="fFRTabellaN" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('tabella-numero', true)">+</button>
@@ -449,7 +435,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Descrizione Esercizio</label>
+          <label for="fFRDescrizione">Descrizione Esercizio</label>
           <div style="display:flex; gap:4px;">
             <select id="fFRDescrizione" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('allfisforres-descrizione')">+</button>
@@ -458,21 +444,20 @@
         </div>
       </div>
       <div class="giorni-grid">
-        <div class="field"><label>Lunedì</label>   <input type="text" id="fFR_lunedi" /></div>
-        <div class="field"><label>Martedì</label>  <input type="text" id="fFR_martedi" /></div>
-        <div class="field"><label>Mercoledì</label><input type="text" id="fFR_mercoledi" /></div>
-        <div class="field"><label>Giovedì</label>  <input type="text" id="fFR_giovedi" /></div>
-        <div class="field"><label>Venerdì</label>  <input type="text" id="fFR_venerdi" /></div>
-        <div class="field"><label>Sabato</label>   <input type="text" id="fFR_sabato" /></div>
-        <div class="field"><label>Domenica</label> <input type="text" id="fFR_domenica" /></div>
+        <div class="field"><label for="fFR_lunedi">Lunedì</label>   <input type="text" id="fFR_lunedi" /></div>
+        <div class="field"><label for="fFR_martedi">Martedì</label>  <input type="text" id="fFR_martedi" /></div>
+        <div class="field"><label for="fFR_mercoledi">Mercoledì</label><input type="text" id="fFR_mercoledi" /></div>
+        <div class="field"><label for="fFR_giovedi">Giovedì</label>  <input type="text" id="fFR_giovedi" /></div>
+        <div class="field"><label for="fFR_venerdi">Venerdì</label>  <input type="text" id="fFR_venerdi" /></div>
+        <div class="field"><label for="fFR_sabato">Sabato</label>   <input type="text" id="fFR_sabato" /></div>
+        <div class="field"><label for="fFR_domenica">Domenica</label> <input type="text" id="fFR_domenica" /></div>
       </div>
     </div>
 
-    <!-- CAMPI ALL FIS COR -->
     <div id="campiAllFisCor" style="display:none">
       <div class="form-row" style="display:grid;grid-template-columns:1fr 2fr;gap:0 16px;">
         <div class="field">
-          <label>Attrezzo</label>
+          <label for="fCOAttrezzo">Attrezzo</label>
           <div style="display:flex; gap:4px;">
             <select id="fCOAttrezzo" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('attrezzi')">+</button>
@@ -480,7 +465,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Descrizione Esercizio</label>
+          <label for="fCODescrizione">Descrizione Esercizio</label>
           <div style="display:flex; gap:4px;">
             <select id="fCODescrizione" style="flex:1;"></select>
             <button class="btn btn-outline" style="padding:0 8px;" onclick="promptAddLookup('allfiscor-descrizione')">+</button>
@@ -489,13 +474,13 @@
         </div>
       </div>
       <div class="giorni-grid">
-        <div class="field"><label>Lunedì</label>   <input type="text" id="fCO_lunedi" /></div>
-        <div class="field"><label>Martedì</label>  <input type="text" id="fCO_martedi" /></div>
-        <div class="field"><label>Mercoledì</label><input type="text" id="fCO_mercoledi" /></div>
-        <div class="field"><label>Giovedì</label>  <input type="text" id="fCO_giovedi" /></div>
-        <div class="field"><label>Venerdì</label>  <input type="text" id="fCO_venerdi" /></div>
-        <div class="field"><label>Sabato</label>   <input type="text" id="fCO_sabato" /></div>
-        <div class="field"><label>Domenica</label> <input type="text" id="fCO_domenica" /></div>
+        <div class="field"><label for="fCO_lunedi">Lunedì</label>   <input type="text" id="fCO_lunedi" /></div>
+        <div class="field"><label for="fCO_martedi">Martedì</label>  <input type="text" id="fCO_martedi" /></div>
+        <div class="field"><label for="fCO_mercoledi">Mercoledì</label><input type="text" id="fCO_mercoledi" /></div>
+        <div class="field"><label for="fCO_giovedi">Giovedì</label>  <input type="text" id="fCO_giovedi" /></div>
+        <div class="field"><label for="fCO_venerdi">Venerdì</label>  <input type="text" id="fCO_venerdi" /></div>
+        <div class="field"><label for="fCO_sabato">Sabato</label>   <input type="text" id="fCO_sabato" /></div>
+        <div class="field"><label for="fCO_domenica">Domenica</label> <input type="text" id="fCO_domenica" /></div>
       </div>
     </div>
 
@@ -505,7 +490,6 @@
     </div>
   </div>
 </div>
-
 
 <script src="DettaglioAllenamento.js"></script>
 </body>
