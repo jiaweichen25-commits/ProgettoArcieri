@@ -22,6 +22,7 @@ let lookupDesFisForRes = [];
 let lookupAttrezzi     = [];
 let lookupDesFisCor    = [];
 let lookupPosizionePiedi = [];
+let lookupSerie        = [];
 
 // Cache dati seduta corrente
 let cacheRiscaldamento = [];
@@ -106,6 +107,18 @@ function buildSelect(options, valueKey, labelKey, selectedVal) {
   return html;
 }
 
+// Select per i 7 giorni di TecForCor: il VALUE è il testo "Serie" (es. "6x12"),
+// non l'IDserie — perché nel DB i campi Lunedi...Domenica restano testo libero,
+// e il backend calcola il totale frecce confrontando questo testo con TSserie.Serie.
+function buildSelectSerie(selectedVal) {
+  let html = `<option value="">—</option>`;
+  lookupSerie.forEach(s => {
+    const sel = s.Serie === selectedVal ? "selected" : "";
+    html += `<option value="${escHtml(s.Serie)}" ${sel}>${escHtml(s.Serie)} (${s.NumeroFrecce})</option>`;
+  });
+  return html;
+}
+
 // ─────────────────────────────────────────
 // CARICA LOOKUP TABLES (una volta sola)
 // ─────────────────────────────────────────
@@ -122,6 +135,7 @@ async function caricaLookup() {
     { url: "/allenamenti/lookup/allfisforres-descrizione/", key: "desFisForRes" },
     { url: "/allenamenti/lookup/attrezzi/",             key: "attrezzi" },
     { url: "/allenamenti/lookup/allfiscor-descrizione/", key: "desFisCor" },
+    { url: "/allenamenti/lookup/serie/",                key: "serie" },
   ];
 
   await Promise.all(endpoints.map(async ({ url, key }) => {
@@ -139,6 +153,7 @@ async function caricaLookup() {
       if (key === "desFisForRes")  lookupDesFisForRes  = data;
       if (key === "attrezzi")      lookupAttrezzi      = data;
       if (key === "desFisCor")     lookupDesFisCor     = data;
+      if (key === "serie")         lookupSerie         = data;
     } catch { /* ignora errori singole lookup */ }
   }));
 }
@@ -189,7 +204,7 @@ async function fetchSezione(sezione) {
     if (!res.ok) return;
     const data = await res.json();
     if (sezione === "riscaldamento") { cacheRiscaldamento = data; renderRiscaldamento(); }
-    if (sezione === "tecforcor")     { cacheTecForCor     = data; renderTecForCor(); }
+    if (sezione === "tecforcor")     { cacheTecForCor     = data; renderTecForCor(); caricaTotaleFrecce(); }
     if (sezione === "stretching")    { cacheStretching    = data; renderStretching(); }
     if (sezione === "allfisforres")  { cacheAllFisForRes  = data; renderAllFisForRes(); }
     if (sezione === "allfiscor")     { cacheAllFisCor     = data; renderAllFisCor(); }
@@ -203,6 +218,22 @@ async function fetchNota() {
     if (!res.ok) return;
     const data = await res.json();
     document.getElementById("notaTextarea").value = data ? (data.nota || "") : "";
+  } catch { /* ignora */ }
+}
+
+// — TOTALE FRECCE (sezione TecForCor) —
+async function caricaTotaleFrecce() {
+  const url = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaAttuale}/sedute/${sedutaAttuale}/tecforcor/totale-frecce`;
+  const box = document.getElementById("totaleFrecceBox");
+  if (!box) return;
+  try {
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) return;
+    const t = await res.json();
+    box.innerHTML =
+      `Lun: <strong>${t.lunedi}</strong> · Mar: <strong>${t.martedi}</strong> · Mer: <strong>${t.mercoledi}</strong> · ` +
+      `Gio: <strong>${t.giovedi}</strong> · Ven: <strong>${t.venerdi}</strong> · Sab: <strong>${t.sabato}</strong> · Dom: <strong>${t.domenica}</strong>` +
+      ` &nbsp;|&nbsp; Totale settimana: <strong>${t.totale}</strong>`;
   } catch { /* ignora */ }
 }
 
@@ -359,7 +390,12 @@ function apriModaleTecForCor(idRecord) {
   document.getElementById("fTecDistanza").innerHTML          = buildSelect(lookupDistanza,     "IDdistanza",             "NomeEsercizio",  r?.id_distanza);
   document.getElementById("fTecTarga").innerHTML             = buildSelect(lookupTarga,        "IDtarga",                "NomeTarga",      r?.id_targa);
   document.getElementById("fTecDesEsercizio").innerHTML      = buildSelect(lookupDesEsercizio, "IDdescrizioneEsercizio", "NomeEsercizio",  r?.id_descrizione_esercizio);
-  GIORNI.forEach(g => { document.getElementById(`fTec_${g}`).value = r ? (r[g] || "") : ""; });
+
+  // catalogo Serie (solo per gestione +/x, non legato al record)
+  document.getElementById("fTecSerieRef").innerHTML = buildSelect(lookupSerie, "IDserie", "Serie", null);
+
+  // i 7 giorni ora sono select collegati alla lookup Serie
+  GIORNI.forEach(g => { document.getElementById(`fTec_${g}`).innerHTML = buildSelectSerie(r ? (r[g] || null) : null); });
 
   clearMsg("formMsgBox");
   openModal("formModal");
@@ -564,6 +600,13 @@ async function refreshOpenModalLookups() {
     document.getElementById("fTecDistanza").innerHTML          = buildSelect(lookupDistanza,     "IDdistanza",             "NomeEsercizio", document.getElementById("fTecDistanza").value);
     document.getElementById("fTecTarga").innerHTML             = buildSelect(lookupTarga,        "IDtarga",                "NomeTarga", document.getElementById("fTecTarga").value);
     document.getElementById("fTecDesEsercizio").innerHTML      = buildSelect(lookupDesEsercizio, "IDdescrizioneEsercizio", "NomeEsercizio", document.getElementById("fTecDesEsercizio").value);
+
+    document.getElementById("fTecSerieRef").innerHTML = buildSelect(lookupSerie, "IDserie", "Serie", null);
+    GIORNI.forEach(g => {
+      const sel = document.getElementById(`fTec_${g}`);
+      const valoreAttuale = sel.value;
+      sel.innerHTML = buildSelectSerie(valoreAttuale);
+    });
   }
   else if (modalSezione === "stretching") {
     document.getElementById("fStrEsercizio").innerHTML = buildSelect(lookupStretching, "IDesercizioStretching", "NomeEsercizio", document.getElementById("fStrEsercizio").value);
@@ -594,6 +637,37 @@ async function promptAddLookup(endpointPath, isNumber = false) {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       alert(err.detail || "Errore nell'aggiunta del valore.");
+      return;
+    }
+    await refreshOpenModalLookups();
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
+}
+
+// Come promptAddLookup, ma per Serie servono due valori (testo + numero frecce)
+async function promptAddSerie() {
+  const serieVal = prompt("Inserisci la serie (es. 6x12):");
+  if (!serieVal || !serieVal.trim()) return;
+
+  const numStr = prompt("Numero di frecce corrispondente (es. 72):");
+  if (!numStr || !numStr.trim()) return;
+  const numero_frecce = Number(numStr);
+  if (!Number.isFinite(numero_frecce)) {
+    alert("Numero frecce non valido.");
+    return;
+  }
+
+  const url = `${API_URL}/allenamenti/lookup/serie/`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ serie: serieVal.trim(), numero_frecce })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.detail || "Errore nell'aggiunta della serie.");
       return;
     }
     await refreshOpenModalLookups();
