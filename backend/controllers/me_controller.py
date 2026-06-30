@@ -30,3 +30,7 @@ def il_mio_antidoping(utente: dict = Depends(solo_atleta)):
 @router.get("/piano-gare")
 def il_mio_piano_gare(utente: dict = Depends(solo_atleta)):
     return me_service.get_piano_gare(utente["id_utente"])
+
+@router.get("/allenamenti/{id_allenamento}/dettaglio")
+def il_mio_dettaglio_allenamento(id_allenamento: int, utente: dict = Depends(solo_atleta)):
+    return me_service.get_dettaglio_allenamento(utente["id_utente"], id_allenamento)

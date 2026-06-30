@@ -78,3 +78,80 @@ def get_piano_gare(id_utente: int):
                 })
     gare.sort(key=lambda x: (x["data"] is None, x["data"]))
     return gare
+
+def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
+    # Verify the allenamento belongs to the atleta
+    atleta = _get_atleta_or_404(id_utente)
+    allenamenti_atleta = allenamenti_repository.get_allenamenti_by_atleta(atleta["IDatleta"])
+    if not any(a[0] == id_allenamento for a in allenamenti_atleta):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Allenamento non trovato o non autorizzato")
+
+    # Get sedute
+    sedute_rows = me_repository.get_sedute_by_allenamento(id_allenamento)
+    
+    # Structure the response
+    # We want to group by settimana, then by seduta
+    dettaglio = {}
+    
+    for row in sedute_rows:
+        id_settimana = row[1]
+        id_seduta = row[2]
+        
+        if id_settimana not in dettaglio:
+            nota_row = me_repository.get_nota_allenamento(id_allenamento, id_settimana)
+            dettaglio[id_settimana] = {
+                "id_settimana": id_settimana,
+                "nota": nota_row[1] if nota_row else None,
+                "sedute": []
+            }
+            
+        seduta_dict = {
+            "id_seduta": id_seduta,
+            "stretching": [],
+            "riscaldamento": [],
+            "tec_for_cor": [],
+            "all_fis_for_res": [],
+            "all_fis_cor": []
+        }
+        
+        # Stretching
+        stretch_rows = me_repository.get_stretching_con_nomi(id_allenamento, id_settimana, id_seduta)
+        for sr in stretch_rows:
+            seduta_dict["stretching"].append({
+                "id": sr[0], "nome": sr[1], "giorni": {"lun": sr[2], "mar": sr[3], "mer": sr[4], "gio": sr[5], "ven": sr[6], "sab": sr[7], "dom": sr[8]}
+            })
+            
+        # Riscaldamento
+        risc_rows = me_repository.get_riscaldamento_con_nomi(id_allenamento, id_settimana, id_seduta)
+        for rr in risc_rows:
+            seduta_dict["riscaldamento"].append({
+                "id": rr[0], "nome": rr[1], "giorni": {"lun": rr[2], "mar": rr[3], "mer": rr[4], "gio": rr[5], "ven": rr[6], "sab": rr[7], "dom": rr[8]}
+            })
+            
+        # TecForCor
+        tfc_rows = me_repository.get_tec_for_cor_con_nomi(id_allenamento, id_settimana, id_seduta)
+        for tr in tfc_rows:
+            seduta_dict["tec_for_cor"].append({
+                "id": tr[0], "posizione_piedi": tr[1], "distanza": tr[2], "targa": tr[3], "esercizio": tr[4],
+                "giorni": {"lun": tr[5], "mar": tr[6], "mer": tr[7], "gio": tr[8], "ven": tr[9], "sab": tr[10], "dom": tr[11]}
+            })
+            
+        # AllFisForRes
+        affr_rows = me_repository.get_all_fis_for_res_con_nomi(id_allenamento, id_settimana, id_seduta)
+        for ar in affr_rows:
+            seduta_dict["all_fis_for_res"].append({
+                "id": ar[0], "tabella_n": ar[1], "esercizio": ar[2],
+                "giorni": {"lun": ar[3], "mar": ar[4], "mer": ar[5], "gio": ar[6], "ven": ar[7], "sab": ar[8], "dom": ar[9]}
+            })
+            
+        # AllFisCor
+        afc_rows = me_repository.get_all_fis_cor_con_nomi(id_allenamento, id_settimana, id_seduta)
+        for cr in afc_rows:
+            seduta_dict["all_fis_cor"].append({
+                "id": cr[0], "attrezzo": cr[1], "esercizio": cr[2],
+                "giorni": {"lun": cr[3], "mar": cr[4], "mer": cr[5], "gio": cr[6], "ven": cr[7], "sab": cr[8], "dom": cr[9]}
+            })
+            
+        dettaglio[id_settimana]["sedute"].append(seduta_dict)
+        
+    return {"dettaglio": list(dettaglio.values())}

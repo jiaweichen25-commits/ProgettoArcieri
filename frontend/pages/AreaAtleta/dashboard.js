@@ -165,7 +165,7 @@ async function caricaAllenamenti() {
     box.innerHTML = lista.map((a) => {
       const inCorso = new Date(a.data_fine) >= oggi;
       return `
-        <div class="info-card${inCorso ? " in-uso" : ""}">
+        <div class="info-card allenamento-card${inCorso ? " in-uso" : ""}">
           <div class="info-card-header">
             <span class="materiale-badge" style="background:${inCorso ? "#276749" : "#c53030"}">
               ${inCorso ? "In corso" : "Concluso"}
@@ -173,11 +173,142 @@ async function caricaAllenamenti() {
             <span class="info-date">${formatDate(a.data_inizio)} → ${formatDate(a.data_fine)}</span>
           </div>
           ${a.obiettivi ? `<p class="info-obiettivi">${escHtml(a.obiettivi)}</p>` : ""}
+          <button class="btn-dettaglio" onclick="toggleDettaglio(${a.IDallenamento}, this)">Vedi Dettaglio</button>
+          <div class="dettaglio-container" id="dettaglio-${a.IDallenamento}"></div>
         </div>
       `;
     }).join("");
   } catch {
     console.error("Errore caricamento allenamenti");
+  }
+}
+
+async function toggleDettaglio(idAllenamento, btnObj) {
+  const container = document.getElementById(`dettaglio-${idAllenamento}`);
+  
+  if (container.style.display === "block") {
+    container.style.display = "none";
+    btnObj.textContent = "Vedi Dettaglio";
+    return;
+  }
+
+  // Se è già caricato, lo mostro solo
+  if (container.innerHTML.trim() !== "") {
+    container.style.display = "block";
+    btnObj.textContent = "Nascondi Dettaglio";
+    return;
+  }
+
+  // Altrimenti carico i dati
+  try {
+    const res = await fetch(`${API_URL}/me/allenamenti/${idAllenamento}/dettaglio`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Errore fetch dettaglio");
+    const data = await res.json();
+    const dettaglio = data.dettaglio || [];
+
+    if (dettaglio.length === 0) {
+      container.innerHTML = `<div class="empty-state">Nessun dettaglio presente per questo allenamento.</div>`;
+      container.style.display = "block";
+      btnObj.textContent = "Nascondi Dettaglio";
+      return;
+    }
+
+    const html = dettaglio.map(sett => {
+      const notaHtml = sett.nota ? `<div class="settimana-nota">Nota Istruttore: ${escHtml(sett.nota)}</div>` : "";
+      
+      const seduteHtml = sett.sedute.map(sed => {
+        let esHtml = "";
+        
+        const renderRow = (nome, gg) => {
+          const v = (val) => val ? `<td class="day-col has-value">${escHtml(val)}</td>` : `<td class="day-col">—</td>`;
+          return `<tr>
+            <td>${escHtml(nome)}</td>
+            ${v(gg.lun)}${v(gg.mar)}${v(gg.mer)}${v(gg.gio)}${v(gg.ven)}${v(gg.sab)}${v(gg.dom)}
+          </tr>`;
+        };
+
+        const thead = `<thead><tr><th>Esercizio</th><th class="day-col">L</th><th class="day-col">M</th><th class="day-col">M</th><th class="day-col">G</th><th class="day-col">V</th><th class="day-col">S</th><th class="day-col">D</th></tr></thead>`;
+
+        if (sed.stretching.length > 0) {
+          esHtml += `<div class="categoria-esercizi">
+            <div class="categoria-titolo">Stretching</div>
+            <div class="table-wrapper"><table class="dettaglio-table">${thead}<tbody>
+              ${sed.stretching.map(s => renderRow(s.nome, s.giorni)).join('')}
+            </tbody></table></div></div>`;
+        }
+        if (sed.riscaldamento.length > 0) {
+          esHtml += `<div class="categoria-esercizi">
+            <div class="categoria-titolo">Riscaldamento</div>
+            <div class="table-wrapper"><table class="dettaglio-table">${thead}<tbody>
+              ${sed.riscaldamento.map(r => renderRow(r.nome, r.giorni)).join('')}
+            </tbody></table></div></div>`;
+        }
+        if (sed.tec_for_cor.length > 0) {
+          const thTFC = `<thead><tr><th>Posizione</th><th>Distanza</th><th>Targa</th><th>Esercizio</th><th class="day-col">L</th><th class="day-col">M</th><th class="day-col">M</th><th class="day-col">G</th><th class="day-col">V</th><th class="day-col">S</th><th class="day-col">D</th></tr></thead>`;
+          const trTFC = sed.tec_for_cor.map(t => {
+            const v = (val) => val ? `<td class="day-col has-value">${escHtml(val)}</td>` : `<td class="day-col">—</td>`;
+            return `<tr>
+              <td>${escHtml(t.posizione_piedi)}</td><td>${escHtml(t.distanza)}</td><td>${escHtml(t.targa)}</td><td>${escHtml(t.esercizio)}</td>
+              ${v(t.giorni.lun)}${v(t.giorni.mar)}${v(t.giorni.mer)}${v(t.giorni.gio)}${v(t.giorni.ven)}${v(t.giorni.sab)}${v(t.giorni.dom)}
+            </tr>`;
+          }).join('');
+          esHtml += `<div class="categoria-esercizi">
+            <div class="categoria-titolo">Tecnica / Forza / Coordinazione</div>
+            <div class="table-wrapper"><table class="dettaglio-table">${thTFC}<tbody>${trTFC}</tbody></table></div></div>`;
+        }
+        if (sed.all_fis_for_res.length > 0) {
+          const thAFFR = `<thead><tr><th>Tabella N°</th><th>Esercizio</th><th class="day-col">L</th><th class="day-col">M</th><th class="day-col">M</th><th class="day-col">G</th><th class="day-col">V</th><th class="day-col">S</th><th class="day-col">D</th></tr></thead>`;
+          const trAFFR = sed.all_fis_for_res.map(a => {
+            const v = (val) => val ? `<td class="day-col has-value">${escHtml(val)}</td>` : `<td class="day-col">—</td>`;
+            return `<tr>
+              <td>${escHtml(a.tabella_n)}</td><td>${escHtml(a.esercizio)}</td>
+              ${v(a.giorni.lun)}${v(a.giorni.mar)}${v(a.giorni.mer)}${v(a.giorni.gio)}${v(a.giorni.ven)}${v(a.giorni.sab)}${v(a.giorni.dom)}
+            </tr>`;
+          }).join('');
+          esHtml += `<div class="categoria-esercizi">
+            <div class="categoria-titolo">All. Fisico Forza/Resistenza</div>
+            <div class="table-wrapper"><table class="dettaglio-table">${thAFFR}<tbody>${trAFFR}</tbody></table></div></div>`;
+        }
+        if (sed.all_fis_cor.length > 0) {
+          const thAFC = `<thead><tr><th>Attrezzo</th><th>Esercizio</th><th class="day-col">L</th><th class="day-col">M</th><th class="day-col">M</th><th class="day-col">G</th><th class="day-col">V</th><th class="day-col">S</th><th class="day-col">D</th></tr></thead>`;
+          const trAFC = sed.all_fis_cor.map(a => {
+            const v = (val) => val ? `<td class="day-col has-value">${escHtml(val)}</td>` : `<td class="day-col">—</td>`;
+            return `<tr>
+              <td>${escHtml(a.attrezzo)}</td><td>${escHtml(a.esercizio)}</td>
+              ${v(a.giorni.lun)}${v(a.giorni.mar)}${v(a.giorni.mer)}${v(a.giorni.gio)}${v(a.giorni.ven)}${v(a.giorni.sab)}${v(a.giorni.dom)}
+            </tr>`;
+          }).join('');
+          esHtml += `<div class="categoria-esercizi">
+            <div class="categoria-titolo">All. Fisico Coordinazione</div>
+            <div class="table-wrapper"><table class="dettaglio-table">${thAFC}<tbody>${trAFC}</tbody></table></div></div>`;
+        }
+        
+        if (!esHtml) return "";
+
+        return `
+          <div class="seduta-block">
+            <div class="seduta-title">Seduta ${sed.id_seduta}</div>
+            ${esHtml}
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="settimana-block">
+          <div class="settimana-header">Settimana ${sett.id_settimana}</div>
+          ${notaHtml}
+          ${seduteHtml}
+        </div>
+      `;
+    }).join("");
+
+    container.innerHTML = html;
+    container.style.display = "block";
+    btnObj.textContent = "Nascondi Dettaglio";
+
+  } catch (e) {
+    console.error(e);
+    alert("Errore nel caricamento del dettaglio.");
   }
 }
 

@@ -196,3 +196,252 @@ nav {
   .page { padding: 24px 16px 48px; }
   .info-card-header { flex-wrap: wrap; }
 }
+
+/* ══ DETTAGLIO ALLENAMENTO ══ */
+.btn-dettaglio {
+  margin-left: auto;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #ccc;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-dettaglio:hover {
+  background: #333;
+  color: white;
+  border-color: #666;
+}
+
+.allenamento-dettaglio {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.dettaglio-content {
+  font-size: 0.9rem;
+}
+
+.settimana-box {
+  margin-bottom: 24px;
+  background: #151515;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.settimana-title {
+  color: #c0392b;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.settimana-nota {
+  background: #1a1a1a;
+  padding: 10px;
+  border-left: 3px solid #666;
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 16px;
+}
+
+.seduta-box {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed #333;
+}
+
+.seduta-box:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.seduta-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.tabella-container {
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.tabella-titolo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.dettaglio-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 600px; /* per scroll orizzontale su mobile */
+}
+
+.dettaglio-table th, .dettaglio-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.dettaglio-table th {
+  background: #111;
+  color: #aaa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dettaglio-table tr:hover {
+  background: #1a1a1a;
+}
+
+.col-giorno {
+  text-align: center !important;
+  width: 45px;
+}
+
+/* ══ DETTAGLIO ALLENAMENTI ══ */
+.allenamento-card {
+  position: relative;
+}
+
+.btn-dettaglio {
+  background: transparent;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  padding: 6px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+
+.btn-dettaglio:hover {
+  background: #c0392b;
+  color: white;
+}
+
+.dettaglio-container {
+  display: none;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #333;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.settimana-block {
+  margin-bottom: 24px;
+  background: #151515;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.settimana-header {
+  background: #1f1f1f;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2a2a2a;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  color: #ddd;
+}
+
+.settimana-nota {
+  padding: 12px 16px;
+  background: #2a2a2a;
+  font-size: 0.85rem;
+  color: #bbb;
+  font-style: italic;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.seduta-block {
+  padding: 16px;
+  border-bottom: 1px solid #222;
+}
+.seduta-block:last-child { border-bottom: none; }
+
+.seduta-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.categoria-esercizi {
+  margin-bottom: 16px;
+}
+
+.categoria-esercizi:last-child { margin-bottom: 0; }
+
+.categoria-titolo {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #c0392b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.dettaglio-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  min-width: 600px;
+}
+
+.dettaglio-table th, .dettaglio-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.dettaglio-table th {
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+}
+
+.dettaglio-table td.day-col {
+  width: 8%;
+  text-align: center;
+  color: #aaa;
+}
+
+.dettaglio-table td.day-col.has-value {
+  color: white;
+  font-weight: 600;
+}
