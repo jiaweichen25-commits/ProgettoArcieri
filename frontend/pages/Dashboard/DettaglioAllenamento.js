@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = `${window.location.protocol}//${window.location.hostname}:8000`;
 
 const params = new URLSearchParams(window.location.search);
 const ID_ALLENAMENTO = Number(params.get("allenamento"));
@@ -722,4 +722,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("titoloAtleta2").textContent = titolo ? `Dettaglio Allenamento: ${titolo}` : "Dettaglio Allenamento";
 
   await caricaLookup();
+
+  const settFromUrl = params.get("settimana");
+  if (settFromUrl) {
+    const sel = document.getElementById("selSettimana");
+    if (sel) { sel.value = settFromUrl; caricaSeduta(); }
+  }
 });

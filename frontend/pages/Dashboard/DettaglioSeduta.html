@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dettaglio Seduta</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #13131a; color: #fff; min-height: 100vh; padding: 20px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 1100px; }
+
+    .top-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #222; margin-bottom: 15px; }
+    .breadcrumb { color: #8c8c96; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; }
+    .close-btn { background: #252538; border: 1px solid #38384e; color: #fff; width: 28px; height: 28px; border-radius: 3px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .close-btn:hover { background: #c0392b; border-color: #c0392b; }
+
+    .main-card { background: #181824; padding: 20px; border-radius: 4px; border: 1px solid #252532; box-shadow: 0 4px 15px rgba(0,0,0,.5); }
+    .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .title-row h2 { font-size: 16px; font-weight: bold; letter-spacing: 0.5px; }
+    .icon-group { display: flex; gap: 8px; }
+    .icon-btn { background: #252538; border: 1px solid #38384e; color: #fff; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .icon-btn:hover { background: #38384e; }
+
+    .info-row { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+    .input-group { display: flex; align-items: center; gap: 8px; background: #111116; padding: 6px 10px; border: 1px solid #2d2d3d; border-radius: 3px; }
+    .input-group.flex-1 { flex: 1; min-width: 200px; }
+    .label { color: #8c8c96; font-size: 11px; font-weight: bold; white-space: nowrap; letter-spacing: 0.5px; }
+    .input-text { background: transparent; border: none; color: #fff; font-size: 13px; outline: none; width: 100%; }
+    input[type=number].input-text { width: 50px; }
+
+    .btn-carica { background: #c0392b; border: none; color: #fff; padding: 7px 16px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; }
+    .btn-carica:hover { background: #a93226; }
+
+    .totale-frecce-box { border: 1px solid #2d2d3d; margin-bottom: 20px; }
+    .totale-frecce-header { background: #1c1c2b; padding: 8px; text-align: center; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #2d2d3d; }
+    .totale-frecce-value { background: #111116; padding: 10px; text-align: center; font-size: 22px; font-weight: bold; border-bottom: 1px solid #2d2d3d; }
+    .giornate-header { background: #1c1c2b; padding: 8px; text-align: center; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #2d2d3d; }
+    .giornate-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #111116; }
+    .giornata-cell { padding: 8px; text-align: center; border-right: 1px solid #2d2d3d; }
+    .giornata-cell:last-child { border-right: none; }
+    .giornata-label { color: #8c8c96; font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; }
+    .giornata-val { color: #fff; font-size: 14px; font-weight: bold; }
+    .frecce-per-seduta { background: #111116; padding: 8px 12px; text-align: right; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; }
+
+    .section-box { border: 1px solid #252535; border-radius: 3px; margin-bottom: 20px; background: #14141f; overflow: hidden; }
+    .section-header { background: #1c1c2b; padding: 10px 12px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #252535; display: flex; justify-content: space-between; align-items: center; }
+    .btn-add-row { background: #1976d2; border: none; color: #fff; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight: bold; }
+    .btn-add-row:hover { background: #1565c0; }
+
+    .section-body { padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .dropdown { background: #111116; color: #fff; border: 1px solid #2d2d3d; padding: 6px 15px; border-radius: 3px; cursor: pointer; outline: none; font-size: 12px; }
+    .dropdown:hover { border-color: #4a4a6d; }
+
+    .table-wrapper { overflow-x: auto; }
+    .grid-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .grid-table th { background: #1c1c2b; color: #8c8c96; font-size: 10px; font-weight: bold; padding: 8px 4px; text-align: center; border-bottom: 1px solid #252535; letter-spacing: 0.5px; white-space: nowrap; }
+    .grid-table td { padding: 6px 4px; text-align: center; border-bottom: 1px solid #1f1f2e; background: #14141f; }
+    .grid-table tr:last-child td { border-bottom: none; }
+    .empty-row td { color: #555; text-align: center; padding: 14px !important; }
+
+    .dropdown-grid { background: #111116; color: #fff; border: 1px solid #2d2d3d; padding: 5px 4px; border-radius: 3px; font-size: 11px; width: 100%; min-width: 70px; outline: none; cursor: pointer; }
+    .dropdown-grid:hover { border-color: #4a4a6d; }
+
+    .serie-cell { background: #111116; border: 1px solid #2d2d3d; color: #fff; text-align: center; width: 100%; min-width: 55px; padding: 6px 4px; font-size: 11px; border-radius: 3px; cursor: pointer; outline: none; display: block; font-weight: bold; user-select: none; }
+    .serie-cell:hover { border-color: #e91e63; background: #1a1a26; }
+    .serie-cell.has-value { background: #1c1c2b; color: #ff6d9c; }
+    .serie-cell.empty-val { color: #525266; font-weight: normal; }
+
+    .delete-row { color: #fff; cursor: pointer; font-size: 14px; font-weight: bold; background: #d32f2f; border: none; padding: 4px 8px; border-radius: 3px; line-height: 1; }
+    .delete-row:hover { background: #b71c1c; }
+    .icon-cell { color: #e91e63; cursor: pointer; font-size: 14px; }
+
+    .note-box { margin-top: 10px; border: 1px solid #252535; border-radius: 3px; background: #14141f; overflow: hidden; }
+    .note-header { background: #1c1c2b; padding: 10px 12px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; border-bottom: 1px solid #252535; display: flex; justify-content: space-between; align-items: center; }
+    .btn-save-nota { background: #276749; border: none; color: #fff; padding: 4px 12px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight: bold; }
+    .btn-save-nota:hover { background: #1e4d35; }
+    .note-body { padding: 15px; background: #111116; }
+    .note-textarea { background: #1a1a25; border: 1px solid #2d2d3d; color: #fff; padding: 12px; border-radius: 3px; font-family: inherit; font-size: 13px; width: 100%; height: 120px; outline: none; resize: vertical; }
+    .note-textarea:focus { border-color: #e91e63; }
+    .note-textarea::placeholder { color: #525266; }
+
+    .msg-inline { font-size: 11px; padding: 4px 8px; border-radius: 3px; }
+    .msg-inline.ok { background: #276749; color: #fff; }
+    .msg-inline.err { background: #c0392b; color: #fff; }
+
+    /* ===== MODAL SERIE ===== */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.7); z-index: 1000; justify-content: center; align-items: flex-start; padding-top: 5vh; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: #181824; border: 1px solid #38384e; border-radius: 6px; width: 90%; max-width: 420px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+    .modal-header { background: linear-gradient(to right, #b3d4f5, #d0e3f7); color: #1c1c2b; padding: 12px 16px; font-weight: bold; font-size: 16px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-close { background: none; border: none; color: #1c1c2b; font-size: 22px; cursor: pointer; font-weight: bold; padding: 0 6px; }
+    .modal-body { padding: 12px; overflow-y: auto; background: #14141f; }
+    .modal-footer { padding: 12px; text-align: center; border-top: 1px solid #2d2d3d; background: #181824; border-radius: 0 0 6px 6px; }
+    .btn-clear { background: #d32f2f; color: #fff; border: none; padding: 8px 20px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .btn-clear:hover { background: #b71c1c; }
+
+    .serie-list { display: flex; flex-direction: column; gap: 6px; }
+    .serie-item { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; align-items: center; padding: 4px; }
+    .serie-name-box, .serie-frecce-box { background: #fff; color: #000; padding: 8px 12px; border-radius: 3px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 500; border: 2px solid transparent; transition: all .15s; }
+    .serie-name-box:hover, .serie-frecce-box:hover { border-color: #e91e63; }
+    .serie-pick-btn { background: #1976d2; color: #fff; border: none; padding: 8px; border-radius: 3px; cursor: pointer; font-size: 12px; }
+    .serie-pick-btn:hover { background: #1565c0; }
+
+    /* ===== MODAL LISTA ===== */
+    .data-list { display: flex; flex-direction: column; gap: 8px; }
+    .add-item-form { background: #1c1c2b; padding: 14px; border-radius: 6px; margin-bottom: 14px; border: 1px solid #2d2d3d; }
+    .add-item-form-title { color: #e91e63; font-size: 12px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .add-item-input { background: #14141f; border: 1px solid #2d2d3d; color: #fff; padding: 9px 12px; border-radius: 4px; font-size: 13px; width: 100%; outline: none; font-family: inherit; }
+    .add-item-input:focus { border-color: #e91e63; }
+    .add-item-input::placeholder { color: #525266; }
+    .add-item-hint { color: #8c8c96; font-size: 11px; margin-top: 6px; }
+    .data-list-item-wrapper { display: flex; align-items: center; gap: 8px; }
+    .item-number { width: 32px; height: 32px; background: #1565c0; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; flex-shrink: 0; }
+    .data-list-item { flex: 1; background: #fff; color: #1c1c2b; padding: 11px 14px; border-radius: 4px; font-size: 13px; }
+    .data-list-item:hover { background: #f0f4ff; }
+    .item-delete-btn { background: #d32f2f; color: #fff; border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .item-delete-btn:hover { background: #b71c1c; }
+    .item-success-msg { background: #2e7d32; color: #fff; padding: 8px 12px; border-radius: 3px; font-size: 12px; margin-bottom: 10px; text-align: center; }
+
+    select option { background: #1c1c2b; color: #fff; }
+    ::-webkit-scrollbar { height: 8px; width: 8px; }
+    ::-webkit-scrollbar-track { background: #14141f; }
+    ::-webkit-scrollbar-thumb { background: #2d2d3d; border-radius: 4px; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+    .new-row { animation: fadeIn .25s ease-out; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-header">
+    <span class="breadcrumb">DETTAGLI SEDUTA</span>
+    <button class="close-btn" id="closeBtn" title="Torna agli allenamenti">×</button>
+  </div>
+
+  <div class="main-card">
+    <div class="title-row">
+      <h2>PROGRAMMAZIONE SETTIMANA DI ALLENAMENTO</h2>
+      <div class="icon-group">
+        <button class="icon-btn" title="Stampa" onclick="window.print()">🖨️</button>
+      </div>
+    </div>
+
+    <!-- Info row -->
+    <div class="info-row">
+      <div class="input-group">
+        <span class="label">SETTIMANA</span>
+        <input type="number" id="settimanaInput" class="input-text" value="1" min="1" max="12" style="width:50px;">
+      </div>
+      <div class="input-group">
+        <span class="label">SEDUTA</span>
+        <select id="sedutaInput" class="input-text" style="background:transparent;border:none;color:#fff;font-size:13px;outline:none;">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        </select>
+      </div>
+      <div class="input-group" style="min-width:180px;">
+        <span class="label">ATLETA</span>
+        <input type="text" id="atletaInput" class="input-text" readonly>
+      </div>
+      <div class="input-group flex-1">
+        <span class="label">OBIETTIVO</span>
+        <input type="text" id="obiettivoInput" class="input-text" placeholder="—">
+      </div>
+      <button class="btn-carica" id="btnCarica">CARICA</button>
+    </div>
+
+    <!-- Totale frecce -->
+    <div class="totale-frecce-box">
+      <div class="totale-frecce-header">TOTALE FRECCE</div>
+      <div class="totale-frecce-value" id="totaleFrecce">—</div>
+      <div class="giornate-header">GIORNATE DI ALLENAMENTO</div>
+      <div class="giornate-grid">
+        <div class="giornata-cell"><span class="giornata-label">Lun</span><span class="giornata-val" id="fLun">0</span></div>
+        <div class="giornata-cell"><span class="giornata-label">Mar</span><span class="giornata-val" id="fMar">0</span></div>
+        <div class="giornata-cell"><span class="giornata-label">Mer</span><span class="giornata-val" id="fMer">0</span></div>
+        <div class="giornata-cell"><span class="giornata-label">Gio</span><span class="giornata-val" id="fGio">0</span></div>
+        <div class="giornata-cell"><span class="giornata-label">Ven</span><span class="giornata-val" id="fVen">0</span></div>
+        <div class="giornata-cell"><span class="giornata-label">Sab</span><span class="giornata-val" id="fSab">0</span></div>
+        <div class="giornata-cell"><span class="giornata-label">Dom</span><span class="giornata-val" id="fDom">0</span></div>
+      </div>
+      <div class="frecce-per-seduta">N° FRECCE PER SEDUTA</div>
+    </div>
+
+    <!-- RISCALDAMENTO -->
+    <div class="section-box">
+      <div class="section-header">
+        RISCALDAMENTO
+        <span class="icon-cell open-list-modal" data-list="riscaldamento" data-title="Riscaldamento – Esercizi" title="Gestisci lista">📋</span>
+      </div>
+      <div class="section-body">
+        <span class="label" style="font-size:12px;">AGGIUNGI ESERCIZIO</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select class="dropdown" id="riscDropdown"><option value="">▼ Esercizi</option></select>
+        </div>
+      </div>
+      <div class="table-wrapper" id="riscContainer" style="display:none;">
+        <table class="grid-table">
+          <thead><tr><th style="text-align:left;padding-left:12px;">ESERCIZIO</th><th style="width:40px;"></th></tr></thead>
+          <tbody id="riscRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TECNICA FORZA COORDINAZIONE -->
+    <div class="section-box">
+      <div class="section-header">
+        TECNICA – FORZA – COORDINAZIONE
+        <button class="btn-add-row" id="btnAddTec">+ Riga</button>
+      </div>
+      <div class="table-wrapper">
+        <table class="grid-table">
+          <thead><tr>
+            <th>POS. PIEDI <span class="icon-cell open-list-modal" data-list="posizionePiedi" data-title="Posizione Piedi" style="font-size:11px;">📋</span></th>
+            <th>DISTANZA <span class="icon-cell open-list-modal" data-list="distanza" data-title="Distanza" style="font-size:11px;">📋</span></th>
+            <th>TARGA <span class="icon-cell open-list-modal" data-list="targa" data-title="Targa" style="font-size:11px;">📋</span></th>
+            <th>LUN</th><th>MAR</th><th>MER</th><th>GIO</th><th>VEN</th><th>SAB</th><th>DOM</th>
+            <th><span class="icon-cell open-list-modal" data-list="serie" data-title="Serie – N° Frecce" style="font-size:11px;">📋</span></th>
+            <th style="min-width:150px;">DESCRIZIONE ESERCIZIO <span class="icon-cell open-list-modal" data-list="descrizioneEsercizi" data-title="Descrizione Esercizio" style="font-size:11px;">📋</span></th>
+            <th style="width:30px;"></th>
+          </tr></thead>
+          <tbody id="tecRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STRETCHING -->
+    <div class="section-box">
+      <div class="section-header">
+        STRETCHING
+        <button class="btn-add-row" id="btnAddStr">+ Riga</button>
+      </div>
+      <div class="table-wrapper">
+        <table class="grid-table">
+          <thead><tr>
+            <th style="text-align:left;padding-left:8px;">ESERCIZIO <span class="icon-cell open-list-modal" data-list="stretching" data-title="Stretching – Esercizi" style="font-size:11px;">📋</span></th>
+            <th>LUN</th><th>MAR</th><th>MER</th><th>GIO</th><th>VEN</th><th>SAB</th><th>DOM</th>
+            <th style="width:30px;"></th>
+          </tr></thead>
+          <tbody id="strRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALLENAMENTO FISICO FORZA RESISTENZA -->
+    <div class="section-box">
+      <div class="section-header">
+        ALLENAMENTO FISICO – FORZA RESISTENZA
+        <button class="btn-add-row" id="btnAddFor">+ Riga</button>
+      </div>
+      <div class="table-wrapper">
+        <table class="grid-table">
+          <thead><tr>
+            <th>TABELLA N° <span class="icon-cell open-list-modal" data-list="esercizioForza" data-title="Tabella N°" style="font-size:11px;">📋</span></th>
+            <th>LUN</th><th>MAR</th><th>MER</th><th>GIO</th><th>VEN</th><th>SAB</th><th>DOM</th>
+            <th style="min-width:150px;">DESCRIZIONE <span class="icon-cell open-list-modal" data-list="ripetizioni" data-title="Descrizione – Ripetizioni" style="font-size:11px;">📋</span></th>
+            <th style="width:30px;"></th>
+          </tr></thead>
+          <tbody id="forRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALLENAMENTO FISICO COORDINAZIONE -->
+    <div class="section-box">
+      <div class="section-header">
+        ALLENAMENTO FISICO – COORDINAZIONE
+        <button class="btn-add-row" id="btnAddCor">+ Riga</button>
+      </div>
+      <div class="table-wrapper">
+        <table class="grid-table">
+          <thead><tr>
+            <th>ATTREZZO <span class="icon-cell open-list-modal" data-list="attrezzo" data-title="Attrezzo" style="font-size:11px;">📋</span></th>
+            <th>LUN</th><th>MAR</th><th>MER</th><th>GIO</th><th>VEN</th><th>SAB</th><th>DOM</th>
+            <th style="min-width:150px;">DESCRIZIONE <span class="icon-cell open-list-modal" data-list="descrizioneCoord" data-title="Descrizione Coordinazione" style="font-size:11px;">📋</span></th>
+            <th style="width:30px;"></th>
+          </tr></thead>
+          <tbody id="corRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NOTE -->
+    <div class="note-box">
+      <div class="note-header">
+        NOTE PER L'ATLETA
+        <button class="btn-save-nota" id="btnSalvaNota">Salva</button>
+      </div>
+      <div class="note-body">
+        <textarea id="noteAtleta" class="note-textarea" placeholder="Inserisci qui le note per l'atleta..."></textarea>
+        <span id="notaMsg" class="msg-inline" style="display:none;"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SERIE -->
+<div class="modal-overlay" id="serieModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>📊 Serie – N° Frecce</span>
+      <button class="modal-close" id="serieModalClose">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="serie-list" id="serieList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-clear" id="serieClear">🗑️ Svuota cella</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LISTA DATI -->
+<div class="modal-overlay" id="listModal">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <span id="listModalTitle">📋 Lista</span>
+      <button class="modal-close" id="listModalClose">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="add-item-form">
+        <div class="add-item-form-title">+ AGGIUNGI NUOVO ELEMENTO</div>
+        <input type="text" id="listAddInput" class="add-item-input" placeholder="Scrivi e premi INVIO...">
+        <div class="add-item-hint">💡 Premi INVIO per aggiungere</div>
+        <div id="listAddMsg" style="margin-top:6px;font-size:11px;color:#e91e63;display:none;"></div>
+        <button id="listAddBtn" style="display:none;">Aggiungi</button>
+      </div>
+      <div class="data-list" id="listContent"></div>
+    </div>
+  </div>
+</div>
+
+<script src="DettaglioSeduta.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Coach AI</title>
+  <link rel="stylesheet" href="Dashboard.css" />
+  <link rel="stylesheet" href="CoachAI.css" />
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Portale Ufficiale</span>
+      <strong>Arcieri Vicenza</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <a class="nav-link" href="Dashboard.html">Dashboard</a>
+    <div class="nav-user">Benvenuto, <strong id="navUser">Istruttore</strong></div>
+    <button class="btn-logout" onclick="logout()">Esci</button>
+  </div>
+</nav>
+
+<div class="ai-layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="ai-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Atleti</div>
+      <div class="sidebar-count" id="athletesCount">0</div>
+    </div>
+    <div class="sidebar-search">
+      <input type="text" id="aiSearch" placeholder="Cerca atleta..." />
+    </div>
+    <div class="athletes-list" id="athletesList"></div>
+
+    <div class="sidebar-stats">
+      <div class="stat-row">
+        <span class="stat-label-sm">Totale atleti</span>
+        <span class="stat-val" id="statTotali">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label-sm">Selezionato</span>
+        <span class="stat-val" id="statSelezionato">—</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="ai-main">
+    <div class="ai-page-header">
+      <div class="pill">Coach AI</div>
+      <h1>Analisi Tecnica Arcieri</h1>
+      <p>Seleziona un atleta dalla lista per avviare la consulenza AI biomeccanica</p>
+    </div>
+
+    <div id="athleteSection">
+      <div class="empty-ai">
+        <div class="empty-ai-icon">🏹</div>
+        <div class="empty-ai-text">Seleziona un atleta dalla lista per iniziare l'analisi</div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script src="../../coach_ai.js"></script>
+</body>
+</html>

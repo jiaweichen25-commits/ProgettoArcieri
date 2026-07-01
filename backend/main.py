@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-
 from dotenv import load_dotenv
 from controllers import visitemed_controller
 from controllers import auth_controller
@@ -14,7 +13,8 @@ from controllers import allenamenti_controller
 from controllers import pianogare_controller
 from controllers import dettaglioallenamenti_controller
 from controllers import lookup_controller
-
+# INCLUSIONE DEL NUOVO CONTROLLER PER L'INTELLIGENZA ARTIFICIALE
+from controllers import ai_controller 
 
 # Carica le variabili d'ambiente dal file .env
 load_dotenv()
@@ -24,7 +24,7 @@ app = FastAPI(title="API Arcieri Vicenza")
 # Configurazione del Middleware CORS (perfetto per lo sviluppo)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], #da sostituire con url
+    allow_origins=["*"], # da sostituire con url in produzione
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,6 +41,8 @@ app.include_router(allenamenti_controller.router)
 app.include_router(pianogare_controller.router)
 app.include_router(dettaglioallenamenti_controller.router)
 app.include_router(lookup_controller.router)
+# ATTIVAZIONE DELLE ROTTE PER IL COACH AI
+app.include_router(ai_controller.router) 
 
 
 @app.get("/")

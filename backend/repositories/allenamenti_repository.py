@@ -58,6 +58,13 @@ def elimina_allenamento(id_allenamento: int, id_atleta: int):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
+            for table in (
+                "TdetStretching", "TdetRiscaldamento", "TdetTecForCor",
+                "TdetAllFisForRes", "TdetAllFisCor",
+            ):
+                cur.execute(f'DELETE FROM "{table}" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetNoteAtleta" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetAllenamenti" WHERE "IDallenamento" = %s', (id_allenamento,))
             cur.execute(
                 'DELETE FROM "Tallenamenti" WHERE "IDallenamento" = %s AND "IDatleta" = %s',
                 (id_allenamento, id_atleta)

@@ -341,6 +341,25 @@ CREATE TABLE IF NOT EXISTS public."TSserie"
 COMMENT ON TABLE public."TSserie"
     IS 'lookup serie di tiro (es. 6x12) con numero di frecce corrispondente, usata per il conteggio frecce in TdetTecForCor';
 
+-- ====================================================================
+-- 🤖 REPARTO NUOVO: TABELLA PER LA CRONOLOGIA DEL COACH AI
+-- ====================================================================
+CREATE TABLE IF NOT EXISTS public."TcronologiaCoachAI"
+(
+    "IDconversazione"       serial NOT NULL,
+    "IDatleta"              integer NOT NULL,
+    "RuoloUtente"           character varying NOT NULL, -- 'istruttore' ose 'atleta'
+    "Domanda"               text NOT NULL,
+    "RispostaAI"            text NOT NULL,
+    "DataOra"               timestamp without time zone DEFAULT NOW(),
+    PRIMARY KEY ("IDconversazione")
+);
+
+COMMENT ON TABLE public."TcronologiaCoachAI"
+    IS 'tabella principale per memorizzare lo storico delle domande e risposte generate dal modulo AI';
+
+
+
 -- ==========================================
 -- VINCOLI E CHIAVI ESTERNE (ALTER TABLES)
 -- ==========================================
@@ -408,6 +427,22 @@ ALTER TABLE IF EXISTS public."TdetAllFisCor"
     ADD FOREIGN KEY ("IDdescrizioneEsercizioAllFisCor")
     REFERENCES public."TSdesEsercizioAllFisCor" ("IDdescrizioneEsercizioAllFisCor") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+CREATE TABLE IF NOT EXISTS public."TcronologiaAI"
+(
+    "IDcronologia"  serial NOT NULL,
+    "IDatleta"      integer NOT NULL,
+    "RuoloUtente"   character varying NOT NULL DEFAULT 'atleta',
+    "Domanda"       text NOT NULL,
+    "RispostaAI"    text NOT NULL,
+    "DataOra"       timestamp without time zone DEFAULT NOW(),
+    PRIMARY KEY ("IDcronologia"),
+    FOREIGN KEY ("IDatleta")
+        REFERENCES public."Tatleti" ("IDatleta") ON DELETE CASCADE
+);
+
+COMMENT ON COLUMN public."TcronologiaAI"."RuoloUtente"
+    IS 'Chi ha fatto la domanda: ''atleta'' o ''istruttore''. Usato per filtrare la cronologia visibile all''atleta.';
+
 ALTER TABLE IF EXISTS public."Tvisitemediche"
     ADD FOREIGN KEY ("IDatleta")
     REFERENCES public."Tatleti" ("IDatleta") ON UPDATE NO ACTION ON DELETE NO ACTION;
@@ -421,5 +456,26 @@ ALTER TABLE IF EXISTS public."Tpianogare"
     REFERENCES public."Tallenamenti" ("IDallenamento") ON UPDATE NO ACTION ON DELETE NO ACTION,
     ADD FOREIGN KEY ("IDtipogara")
     REFERENCES public."TStipigare" ("IDtipogara") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+-- ====================================================================
+-- VINCOLO DI CHIAVE ESTERNA E INDICE PER LA TABELLA DEL COACH AI
+-- ====================================================================
+
+ALTER TABLE IF EXISTS public."TcronologiaCoachAI"
+    ADD CONSTRAINT "FK_TcronologiaCoachAI_Tatleti" FOREIGN KEY ("IDatleta")
+    REFERENCES public."Tatleti" ("IDatleta") MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+CREATE INDEX IF NOT EXISTS "idx_atleta_coach_ai"
+    ON public."TcronologiaCoachAI"("IDatleta");
+
+-- Migrazione: aggiunge RuoloUtente a TcronologiaAI se la tabella esiste già
+-- (sicuro da rieseguire grazie a IF NOT EXISTS e DEFAULT)
+ALTER TABLE IF EXISTS public."TcronologiaAI"
+    ADD COLUMN IF NOT EXISTS "RuoloUtente" character varying NOT NULL DEFAULT 'atleta';
+
+CREATE INDEX IF NOT EXISTS "idx_cronologia_ai_ruolo"
+    ON public."TcronologiaAI"("IDatleta", "RuoloUtente");
 
 COMMIT;

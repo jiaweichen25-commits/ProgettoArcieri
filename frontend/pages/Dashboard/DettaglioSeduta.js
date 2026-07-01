@@ -1,102 +1,10 @@
 const API_URL = `${window.location.protocol}//${window.location.hostname}:8000`;
-
 const params = new URLSearchParams(window.location.search);
-const ID_ATLETA = Number(params.get("atleta"));
-const NOME_ATLETA = params.get("nome") || "";
+const ID_ALLENAMENTO = Number(params.get("allenamento"));
+const ID_ATLETA      = Number(params.get("atleta"));
+const NOME_ATLETA    = params.get("nome") || "";
 const COGNOME_ATLETA = params.get("cognome") || "";
 
-let allenamentoCache = [];
-
-function getToken() {
-  return localStorage.getItem("access_token");
-}
-
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getToken()}`,
-  };
-}
-
-function requireAuth() {
-  const token = getToken();
-  if (!token) {
-    window.location.href = "../Autenticazione/Istruttore.html";
-    return false;
-  }
-  try {
-    const payload = JSON.parse(
-      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
-    );
-    if (payload.ruolo !== "istruttore") {
-      localStorage.clear();
-      window.location.href = "../Autenticazione/Istruttore.html";
-      return false;
-    }
-    return true;
-  } catch {
-    window.location.href = "../Autenticazione/Istruttore.html";
-    return false;
-  }
-}
-
-function tornaDashboard() {
-  window.location.href = "Dashboard.html";
-}
-
-function logout() {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("currentUser");
-  window.location.href = "../Autenticazione/Istruttore.html";
-}
-
-function formatDate(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("it-IT");
-}
-
-function toInputDate(iso) {
-  if (!iso) return "";
-  return String(iso).slice(0, 10);
-}
-
-function showMsg(boxId, testo, tipo) {
-  const box = document.getElementById(boxId);
-  if (!box) return;
-  box.textContent = testo;
-  box.className = "msg-box " + tipo;
-}
-
-function clearMsg(boxId) {
-  const box = document.getElementById(boxId);
-  if (box) box.className = "msg-box";
-}
-
-function escHtml(str) {
-  if (str == null || str === "") return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function openModal(id) {
-  document.getElementById(id).classList.add("open");
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove("open");
-  clearMsg("formMsgBox");
-}
-
-// ════════════════════════════════════════════
-//  STATO PROGRAMMAZIONE SETTIMANA
-// ════════════════════════════════════════════
-
-let currentSedutaAllId = null;
 let settimanaCorrente = 1;
 let sedutaCorrente    = 1;
 
@@ -180,8 +88,34 @@ const ESERCIZI = {
 
 const GIORNI_KEYS = ["lunedi","martedi","mercoledi","giovedi","venerdi","sabato","domenica"];
 
-// ─── Helpers modal ───
-function strToNull(v) { return (v === "" || v == null) ? null : v; }
+// ─── Auth ───
+function getToken() { return localStorage.getItem("access_token"); }
+function authHeaders() { return { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` }; }
+
+function requireAuth() {
+  const token = getToken();
+  if (!token) { location.href = "../Autenticazione/Istruttore.html"; return false; }
+  try {
+    const p = JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+    if (p.ruolo !== "istruttore") { localStorage.clear(); location.href = "../Autenticazione/Istruttore.html"; return false; }
+    return true;
+  } catch { location.href = "../Autenticazione/Istruttore.html"; return false; }
+}
+
+function tornaAllenamenti() {
+  const q = new URLSearchParams({ atleta: ID_ATLETA, nome: NOME_ATLETA, cognome: COGNOME_ATLETA });
+  location.href = `Allenamenti.html?${q}`;
+}
+
+// ─── Helpers ───
+function escHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function strToNull(v) {
+  return (v === "" || v == null) ? null : v;
+}
 
 function makeOpts(arr, selected) {
   let h = `<option value="">▼ Seleziona</option>`;
@@ -194,6 +128,7 @@ function makeOptsWithEmpty(arr, selected, emptyLabel="—") {
   return h;
 }
 
+// ─── Debounce save ───
 const saveTimers = new WeakMap();
 function debSave(tr, fn, delay=900) {
   if (saveTimers.has(tr)) clearTimeout(saveTimers.get(tr));
@@ -202,16 +137,16 @@ function debSave(tr, fn, delay=900) {
 
 // ─── Lookup config ───
 const LCFG = {
-  riscaldamento:  { arr:()=>lookupRiscaldamento,  idK:"IDesercizioRiscaldamento",           nameK:"NomeEsercizio",        ep:"riscaldamento",            bodyFn:v=>({nome:v}) },
-  posizionePiedi: { arr:()=>lookupPosizionePiedi, idK:"IDposizionePiedi",                   nameK:"NomePosizione",        ep:"posizione-piedi",          bodyFn:v=>({nome:v}) },
-  distanza:       { arr:()=>lookupDistanza,        idK:"IDdistanza",                         nameK:"NomeEsercizio",        ep:"distanza",                 bodyFn:v=>({nome:v}) },
-  targa:          { arr:()=>lookupTarga,           idK:"IDtarga",                            nameK:"NomeTarga",            ep:"targa",                    bodyFn:v=>({nome:v}) },
-  desEsercizio:   { arr:()=>lookupDesEsercizio,    idK:"IDdescrizioneEsercizio",             nameK:"NomeEsercizio",        ep:"descrizione-esercizio",    bodyFn:v=>({nome:v}) },
-  stretching:     { arr:()=>lookupStretching,      idK:"IDesercizioStretching",              nameK:"NomeEsercizio",        ep:"stretching",               bodyFn:v=>({nome:v}) },
-  tabellaN:       { arr:()=>lookupTabellaN,        idK:"IDtabella_n",                        nameK:"NumeroTabella",        ep:"tabella-numero",           bodyFn:v=>({numero:parseTabellaNum(v)}) },
-  desFisForRes:   { arr:()=>lookupDesFisForRes,    idK:"IDdescrizioneEsercizioAllFisForRes", nameK:"DescrizioneEsercizio", ep:"allfisforres-descrizione", bodyFn:v=>({nome:v}) },
-  attrezzi:       { arr:()=>lookupAttrezzi,        idK:"IDattrezzo",                         nameK:"AttrezzoDes",          ep:"attrezzi",                 bodyFn:v=>({nome:v}) },
-  desFisCor:      { arr:()=>lookupDesFisCor,       idK:"IDdescrizioneEsercizioAllFisCor",    nameK:"DescrizioneEsercizio", ep:"allfiscor-descrizione",    bodyFn:v=>({nome:v}) },
+  riscaldamento:  { arr:()=>lookupRiscaldamento,  idK:"IDesercizioRiscaldamento",              nameK:"NomeEsercizio",          ep:"riscaldamento",            bodyFn:v=>({nome:v}) },
+  posizionePiedi: { arr:()=>lookupPosizionePiedi, idK:"IDposizionePiedi",                      nameK:"NomePosizione",          ep:"posizione-piedi",          bodyFn:v=>({nome:v}) },
+  distanza:       { arr:()=>lookupDistanza,        idK:"IDdistanza",                            nameK:"NomeEsercizio",          ep:"distanza",                 bodyFn:v=>({nome:v}) },
+  targa:          { arr:()=>lookupTarga,           idK:"IDtarga",                               nameK:"NomeTarga",              ep:"targa",                    bodyFn:v=>({nome:v}) },
+  desEsercizio:   { arr:()=>lookupDesEsercizio,    idK:"IDdescrizioneEsercizio",                nameK:"NomeEsercizio",          ep:"descrizione-esercizio",    bodyFn:v=>({nome:v}) },
+  stretching:     { arr:()=>lookupStretching,      idK:"IDesercizioStretching",                 nameK:"NomeEsercizio",          ep:"stretching",               bodyFn:v=>({nome:v}) },
+  tabellaN:       { arr:()=>lookupTabellaN,        idK:"IDtabella_n",                           nameK:"NumeroTabella",          ep:"tabella-numero",           bodyFn:v=>({numero:parseTabellaNum(v)}) },
+  desFisForRes:   { arr:()=>lookupDesFisForRes,    idK:"IDdescrizioneEsercizioAllFisForRes",    nameK:"DescrizioneEsercizio",   ep:"allfisforres-descrizione", bodyFn:v=>({nome:v}) },
+  attrezzi:       { arr:()=>lookupAttrezzi,        idK:"IDattrezzo",                            nameK:"AttrezzoDes",            ep:"attrezzi",                 bodyFn:v=>({nome:v}) },
+  desFisCor:      { arr:()=>lookupDesFisCor,       idK:"IDdescrizioneEsercizioAllFisCor",       nameK:"DescrizioneEsercizio",   ep:"allfiscor-descrizione",    bodyFn:v=>({nome:v}) },
 };
 
 function parseTabellaNum(text) {
@@ -231,6 +166,7 @@ function tabellaNumToText(n) {
 async function findOrCreateId(cfgKey, text) {
   if (!text) return null;
   const cfg = LCFG[cfgKey];
+
   if (cfgKey === "tabellaN") {
     const num = parseTabellaNum(text);
     if (num == null) return null;
@@ -247,8 +183,10 @@ async function findOrCreateId(cfgKey, text) {
     } catch {}
     return null;
   }
+
   let found = cfg.arr().find(x => (x[cfg.nameK] || "").toLowerCase() === text.toLowerCase());
   if (found) return found[cfg.idK];
+
   try {
     const res = await fetch(`${API_URL}/allenamenti/lookup/${cfg.ep}/`,
       { method: "POST", headers: authHeaders(), body: JSON.stringify(cfg.bodyFn(text)) });
@@ -261,6 +199,7 @@ async function findOrCreateId(cfgKey, text) {
   return null;
 }
 
+// ─── Lookup loading ───
 async function caricaLookupSingle(ep, setter) {
   try {
     const r = await fetch(`${API_URL}/allenamenti/lookup/${ep}/`, { headers: authHeaders() });
@@ -298,15 +237,17 @@ function refreshRiscDropdown() {
 
 // ─── Carica seduta ───
 async function caricaSeduta() {
-  if (!currentSedutaAllId) return;
   settimanaCorrente = parseInt(document.getElementById("settimanaInput").value) || 1;
   sedutaCorrente    = parseInt(document.getElementById("sedutaInput").value) || 1;
+
+  // Inizializza seduta se non esiste
   try {
     await fetch(
-      `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}/inizializza`,
+      `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}/inizializza`,
       { method: "POST", headers: authHeaders(), body: "{}" }
     );
   } catch {}
+
   await Promise.all([
     fetchSezione("riscaldamento"),
     fetchSezione("tecforcor"),
@@ -319,8 +260,7 @@ async function caricaSeduta() {
 }
 
 async function fetchSezione(sez) {
-  if (!currentSedutaAllId) return;
-  const url = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}/${sez}/`;
+  const url = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}/${sez}/`;
   try {
     const r = await fetch(url, { headers: authHeaders() });
     if (!r.ok) return;
@@ -334,8 +274,7 @@ async function fetchSezione(sez) {
 }
 
 async function aggiornaTotaleFrecce() {
-  if (!currentSedutaAllId) return;
-  const url = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}/tecforcor/totale-frecce`;
+  const url = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}/tecforcor/totale-frecce`;
   try {
     const r = await fetch(url, { headers: authHeaders() });
     if (!r.ok) return;
@@ -351,10 +290,9 @@ async function aggiornaTotaleFrecce() {
 }
 
 async function fetchNota() {
-  if (!currentSedutaAllId) return;
   try {
     const r = await fetch(
-      `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/nota/`,
+      `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/nota/`,
       { headers: authHeaders() }
     );
     if (!r.ok) return;
@@ -365,12 +303,11 @@ async function fetchNota() {
 }
 
 async function salvaNota() {
-  if (!currentSedutaAllId) return;
   const nota = strToNull(document.getElementById("noteAtleta").value.trim());
   const msgEl = document.getElementById("notaMsg");
   try {
     const r = await fetch(
-      `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/nota/`,
+      `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/nota/`,
       { method: "POST", headers: authHeaders(), body: JSON.stringify({ nota }) }
     );
     msgEl.textContent = r.ok ? "Salvato ✓" : "Errore";
@@ -380,9 +317,10 @@ async function salvaNota() {
   } catch {}
 }
 
-async function eliminaRigaSeduta(sez, id, refreshFn) {
+// ─── DELETE ───
+async function eliminaRiga(sez, id, refreshFn) {
   if (!confirm("Eliminare questa riga?")) return;
-  const base = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
+  const base = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
   try {
     const r = await fetch(`${base}/${sez}/${id}`, { method: "DELETE", headers: authHeaders() });
     if (r.ok || r.status === 204) {
@@ -411,7 +349,7 @@ function renderRisc() {
     tr.innerHTML = `<td style="text-align:left;padding-left:12px;">${escHtml(nome)}</td>
       <td><button class="delete-row">×</button></td>`;
     tr.querySelector(".delete-row").addEventListener("click", () =>
-      eliminaRigaSeduta("riscaldamento", row.IDdetRiscaldamento, () => fetchSezione("riscaldamento"))
+      eliminaRiga("riscaldamento", row.IDdetRiscaldamento, () => fetchSezione("riscaldamento"))
     );
     tbody.appendChild(tr);
   });
@@ -420,7 +358,7 @@ function renderRisc() {
 async function aggiungiRisc(nome) {
   if (!nome) return;
   const id = await findOrCreateId("riscaldamento", nome);
-  const base = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
+  const base = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
   try {
     const r = await fetch(`${base}/riscaldamento/`, {
       method: "POST", headers: authHeaders(),
@@ -461,10 +399,12 @@ function creaRigaTec(row) {
   const disTxt = lookupDistanza.find(l => l.IDdistanza === row.id_distanza)?.NomeEsercizio || "";
   const trgTxt = lookupTarga.find(l => l.IDtarga === row.id_targa)?.NomeTarga || "";
   const desTxt = lookupDesEsercizio.find(l => l.IDdescrizioneEsercizio === row.id_descrizione_esercizio)?.NomeEsercizio || "";
+
   const serieCells = GIORNI_KEYS.map(g => {
     const val = row[g] || "";
     return `<td><div class="serie-cell${val ? " has-value" : " empty-val"}" data-day="${g}" data-val="${escHtml(val)}">${val ? escHtml(val) : "-"}</div></td>`;
   }).join("");
+
   const tr = document.createElement("tr");
   tr.classList.add("new-row");
   tr.dataset.id = String(row.IDdetTecForCor);
@@ -509,7 +449,7 @@ function setupTecListeners(tr) {
     apriSerieModal(tr.querySelector(".serie-cell"))
   );
   tr.querySelector(".delete-row").addEventListener("click", () => {
-    if (tr.dataset.id) eliminaRigaSeduta("tecforcor", tr.dataset.id, () => fetchSezione("tecforcor"));
+    if (tr.dataset.id) eliminaRiga("tecforcor", tr.dataset.id, () => fetchSezione("tecforcor"));
     else tr.remove();
   });
 }
@@ -519,20 +459,31 @@ async function salvaTec(tr) {
   const dist  = tr.querySelector('[data-col="distanza"]').value;
   const targa = tr.querySelector('[data-col="targa"]').value;
   const des   = tr.querySelector('[data-col="descrizione"]').value;
+
   const giorni = {};
   GIORNI_KEYS.forEach(g => {
     const cell = tr.querySelector(`[data-day="${g}"]`);
     giorni[g] = strToNull(cell ? cell.dataset.val : "");
   });
+
   const [idPos, idDis, idTrg, idDes] = await Promise.all([
     findOrCreateId("posizionePiedi", piedi),
     findOrCreateId("distanza", dist),
     findOrCreateId("targa", targa),
     findOrCreateId("desEsercizio", des),
   ]);
-  const body = { id_posizione_piedi: idPos, id_distanza: idDis, id_targa: idTrg, id_descrizione_esercizio: idDes, ...giorni };
-  const base = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
+
+  const body = {
+    id_posizione_piedi: idPos,
+    id_distanza: idDis,
+    id_targa: idTrg,
+    id_descrizione_esercizio: idDes,
+    ...giorni
+  };
+
+  const base = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
   const idRiga = tr.dataset.id || "";
+
   try {
     const r = await fetch(
       idRiga ? `${base}/tecforcor/${idRiga}` : `${base}/tecforcor/`,
@@ -598,7 +549,7 @@ function setupStrListeners(tr) {
     sel.addEventListener("change", () => debSave(tr, salvaStr))
   );
   tr.querySelector(".delete-row").addEventListener("click", () => {
-    if (tr.dataset.id) eliminaRigaSeduta("stretching", tr.dataset.id, () => fetchSezione("stretching"));
+    if (tr.dataset.id) eliminaRiga("stretching", tr.dataset.id, () => fetchSezione("stretching"));
     else tr.remove();
   });
 }
@@ -606,10 +557,14 @@ function setupStrListeners(tr) {
 async function salvaStr(tr) {
   const esNome = strToNull(tr.querySelector('[data-col="esercizio"]')?.value || "");
   const giorni = {};
-  GIORNI_KEYS.forEach(g => { giorni[g] = strToNull(tr.querySelector(`[data-col="${g}"]`)?.value || ""); });
+  GIORNI_KEYS.forEach(g => {
+    giorni[g] = strToNull(tr.querySelector(`[data-col="${g}"]`)?.value || "");
+  });
+
   const idEs = esNome ? await findOrCreateId("stretching", esNome) : null;
   const body = { id_esercizio_stretching: idEs, ...giorni };
-  const base = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
+
+  const base = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
   const idRiga = tr.dataset.id || "";
   try {
     const r = await fetch(
@@ -682,7 +637,7 @@ function setupForListeners(tr) {
     sel.addEventListener("change", () => debSave(tr, salvaFor))
   );
   tr.querySelector(".delete-row").addEventListener("click", () => {
-    if (tr.dataset.id) eliminaRigaSeduta("allfisforres", tr.dataset.id, () => fetchSezione("allfisforres"));
+    if (tr.dataset.id) eliminaRiga("allfisforres", tr.dataset.id, () => fetchSezione("allfisforres"));
     else tr.remove();
   });
 }
@@ -691,13 +646,17 @@ async function salvaFor(tr) {
   const tabTxt = tr.querySelector('[data-col="tabella"]').value;
   const desTxt = tr.querySelector('[data-col="descrizione"]').value;
   const giorni = {};
-  GIORNI_KEYS.forEach(g => { giorni[g] = strToNull(tr.querySelector(`[data-col="${g}"]`)?.value || ""); });
+  GIORNI_KEYS.forEach(g => {
+    giorni[g] = strToNull(tr.querySelector(`[data-col="${g}"]`)?.value || "");
+  });
+
   const [idTab, idDes] = await Promise.all([
     findOrCreateId("tabellaN", tabTxt),
     findOrCreateId("desFisForRes", desTxt),
   ]);
   const body = { id_tabella_n: idTab, id_descrizione_esercizio_all_fis_for_res: idDes, ...giorni };
-  const base = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
+
+  const base = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
   const idRiga = tr.dataset.id || "";
   try {
     const r = await fetch(
@@ -769,7 +728,7 @@ function setupCorListeners(tr) {
     sel.addEventListener("change", () => debSave(tr, salvaCor))
   );
   tr.querySelector(".delete-row").addEventListener("click", () => {
-    if (tr.dataset.id) eliminaRigaSeduta("allfiscor", tr.dataset.id, () => fetchSezione("allfiscor"));
+    if (tr.dataset.id) eliminaRiga("allfiscor", tr.dataset.id, () => fetchSezione("allfiscor"));
     else tr.remove();
   });
 }
@@ -778,13 +737,17 @@ async function salvaCor(tr) {
   const attTxt = tr.querySelector('[data-col="attrezzo"]').value;
   const desTxt = tr.querySelector('[data-col="descrizione"]').value;
   const giorni = {};
-  GIORNI_KEYS.forEach(g => { giorni[g] = strToNull(tr.querySelector(`[data-col="${g}"]`)?.value || ""); });
+  GIORNI_KEYS.forEach(g => {
+    giorni[g] = strToNull(tr.querySelector(`[data-col="${g}"]`)?.value || "");
+  });
+
   const [idAtt, idDes] = await Promise.all([
     findOrCreateId("attrezzi", attTxt),
     findOrCreateId("desFisCor", desTxt),
   ]);
   const body = { id_attrezzo: idAtt, id_descrizione_esercizio_all_fis_cor: idDes, ...giorni };
-  const base = `${API_URL}/allenamenti/${currentSedutaAllId}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
+
+  const base = `${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${settimanaCorrente}/sedute/${sedutaCorrente}`;
   const idRiga = tr.dataset.id || "";
   try {
     const r = await fetch(
@@ -809,9 +772,11 @@ function apriSerieModal(cella) {
   activeSerieCella = cella;
   const listEl = document.getElementById("serieList");
   listEl.innerHTML = "";
+
   const serieMap = new Map();
   ESERCIZI.serie.forEach(s => serieMap.set(s.serie, s.frecce));
   lookupSerie.forEach(s => serieMap.set(s.Serie, s.NumeroFrecce));
+
   serieMap.forEach((frecce, nome) => {
     const div = document.createElement("div");
     div.className = "serie-item";
@@ -823,6 +788,7 @@ function apriSerieModal(cella) {
     div.querySelector(".serie-name-box").addEventListener("click", () => scegliSerie(nome));
     listEl.appendChild(div);
   });
+
   document.getElementById("serieModal").classList.add("active");
 }
 
@@ -884,6 +850,7 @@ function renderListContent(listKey) {
     if (cfg.isSerie)  label = `${item.Serie} (${item.NumeroFrecce} frecce)`;
     else if (cfg.isForza) label = tabellaNumToText(item.NumeroTabella);
     else label = item[cfg.nameK] || "—";
+
     const wrap = document.createElement("div");
     wrap.className = "data-list-item-wrapper";
     wrap.innerHTML = `
@@ -914,6 +881,7 @@ async function aggiungiVoceListModal() {
   const msgEl = document.getElementById("listAddMsg");
   const val = input.value.trim();
   if (!val) return;
+
   try {
     const r = await fetch(`${API_URL}/allenamenti/lookup/${cfg.ep}/`,
       { method: "POST", headers: authHeaders(), body: JSON.stringify(cfg.bodyFn(val)) });
@@ -938,264 +906,28 @@ async function aggiungiVoceListModal() {
   }
 }
 
-// ════════════════════════════════════════════
-//  ALLENAMENTI LIST
-// ════════════════════════════════════════════
-
-async function caricaAllenamenti() {
-  try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/`, {
-      headers: authHeaders(),
-    });
-    if (res.status === 401) { logout(); return; }
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      showMsg("pageMsgBox", err.detail || "Errore nel caricamento.", "error");
-      return;
-    }
-    allenamentoCache = await res.json();
-    renderList();
-  } catch {
-    showMsg("pageMsgBox", "Impossibile contattare il server.", "error");
-  }
-}
-
-function calcSettimane(inizio, fine) {
-  const ms = new Date(fine) - new Date(inizio);
-  const weeks = Math.max(1, Math.ceil(ms / (7 * 24 * 60 * 60 * 1000)));
-  return Math.min(weeks, 12);
-}
-
-function renderList() {
-  const list = document.getElementById("allenamentoList");
-  const empty = document.getElementById("emptyState");
-  list.innerHTML = "";
-
-  if (!allenamentoCache.length) {
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
-
-  const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
-
-  allenamentoCache.forEach((a) => {
-    const nSett = calcSettimane(a.data_inizio, a.data_fine);
-    let righe = "";
-    for (let s = 1; s <= nSett; s++) {
-      righe += `
-        <tr>
-          <td><span class="sett-badge">${s}</span></td>
-          <td><input class="sett-input" type="text" placeholder="Obiettivo settimana ${s}..." /></td>
-          <td>
-            <div class="sett-actions">
-              <button class="sett-btn" data-open-sett="${s}" data-all-id="${a.IDallenamento}" title="Programmazione Settimana">📋</button>
-              <button class="sett-btn sett-btn-del" data-del-sett title="Rimuovi riga">×</button>
-            </div>
-          </td>
-        </tr>`;
-    }
-
-    const card = document.createElement("div");
-    card.className = "all-card";
-    card.innerHTML = `
-      <div class="all-card-header">
-        <span class="all-card-title">📋 ALLENAMENTI: ${escHtml(titolo)}</span>
-        <div class="all-card-btns">
-          <button class="acb" title="Stampa" onclick="window.print()">🖨️</button>
-          <button class="acb acb-del" data-del-all="${a.IDallenamento}" title="Elimina">×</button>
-        </div>
-      </div>
-      <div class="all-card-body">
-        <div class="all-field">
-          <label>Data Inizio</label>
-          <div class="all-field-val">${formatDate(a.data_inizio)}</div>
-        </div>
-        <div class="all-field">
-          <label>Data Fine</label>
-          <div class="all-field-val">${formatDate(a.data_fine)}</div>
-        </div>
-        <div class="all-field">
-          <label>Obiettivi</label>
-          <textarea readonly>${escHtml(a.obiettivi) || ""}</textarea>
-        </div>
-        <table class="sett-table">
-          <thead>
-            <tr>
-              <th style="width:60px;">Settimana</th>
-              <th>Obiettivo</th>
-              <th style="text-align:right;">Azioni</th>
-            </tr>
-          </thead>
-          <tbody>${righe}</tbody>
-        </table>
-      </div>
-      <div class="all-card-footer">
-        <button class="all-card-footer-btn" data-piano-gare="${a.IDallenamento}">PIANO GARE</button>
-        <button class="all-card-footer-btn" data-edit-all="${a.IDallenamento}">MODIFICA</button>
-      </div>`;
-    list.appendChild(card);
-  });
-
-  list.querySelectorAll("[data-open-sett]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const sett = Number(btn.dataset.openSett);
-      const allId = Number(btn.dataset.allId);
-
-      currentSedutaAllId = allId;
-      settimanaCorrente = sett;
-      sedutaCorrente = 1;
-
-      document.getElementById("settimanaInput").value = sett;
-      document.getElementById("sedutaInput").value = 1;
-      const atletaTitolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
-      document.getElementById("atletaInput").value = atletaTitolo || "—";
-      document.getElementById("obiettivoInput").value = "";
-
-      document.getElementById("sedutaModal").classList.add("active");
-      await caricaSeduta();
-    });
-  });
-
-  list.querySelectorAll("[data-del-sett]").forEach((btn) => {
-    btn.addEventListener("click", () => { btn.closest("tr").remove(); });
-  });
-
-  list.querySelectorAll("[data-del-all]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const a = allenamentoCache.find((x) => x.IDallenamento === Number(btn.dataset.delAll));
-      if (a) openDeleteModal(a);
-    });
-  });
-
-  list.querySelectorAll("[data-piano-gare]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const q = new URLSearchParams({ atleta: ID_ATLETA, nome: NOME_ATLETA, cognome: COGNOME_ATLETA });
-      window.location.href = `Pianogare.html?${q.toString()}`;
-    });
-  });
-
-  list.querySelectorAll("[data-edit-all]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const a = allenamentoCache.find((x) => x.IDallenamento === Number(btn.dataset.editAll));
-      if (a) openEditModal(a);
-    });
-  });
-}
-
-function openAddModal() {
-  clearMsg("formMsgBox");
-  document.getElementById("editAllenamentoId").value = "";
-  document.getElementById("fDataInizio").value = "";
-  document.getElementById("fDataFine").value = "";
-  document.getElementById("fObiettivi").value = "";
-  document.getElementById("formModalPill").textContent = "Nuovo Allenamento";
-  document.getElementById("formModalTitle").textContent = "Aggiungi allenamento";
-  openModal("formModal");
-}
-
-function openEditModal(a) {
-  clearMsg("formMsgBox");
-  document.getElementById("editAllenamentoId").value = a.IDallenamento;
-  document.getElementById("fDataInizio").value = toInputDate(a.data_inizio);
-  document.getElementById("fDataFine").value = toInputDate(a.data_fine);
-  document.getElementById("fObiettivi").value = a.obiettivi || "";
-  document.getElementById("formModalPill").textContent = "Modifica";
-  document.getElementById("formModalTitle").textContent = "Modifica allenamento";
-  openModal("formModal");
-}
-
-function openDeleteModal(a) {
-  document.getElementById("deleteAllenamentoId").value = a.IDallenamento;
-  document.getElementById("deleteMsg").textContent =
-    `Eliminare l'allenamento dal ${formatDate(a.data_inizio)} al ${formatDate(a.data_fine)}?`;
-  openModal("deleteModal");
-}
-
-async function salvaAllenamento() {
-  clearMsg("formMsgBox");
-  const data_inizio = document.getElementById("fDataInizio").value;
-  const data_fine = document.getElementById("fDataFine").value;
-  const obiettivi = document.getElementById("fObiettivi").value.trim() || null;
-
-  if (!data_inizio || !data_fine) {
-    showMsg("formMsgBox", "Le date di inizio e fine sono obbligatorie.", "error");
-    return;
-  }
-  if (data_fine <= data_inizio) {
-    showMsg("formMsgBox", "La data di fine deve essere successiva alla data di inizio.", "error");
-    return;
-  }
-
-  const id = document.getElementById("editAllenamentoId").value;
-  const isEdit = !!id;
-  const url = isEdit
-    ? `${API_URL}/atleti/${ID_ATLETA}/allenamenti/${id}`
-    : `${API_URL}/atleti/${ID_ATLETA}/allenamenti/`;
-
-  try {
-    const res = await fetch(url, {
-      method: isEdit ? "PUT" : "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ data_inizio, data_fine, obiettivi }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      showMsg("formMsgBox", err.detail || "Errore nel salvataggio.", "error");
-      return;
-    }
-    closeModal("formModal");
-    await caricaAllenamenti();
-  } catch {
-    showMsg("formMsgBox", "Impossibile contattare il server.", "error");
-  }
-}
-
-async function confermaElimina() {
-  const id = document.getElementById("deleteAllenamentoId").value;
-  try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/allenamenti/${id}`, {
-      method: "DELETE",
-      headers: authHeaders(),
-    });
-    if (!res.ok && res.status !== 204) {
-      const err = await res.json().catch(() => ({}));
-      alert(err.detail || "Errore nell'eliminazione.");
-      return;
-    }
-    closeModal("deleteModal");
-    await caricaAllenamenti();
-  } catch {
-    alert("Impossibile contattare il server.");
-  }
-}
-
-// ════════════════════════════════════════════
+// ═══════════════════════════
 //  INIT
-// ════════════════════════════════════════════
+// ═══════════════════════════
 window.addEventListener("DOMContentLoaded", async () => {
   if (!requireAuth()) return;
-  if (!ID_ATLETA) {
-    window.location.href = "Dashboard.html";
-    return;
-  }
+  if (!ID_ALLENAMENTO || !ID_ATLETA) { location.href = "Dashboard.html"; return; }
 
+  // Atleta
   const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
-  document.getElementById("titoloAtleta").textContent = titolo || "—";
-  document.getElementById("titoloAtleta2").textContent = titolo ? `Allenamenti: ${titolo}` : "Allenamenti";
+  const atletaEl = document.getElementById("atletaInput");
+  if (atletaEl) atletaEl.value = titolo || "—";
 
-  // Chiudi modal seduta
-  document.getElementById("sedutaClose").addEventListener("click", () => {
-    document.getElementById("sedutaModal").classList.remove("active");
-    currentSedutaAllId = null;
-  });
+  // Close
+  document.getElementById("closeBtn").addEventListener("click", tornaAllenamenti);
 
-  // Pulsanti interni al modal seduta
+  // Carica
   document.getElementById("btnCarica").addEventListener("click", caricaSeduta);
   document.getElementById("settimanaInput").addEventListener("keydown", e => {
     if (e.key === "Enter") caricaSeduta();
   });
 
+  // + Riga buttons
   document.getElementById("btnAddTec").addEventListener("click", () => {
     const tbody = document.getElementById("tecRows");
     if (!tbody.lastElementChild || tbody.lastElementChild.dataset.id) {
@@ -1221,10 +953,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // Riscaldamento dropdown
   document.getElementById("riscDropdown").addEventListener("change", e => aggiungiRisc(e.target.value));
+
+  // Note
   document.getElementById("btnSalvaNota").addEventListener("click", salvaNota);
 
-  // Modal serie
+  // Serie modal
   document.getElementById("serieModalClose").addEventListener("click", () => {
     document.getElementById("serieModal").classList.remove("active");
     activeSerieCella = null;
@@ -1237,7 +972,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Modal lista
+  // List modal
   document.getElementById("listModalClose").addEventListener("click", () =>
     document.getElementById("listModal").classList.remove("active")
   );
@@ -1249,13 +984,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (e.target === e.currentTarget) e.currentTarget.classList.remove("active");
   });
 
-  // Delegated: apri modal lista (icone 📋 negli header sezioni)
+  // Delegated: open list modal (📋 icons in header)
   document.addEventListener("click", e => {
     const el = e.target.closest(".open-list-modal");
     if (el) apriListModal(el.dataset.list, el.dataset.title);
   });
 
-  // Carica lookup e poi allenamenti
+  // Carica lookup e poi seduta
   await caricaLookup();
-  await caricaAllenamenti();
+  await caricaSeduta();
 });

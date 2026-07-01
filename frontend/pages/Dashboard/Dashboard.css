@@ -69,6 +69,23 @@ nav {
   color: white;
 }
 
+.btn-coach-ai {
+  padding: 8px 16px;
+  background: #c0392b;
+  border: none;
+  border-radius: 2px;
+  color: white;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-coach-ai:hover { background: #a93226; }
+
 .btn-logout {
   padding: 8px 16px;
   background: transparent;
@@ -138,6 +155,18 @@ nav {
   border-radius: 4px;
   padding: 20px 24px;
   min-width: 180px;
+}
+
+.stat-card-ai {
+  border-left-color: #c0392b;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s, border-color 0.2s;
+}
+.stat-card-ai:hover {
+  background: #221010;
+  border-left-color: #e74c3c;
 }
 
 .stat-label {

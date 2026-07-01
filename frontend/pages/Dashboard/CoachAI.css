@@ -1,0 +1,348 @@
+/* ══ LAYOUT ══ */
+.ai-layout {
+  display: flex;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+.nav-link {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-link:hover { color: white; }
+
+/* ══ SIDEBAR ══ */
+.ai-sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #141414;
+  border-right: 1px solid #222;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 12px;
+  border-bottom: 1px solid #222;
+}
+
+.sidebar-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  color: white;
+}
+
+.sidebar-count {
+  background: #c0392b;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.sidebar-search {
+  padding: 10px 12px;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.sidebar-search input {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  color: white;
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.sidebar-search input:focus { border-color: #c0392b; }
+.sidebar-search input::placeholder { color: #444; }
+
+.athletes-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+.athletes-list::-webkit-scrollbar { width: 4px; }
+.athletes-list::-webkit-scrollbar-track { background: transparent; }
+.athletes-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+.athlete-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-left: 3px solid transparent;
+}
+.athlete-item:hover { background: #1e1e1e; }
+.athlete-item.active {
+  background: #1e1e1e;
+  border-left-color: #c0392b;
+}
+
+.athlete-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #888;
+  flex-shrink: 0;
+}
+.athlete-item.active .athlete-avatar {
+  background: #c0392b;
+  color: white;
+}
+
+.athlete-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.athlete-info {
+  font-size: 0.7rem;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-stats {
+  padding: 12px 14px;
+  border-top: 1px solid #1e1e1e;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.stat-label-sm { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+.stat-val { font-size: 0.78rem; color: #aaa; font-weight: 600; }
+
+/* ══ MAIN AREA ══ */
+.ai-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 36px 60px;
+  background: #111;
+}
+.ai-main::-webkit-scrollbar { width: 6px; }
+.ai-main::-webkit-scrollbar-track { background: transparent; }
+.ai-main::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+
+.ai-page-header {
+  margin-bottom: 28px;
+}
+.ai-page-header h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.ai-page-header p { color: #555; font-size: 0.88rem; }
+
+/* ══ EMPTY STATE ══ */
+.empty-ai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #333;
+  gap: 14px;
+}
+.empty-ai-icon { font-size: 3rem; opacity: 0.4; }
+.empty-ai-text { font-size: 0.88rem; color: #444; text-align: center; }
+
+/* ══ ATHLETE DATA PANEL ══ */
+.athlete-data-panel {
+  background: #1a1a1a;
+  border-left: 5px solid #c0392b;
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  color: #c0392b;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 24px;
+}
+
+.data-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 3px;
+}
+.data-value { font-size: 0.88rem; color: #ccc; }
+
+/* ══ INPUT SECTION ══ */
+.input-section {
+  background: #1a1a1a;
+  border-left: 5px solid #276749;
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.input-section textarea {
+  width: 100%;
+  min-height: 100px;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  color: #ddd;
+  font-family: inherit;
+  font-size: 0.88rem;
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.input-section textarea:focus { border-color: #276749; }
+.input-section textarea::placeholder { color: #3a3a3a; }
+
+.main-btn {
+  padding: 11px 24px;
+  background: #c0392b;
+  border: none;
+  border-radius: 3px;
+  color: white;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+.main-btn:hover { background: #a93226; }
+.main-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ══ AI RESPONSE ══ */
+#pergjigja {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-left: 5px solid #c0392b;
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.ai-header {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  color: #c0392b;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+}
+
+.ai-body {
+  font-size: 0.88rem;
+  color: #ccc;
+  line-height: 1.7;
+}
+.ai-body p { margin-bottom: 10px; }
+.ai-body strong { color: white; }
+
+.ai-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+}
+
+/* ══ HISTORY ══ */
+.history-section {
+  background: #141414;
+  border: 1px solid #222;
+  border-radius: 4px;
+  padding: 20px 24px;
+}
+
+.history-item {
+  border-bottom: 1px solid #1e1e1e;
+  padding: 14px 0;
+}
+.history-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.history-question {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  border-left: 3px solid #444;
+}
+
+.history-answer {
+  font-size: 0.85rem;
+  color: #aaa;
+  line-height: 1.65;
+  padding-left: 4px;
+}
+.history-answer p { margin-bottom: 6px; }
+.history-answer strong { color: #ccc; }
+
+/* ══ LOADING SPINNER ══ */
+.loading-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #333;
+  border-top-color: #c0392b;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 768px) {
+  .ai-layout { flex-direction: column; height: auto; }
+  .ai-sidebar { width: 100%; min-width: 0; height: 220px; }
+  .ai-main { padding: 20px 16px 40px; }
+  .data-grid { grid-template-columns: 1fr 1fr; }
+}

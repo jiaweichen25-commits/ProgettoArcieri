@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Coach AI</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="coach_ai_atleta.css" />
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Portale Ufficiale</span>
+      <strong>Arcieri Vicenza</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <a class="nav-link" href="Dashboard.html">← Il mio profilo</a>
+    <div class="nav-user">Benvenuto, <strong id="navUser">Atleta</strong></div>
+    <button class="btn-logout" onclick="logout()">Esci</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Coach AI</div>
+    <h1 id="atletaNome">—</h1>
+    <p>Il tuo assistente personale di tiro con l'arco</p>
+  </div>
+
+  <!-- Profilo rapido -->
+  <div class="section">
+    <div class="section-title">Il mio profilo</div>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">Codice Fiscale</span><span class="info-value" id="atletaCf">—</span></div>
+      <div class="info-item"><span class="info-label">Città</span><span class="info-value" id="atletaCitta">—</span></div>
+      <div class="info-item"><span class="info-label">Email</span><span class="info-value" id="atletaEmail">—</span></div>
+    </div>
+  </div>
+
+  <!-- Chat AI -->
+  <div class="section section-ai">
+    <div class="section-title">Consulenza Tecnica</div>
+    <p class="ai-desc">Descrivi il tuo problema tecnico, chiedi un'analisi del tuo allenamento o un consiglio sul materiale. Il Coach AI conosce i tuoi dati.</p>
+    <textarea id="inputDomanda" placeholder="Es: Tendo sempre a sinistra nelle ultime frecce, cosa devo correggere? / Analizza il mio materiale attuale / Come posso migliorare la fase di rilascio?"></textarea>
+    <button class="btn-ai" id="btnChiedi" onclick="window.chiediAI()">Chiedi al Coach AI</button>
+  </div>
+
+  <!-- Risposta AI -->
+  <div id="rispostaBox" style="display:none;"></div>
+
+  <!-- Cronologia -->
+  <div class="section" id="historySection" style="display:none;">
+    <div class="section-title">Cronologia domande</div>
+    <div id="historyList"></div>
+  </div>
+
+</div>
+
+<script src="coach_ai_atleta.js"></script>
+</body>
+</html>

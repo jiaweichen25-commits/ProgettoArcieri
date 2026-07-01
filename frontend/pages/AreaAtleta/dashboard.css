@@ -59,6 +59,21 @@ nav {
 }
 .btn-logout:hover { color: white; border-color: #c0392b; }
 
+.btn-coach-ai-atleta {
+  padding: 8px 16px;
+  background: #c0392b;
+  border-radius: 2px;
+  color: white;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-coach-ai-atleta:hover { background: #a93226; }
+
 /* ══ PAGE ══ */
 .page { max-width: 960px; margin: 0 auto; padding: 36px 28px 60px; }
 .page-header { margin-bottom: 32px; }

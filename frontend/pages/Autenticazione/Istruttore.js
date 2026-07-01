@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = `${window.location.protocol}//${window.location.hostname}:8000`;
 const PORTALE = "istruttore";
 const DASHBOARD = "../Dashboard/Dashboard.html";
 
