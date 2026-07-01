@@ -185,6 +185,7 @@ await fetch(
     }
 );
   document.getElementById("sezioniDettaglio").style.display = "block";
+  document.getElementById("btnStampa").style.display = "inline-block";
   document.getElementById("labelSettSed").textContent = `Settimana ${idS} — Seduta ${idSed}`;
 
   await Promise.all([
