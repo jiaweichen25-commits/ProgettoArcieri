@@ -145,8 +145,11 @@
       gap: 16px;
       flex-wrap: wrap;
     }
-    .totale-frecce-box strong { color: #c0392b; }
-  </style>
+   .totale-frecce-box strong { color: #c0392b; }
+   @media print {
+    nav, .btn, .selettore-box button { display: none !important; }
+   }
+ </style>
 </head>
 <body>
 
@@ -159,6 +162,7 @@
     </div>
   </div>
   <div class="nav-right">
+    <button class="btn-logout" onclick="window.print()"> 🖨 Stampa</button>
     <button class="btn-logout" onclick="tornaAllenamenti()">← Allenamenti</button>
   </div>
 </nav>
