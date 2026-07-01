@@ -59,10 +59,12 @@
     <input type="hidden" id="editGaraId" />
 
     <div class="field">
-      <label>Tipo Gara</label>
-      <select id="fTipoGara">
-        <option value="">— Seleziona tipo —</option>
-      </select>
+      <label for="fTipoGara">Tipo Gara</label>
+      <div style="display:flex; gap:8px;">
+        <select id="fTipoGara" style="flex:1;"></select>
+        <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddTipoGara()">+</button>
+        <button class="btn btn-red" style="padding:0 12px;" onclick="promptDeleteTipoGara()">x</button>
+      </div>
     </div>
 
     <div class="field">

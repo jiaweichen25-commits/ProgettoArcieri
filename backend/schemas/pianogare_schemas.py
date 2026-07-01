@@ -28,3 +28,11 @@ class PianoGaraOut(BaseModel):
     distanza: Optional[str] = None
     note: Optional[str] = None
     escludi_visualizzazione: bool
+
+class TipoGaraCreate(BaseModel):
+    descrizione: str
+
+class TipoGaraOut(BaseModel):
+    IDtipogara: int
+    descrizione: Optional[str] = None
+    note: Optional[str] = None
