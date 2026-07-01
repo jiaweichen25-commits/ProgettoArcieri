@@ -1,0 +1,33 @@
+# Node / Frontend specific
+node_modules/
+
+# Environment variables (security)
+.env
+.env.*
+
+# Git repository
+.git/
+.gitignore
+
+# Docker-related files (not needed inside the container itself)
+docker-compose.yml
+Dockerfile
+dockerfile
+.dockerignore
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local project documentation (optional)
+istruzioni.txt
+index.txt
