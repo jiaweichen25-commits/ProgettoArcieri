@@ -104,3 +104,29 @@ def get_allenamenti_by_atleta_istruttore(id_istruttore: int):
             return cur.fetchall()
     finally:
         conn.close()
+
+def crea_tipo_gara(descrizione: str):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                '''INSERT INTO "TStipigare" ("Descrizione")
+                   VALUES (%s)
+                   RETURNING "IDtipogara"''',
+                (descrizione,)
+            )
+            return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+def elimina_tipo_gara(id_tipogara: int):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'DELETE FROM "TStipigare" WHERE "IDtipogara" = %s',
+                (id_tipogara,)
+            )
+            return cur.rowcount > 0
+    finally:
+        conn.close()

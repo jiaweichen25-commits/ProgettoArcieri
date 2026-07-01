@@ -69,3 +69,22 @@ def elimina_gara(id_utente: int, id_allenamento: int, id_pianogara: int):
 def get_tipi_gara():
     rows = pianogare_repository.get_tipi_gara()
     return [{"IDtipogara": row[0], "descrizione": row[1], "note": row[2]} for row in rows]
+
+def crea_tipo_gara(descrizione: str):
+    descrizione = descrizione.strip()
+    if not descrizione:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="La descrizione non può essere vuota"
+        )
+    new_id = pianogare_repository.crea_tipo_gara(descrizione)
+    return {"IDtipogara": new_id, "message": "Tipo gara creato con successo"}
+
+def elimina_tipo_gara(id_tipogara: int):
+    ok = pianogare_repository.elimina_tipo_gara(id_tipogara)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tipo gara non trovato"
+        )
+    return {"message": "Tipo gara eliminato con successo"}

@@ -146,13 +146,13 @@ function renderList() {
 
   const gareVisibili = gareCache.filter((g) => !g.escludi_visualizzazione);
 
-  if (!gareCache.length) {
+  if (!gareVisibili.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  gareCache.forEach((g) => {
+  gareVisibili.forEach((g) => {
     const card = document.createElement("div");
     card.className = "materiale-card" + (g.escludi_visualizzazione ? "" : " in-uso");
     card.innerHTML = `
@@ -279,6 +279,54 @@ async function confermaElimina() {
     }
     closeModal("deleteModal");
     await caricaGare();
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
+}
+
+async function promptAddTipoGara() {
+  const val = prompt("Inserisci il nome del nuovo tipo di gara:");
+  if (!val || !val.trim()) return;
+
+  try {
+    const res = await fetch(`${API_URL}/allenamenti/tipi-gara/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ descrizione: val.trim() }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.detail || "Errore nell'aggiunta del tipo gara.");
+      return;
+    }
+    await caricaTipiGara();
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
+}
+
+async function promptDeleteTipoGara() {
+  const select = document.getElementById("fTipoGara");
+  const val = select.value;
+  if (!val) {
+    alert("Seleziona prima un tipo di gara dalla tendina per eliminarlo.");
+    return;
+  }
+  const text = select.options[select.selectedIndex].text;
+  if (!confirm(`Sei sicuro di voler eliminare "${text}"?`)) return;
+
+  try {
+    const res = await fetch(`${API_URL}/allenamenti/tipi-gara/${val}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok && res.status !== 204) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.detail || "Errore nell'eliminazione.");
+      return;
+    }
+    select.value = "";
+    await caricaTipiGara();
   } catch {
     alert("Impossibile contattare il server.");
   }
