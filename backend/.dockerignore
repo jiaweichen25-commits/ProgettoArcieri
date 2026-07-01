@@ -1,0 +1,43 @@
+# Virtual environments
+venv/
+env/
+.env/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Git repository
+.git/
+.gitignore
+
+# Environment variables (security)
+.env
+.env.*
+
+# Docker-related files (not needed inside the container itself)
+docker-compose.yml
+Dockerfile
+dockerfile
+.dockerignore
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Local project documentation (optional)
+istruzioni.txt
+index.txt
