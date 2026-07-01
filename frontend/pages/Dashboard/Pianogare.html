@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arcieri Vicenza – Piano Gare</title>
   <link rel="stylesheet" href="Materiali.css" />
+  <style>
+    @media print {
+      nav, .btn { display: none !important; }
+    }
+  </style>
 </head>
 <body>
 
@@ -17,7 +22,7 @@
     </div>
   </div>
   <div class="nav-right">
-    <button class="btn-logout" onclick="tornaAllenamenti()">← Allenamenti</button>
+    <button id="btnStampa" class="btn-logout" style="display:none" onclick="window.print()">🖨️ Stampa</button>
   </div>
 </nav>
 
