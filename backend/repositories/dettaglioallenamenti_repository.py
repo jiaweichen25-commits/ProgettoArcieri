@@ -45,10 +45,33 @@ def elimina_seduta(id_allenamento: int, id_settimana: int, id_seduta: int):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
+            params = (id_allenamento, id_settimana, id_seduta)
+            # elimina prima i dettagli della seduta (nessuna FK ha ON DELETE CASCADE)
+            cur.execute(
+                'DELETE FROM "TdetStretching" WHERE "IDallenamento" = %s AND "IDsettimana" = %s AND "IDseduta" = %s',
+                params
+            )
+            cur.execute(
+                'DELETE FROM "TdetRiscaldamento" WHERE "IDallenamento" = %s AND "IDsettimana" = %s AND "IDseduta" = %s',
+                params
+            )
+            cur.execute(
+                'DELETE FROM "TdetTecForCor" WHERE "IDallenamento" = %s AND "IDsettimana" = %s AND "IDseduta" = %s',
+                params
+            )
+            cur.execute(
+                'DELETE FROM "TdetAllFisForRes" WHERE "IDallenamento" = %s AND "IDsettimana" = %s AND "IDseduta" = %s',
+                params
+            )
+            cur.execute(
+                'DELETE FROM "TdetAllFisCor" WHERE "IDallenamento" = %s AND "IDsettimana" = %s AND "IDseduta" = %s',
+                params
+            )
+
             cur.execute(
                 '''DELETE FROM "TdetAllenamenti"
                    WHERE "IDallenamento" = %s AND "IDsettimana" = %s AND "IDseduta" = %s''',
-                (id_allenamento, id_settimana, id_seduta)
+                params
             )
             return cur.rowcount > 0
     finally:
@@ -97,7 +120,7 @@ def crea_stretching(id_allenamento: int, id_settimana: int, id_seduta: int, dati
     finally:
         conn.close()
 
-def modifica_stretching(id_det: int, dati: dict):
+def modifica_stretching(id_det: int, id_allenamento: int, dati: dict):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
@@ -106,23 +129,26 @@ def modifica_stretching(id_det: int, dati: dict):
                    SET "Lunedi" = %s, "Martedi" = %s, "Mercoledi" = %s, "Giovedi" = %s,
                        "Venerdi" = %s, "Sabato" = %s, "Domenica" = %s,
                        "IDesercizioStretching" = %s
-                   WHERE "IDdetStretching" = %s''',
+                   WHERE "IDdetStretching" = %s AND "IDallenamento" = %s''',
                 (
                     dati.get("lunedi"), dati.get("martedi"), dati.get("mercoledi"),
                     dati.get("giovedi"), dati.get("venerdi"), dati.get("sabato"),
                     dati.get("domenica"), dati.get("id_esercizio_stretching"),
-                    id_det,
+                    id_det, id_allenamento,
                 )
             )
             return cur.rowcount > 0
     finally:
         conn.close()
 
-def elimina_stretching(id_det: int):
+def elimina_stretching(id_det: int, id_allenamento: int):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute('DELETE FROM "TdetStretching" WHERE "IDdetStretching" = %s', (id_det,))
+            cur.execute(
+                'DELETE FROM "TdetStretching" WHERE "IDdetStretching" = %s AND "IDallenamento" = %s',
+                (id_det, id_allenamento)
+            )
             return cur.rowcount > 0
     finally:
         conn.close()
@@ -170,7 +196,7 @@ def crea_riscaldamento(id_allenamento: int, id_settimana: int, id_seduta: int, d
     finally:
         conn.close()
 
-def modifica_riscaldamento(id_det: int, dati: dict):
+def modifica_riscaldamento(id_det: int, id_allenamento: int, dati: dict):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
@@ -179,23 +205,26 @@ def modifica_riscaldamento(id_det: int, dati: dict):
                    SET "Lunedi" = %s, "Martedi" = %s, "Mercoledi" = %s, "Giovedi" = %s,
                        "Venerdi" = %s, "Sabato" = %s, "Domenica" = %s,
                        "IDesercizioRiscaldamento" = %s
-                   WHERE "IDdetRiscaldamento" = %s''',
+                   WHERE "IDdetRiscaldamento" = %s AND "IDallenamento" = %s''',
                 (
                     dati.get("lunedi"), dati.get("martedi"), dati.get("mercoledi"),
                     dati.get("giovedi"), dati.get("venerdi"), dati.get("sabato"),
                     dati.get("domenica"), dati.get("id_esercizio_riscaldamento"),
-                    id_det,
+                    id_det, id_allenamento,
                 )
             )
             return cur.rowcount > 0
     finally:
         conn.close()
 
-def elimina_riscaldamento(id_det: int):
+def elimina_riscaldamento(id_det: int, id_allenamento: int):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute('DELETE FROM "TdetRiscaldamento" WHERE "IDdetRiscaldamento" = %s', (id_det,))
+            cur.execute(
+                'DELETE FROM "TdetRiscaldamento" WHERE "IDdetRiscaldamento" = %s AND "IDallenamento" = %s',
+                (id_det, id_allenamento)
+            )
             return cur.rowcount > 0
     finally:
         conn.close()
@@ -248,7 +277,7 @@ def crea_tec_for_cor(id_allenamento: int, id_settimana: int, id_seduta: int, dat
     finally:
         conn.close()
 
-def modifica_tec_for_cor(id_det: int, dati: dict):
+def modifica_tec_for_cor(id_det: int, id_allenamento: int, dati: dict):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
@@ -258,7 +287,7 @@ def modifica_tec_for_cor(id_det: int, dati: dict):
                        "Lunedi" = %s, "Martedi" = %s, "Mercoledi" = %s, "Giovedi" = %s,
                        "Venerdi" = %s, "Sabato" = %s, "Domenica" = %s,
                        "IDdistanza" = %s, "IDtarga" = %s, "IDdescrizioneEsercizio" = %s
-                   WHERE "IDdetTecForCor" = %s''',
+                   WHERE "IDdetTecForCor" = %s AND "IDallenamento" = %s''',
                 (
                     dati.get("id_posizione_piedi"),
                     dati.get("lunedi"), dati.get("martedi"), dati.get("mercoledi"),
@@ -266,18 +295,21 @@ def modifica_tec_for_cor(id_det: int, dati: dict):
                     dati.get("domenica"),
                     dati.get("id_distanza"), dati.get("id_targa"),
                     dati.get("id_descrizione_esercizio"),
-                    id_det,
+                    id_det, id_allenamento,
                 )
             )
             return cur.rowcount > 0
     finally:
         conn.close()
 
-def elimina_tec_for_cor(id_det: int):
+def elimina_tec_for_cor(id_det: int, id_allenamento: int):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute('DELETE FROM "TdetTecForCor" WHERE "IDdetTecForCor" = %s', (id_det,))
+            cur.execute(
+                'DELETE FROM "TdetTecForCor" WHERE "IDdetTecForCor" = %s AND "IDallenamento" = %s',
+                (id_det, id_allenamento)
+            )
             return cur.rowcount > 0
     finally:
         conn.close()
@@ -354,7 +386,7 @@ def crea_all_fis_for_res(id_allenamento: int, id_settimana: int, id_seduta: int,
     finally:
         conn.close()
 
-def modifica_all_fis_for_res(id_det: int, dati: dict):
+def modifica_all_fis_for_res(id_det: int, id_allenamento: int, dati: dict):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
@@ -363,25 +395,28 @@ def modifica_all_fis_for_res(id_det: int, dati: dict):
                    SET "Lunedi" = %s, "Martedi" = %s, "Mercoledi" = %s, "Giovedi" = %s,
                        "Venerdi" = %s, "Sabato" = %s, "Domenica" = %s,
                        "IDtabella_n" = %s, "IDdescrizioneEsercizioAllFisForRes" = %s
-                   WHERE "IDdetAllFisForRes" = %s''',
+                   WHERE "IDdetAllFisForRes" = %s AND "IDallenamento" = %s''',
                 (
                     dati.get("lunedi"), dati.get("martedi"), dati.get("mercoledi"),
                     dati.get("giovedi"), dati.get("venerdi"), dati.get("sabato"),
                     dati.get("domenica"),
                     dati.get("id_tabella_n"),
                     dati.get("id_descrizione_esercizio_all_fis_for_res"),
-                    id_det,
+                    id_det, id_allenamento,
                 )
             )
             return cur.rowcount > 0
     finally:
         conn.close()
 
-def elimina_all_fis_for_res(id_det: int):
+def elimina_all_fis_for_res(id_det: int, id_allenamento: int):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute('DELETE FROM "TdetAllFisForRes" WHERE "IDdetAllFisForRes" = %s', (id_det,))
+            cur.execute(
+                'DELETE FROM "TdetAllFisForRes" WHERE "IDdetAllFisForRes" = %s AND "IDallenamento" = %s',
+                (id_det, id_allenamento)
+            )
             return cur.rowcount > 0
     finally:
         conn.close()
@@ -433,7 +468,7 @@ def crea_all_fis_cor(id_allenamento: int, id_settimana: int, id_seduta: int, dat
     finally:
         conn.close()
 
-def modifica_all_fis_cor(id_det: int, dati: dict):
+def modifica_all_fis_cor(id_det: int, id_allenamento: int, dati: dict):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
@@ -443,25 +478,28 @@ def modifica_all_fis_cor(id_det: int, dati: dict):
                        "Lunedi" = %s, "Martedi" = %s, "Mercoledi" = %s, "Giovedi" = %s,
                        "Venerdi" = %s, "Sabato" = %s, "Domenica" = %s,
                        "IDdescrizioneEsercizioAllFisCor" = %s
-                   WHERE "IDdetAllFisCor" = %s''',
+                   WHERE "IDdetAllFisCor" = %s AND "IDallenamento" = %s''',
                 (
                     dati.get("id_attrezzo"),
                     dati.get("lunedi"), dati.get("martedi"), dati.get("mercoledi"),
                     dati.get("giovedi"), dati.get("venerdi"), dati.get("sabato"),
                     dati.get("domenica"),
                     dati.get("id_descrizione_esercizio_all_fis_cor"),
-                    id_det,
+                    id_det, id_allenamento,
                 )
             )
             return cur.rowcount > 0
     finally:
         conn.close()
 
-def elimina_all_fis_cor(id_det: int):
+def elimina_all_fis_cor(id_det: int, id_allenamento: int):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
-            cur.execute('DELETE FROM "TdetAllFisCor" WHERE "IDdetAllFisCor" = %s', (id_det,))
+            cur.execute(
+                'DELETE FROM "TdetAllFisCor" WHERE "IDdetAllFisCor" = %s AND "IDallenamento" = %s',
+                (id_det, id_allenamento)
+            )
             return cur.rowcount > 0
     finally:
         conn.close()

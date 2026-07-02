@@ -26,7 +26,7 @@ def inizializza_seduta(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    svc.crea_seduta_se_non_esiste(id_allenamento, id_settimana, id_seduta)
+    svc.crea_seduta_se_non_esiste(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
     return {"ok": True}
 
 @router.get("/{id_allenamento}/settimane/{id_settimana}/sedute/", response_model=List[DettaglioOut])
@@ -35,7 +35,7 @@ def lista_sedute(
     id_settimana: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_sedute(id_allenamento, id_settimana)
+    return svc.get_sedute(utente["id_utente"], id_allenamento, id_settimana)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/sedute/", status_code=status.HTTP_201_CREATED)
 def aggiungi_seduta(
@@ -44,7 +44,7 @@ def aggiungi_seduta(
     dati: DettaglioCreate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.crea_seduta(id_allenamento, dati.model_dump())
+    return svc.crea_seduta(utente["id_utente"], id_allenamento, dati.model_dump())
 
 @router.delete("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}", status_code=status.HTTP_204_NO_CONTENT)
 def cancella_seduta(
@@ -53,7 +53,7 @@ def cancella_seduta(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    svc.elimina_seduta(id_allenamento, id_settimana, id_seduta)
+    svc.elimina_seduta(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -68,7 +68,7 @@ def lista_stretching(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_stretching(id_allenamento, id_settimana, id_seduta)
+    return svc.get_stretching(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/stretching/", status_code=status.HTTP_201_CREATED)
 def aggiungi_stretching(
@@ -78,7 +78,7 @@ def aggiungi_stretching(
     dati: StretchingCreate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.crea_stretching(id_allenamento, id_settimana, id_seduta, dati.model_dump())
+    return svc.crea_stretching(utente["id_utente"], id_allenamento, id_settimana, id_seduta, dati.model_dump())
 
 @router.put("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/stretching/{id_det}")
 def aggiorna_stretching(
@@ -89,7 +89,7 @@ def aggiorna_stretching(
     dati: StretchingUpdate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.modifica_stretching(id_det, dati.model_dump())
+    return svc.modifica_stretching(utente["id_utente"], id_allenamento, id_det, dati.model_dump())
 
 @router.delete("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/stretching/{id_det}", status_code=status.HTTP_204_NO_CONTENT)
 def cancella_stretching(
@@ -99,7 +99,7 @@ def cancella_stretching(
     id_det: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    svc.elimina_stretching(id_det)
+    svc.elimina_stretching(utente["id_utente"], id_allenamento, id_det)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -114,7 +114,7 @@ def lista_riscaldamento(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_riscaldamento(id_allenamento, id_settimana, id_seduta)
+    return svc.get_riscaldamento(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/riscaldamento/", status_code=status.HTTP_201_CREATED)
 def aggiungi_riscaldamento(
@@ -124,7 +124,7 @@ def aggiungi_riscaldamento(
     dati: RiscaldamentoCreate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.crea_riscaldamento(id_allenamento, id_settimana, id_seduta, dati.model_dump())
+    return svc.crea_riscaldamento(utente["id_utente"], id_allenamento, id_settimana, id_seduta, dati.model_dump())
 
 @router.put("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/riscaldamento/{id_det}")
 def aggiorna_riscaldamento(
@@ -135,7 +135,7 @@ def aggiorna_riscaldamento(
     dati: RiscaldamentoUpdate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.modifica_riscaldamento(id_det, dati.model_dump())
+    return svc.modifica_riscaldamento(utente["id_utente"], id_allenamento, id_det, dati.model_dump())
 
 @router.delete("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/riscaldamento/{id_det}", status_code=status.HTTP_204_NO_CONTENT)
 def cancella_riscaldamento(
@@ -145,7 +145,7 @@ def cancella_riscaldamento(
     id_det: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    svc.elimina_riscaldamento(id_det)
+    svc.elimina_riscaldamento(utente["id_utente"], id_allenamento, id_det)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -160,7 +160,7 @@ def lista_tec_for_cor(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_tec_for_cor(id_allenamento, id_settimana, id_seduta)
+    return svc.get_tec_for_cor(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/tecforcor/", status_code=status.HTTP_201_CREATED)
 def aggiungi_tec_for_cor(
@@ -170,7 +170,7 @@ def aggiungi_tec_for_cor(
     dati: TecForCorCreate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.crea_tec_for_cor(id_allenamento, id_settimana, id_seduta, dati.model_dump())
+    return svc.crea_tec_for_cor(utente["id_utente"], id_allenamento, id_settimana, id_seduta, dati.model_dump())
 
 @router.put("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/tecforcor/{id_det}")
 def aggiorna_tec_for_cor(
@@ -181,7 +181,7 @@ def aggiorna_tec_for_cor(
     dati: TecForCorUpdate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.modifica_tec_for_cor(id_det, dati.model_dump())
+    return svc.modifica_tec_for_cor(utente["id_utente"], id_allenamento, id_det, dati.model_dump())
 
 @router.delete("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/tecforcor/{id_det}", status_code=status.HTTP_204_NO_CONTENT)
 def cancella_tec_for_cor(
@@ -191,7 +191,7 @@ def cancella_tec_for_cor(
     id_det: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    svc.elimina_tec_for_cor(id_det)
+    svc.elimina_tec_for_cor(utente["id_utente"], id_allenamento, id_det)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.get("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/tecforcor/totale-frecce", response_model=TotaleFrecceOut)
@@ -201,7 +201,7 @@ def get_totale_frecce(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_totale_frecce(id_allenamento, id_settimana, id_seduta)
+    return svc.get_totale_frecce(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
 
 
 # ─────────────────────────────────────────
@@ -215,7 +215,7 @@ def lista_all_fis_for_res(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_all_fis_for_res(id_allenamento, id_settimana, id_seduta)
+    return svc.get_all_fis_for_res(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/allfisforres/", status_code=status.HTTP_201_CREATED)
 def aggiungi_all_fis_for_res(
@@ -225,7 +225,7 @@ def aggiungi_all_fis_for_res(
     dati: AllFisForResCreate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.crea_all_fis_for_res(id_allenamento, id_settimana, id_seduta, dati.model_dump())
+    return svc.crea_all_fis_for_res(utente["id_utente"], id_allenamento, id_settimana, id_seduta, dati.model_dump())
 
 @router.put("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/allfisforres/{id_det}")
 def aggiorna_all_fis_for_res(
@@ -236,7 +236,7 @@ def aggiorna_all_fis_for_res(
     dati: AllFisForResUpdate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.modifica_all_fis_for_res(id_det, dati.model_dump())
+    return svc.modifica_all_fis_for_res(utente["id_utente"], id_allenamento, id_det, dati.model_dump())
 
 @router.delete("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/allfisforres/{id_det}", status_code=status.HTTP_204_NO_CONTENT)
 def cancella_all_fis_for_res(
@@ -246,7 +246,7 @@ def cancella_all_fis_for_res(
     id_det: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    svc.elimina_all_fis_for_res(id_det)
+    svc.elimina_all_fis_for_res(utente["id_utente"], id_allenamento, id_det)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -261,7 +261,7 @@ def lista_all_fis_cor(
     id_seduta: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_all_fis_cor(id_allenamento, id_settimana, id_seduta)
+    return svc.get_all_fis_cor(utente["id_utente"], id_allenamento, id_settimana, id_seduta)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/allfiscor/", status_code=status.HTTP_201_CREATED)
 def aggiungi_all_fis_cor(
@@ -271,7 +271,7 @@ def aggiungi_all_fis_cor(
     dati: AllFisCorCreate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.crea_all_fis_cor(id_allenamento, id_settimana, id_seduta, dati.model_dump())
+    return svc.crea_all_fis_cor(utente["id_utente"], id_allenamento, id_settimana, id_seduta, dati.model_dump())
 
 @router.put("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/allfiscor/{id_det}")
 def aggiorna_all_fis_cor(
@@ -282,7 +282,7 @@ def aggiorna_all_fis_cor(
     dati: AllFisCorUpdate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.modifica_all_fis_cor(id_det, dati.model_dump())
+    return svc.modifica_all_fis_cor(utente["id_utente"], id_allenamento, id_det, dati.model_dump())
 
 @router.delete("/{id_allenamento}/settimane/{id_settimana}/sedute/{id_seduta}/allfiscor/{id_det}", status_code=status.HTTP_204_NO_CONTENT)
 def cancella_all_fis_cor(
@@ -292,7 +292,7 @@ def cancella_all_fis_cor(
     id_det: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    svc.elimina_all_fis_cor(id_det)
+    svc.elimina_all_fis_cor(utente["id_utente"], id_allenamento, id_det)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -306,7 +306,7 @@ def get_nota(
     id_settimana: int,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.get_nota(id_allenamento, id_settimana)
+    return svc.get_nota(utente["id_utente"], id_allenamento, id_settimana)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/nota/", status_code=status.HTTP_201_CREATED)
 def salva_nota(
@@ -315,6 +315,4 @@ def salva_nota(
     dati: NotaAtletaCreate,
     utente: dict = Depends(solo_istruttore),
 ):
-    return svc.salva_nota(id_allenamento, id_settimana, dati.model_dump())
-
-
+    return svc.salva_nota(utente["id_utente"], id_allenamento, id_settimana, dati.model_dump())

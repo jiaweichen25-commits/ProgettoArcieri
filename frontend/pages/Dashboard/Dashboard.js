@@ -1,6 +1,7 @@
 const API_URL = "http://localhost:8000";
 
 let atletiCache = [];
+let selectedAtleta = null;
 
 function getToken() {
   return localStorage.getItem("access_token");
@@ -139,6 +140,7 @@ function renderTable(lista) {
     // Riga 1: dati dell'atleta
     const trData = document.createElement("tr");
     trData.classList.add("atleta-data-row");
+    trData.dataset.id = id;
     trData.innerHTML = `
       <td>${id}</td>
       <td><strong>${escHtml(atleta.nome)}</strong></td>
@@ -171,6 +173,19 @@ function renderTable(lista) {
     `;
     tbody.appendChild(trActions);
   });
+
+  tbody.querySelectorAll(".atleta-data-row").forEach((tr) => {
+    tr.addEventListener("click", (e) => {
+      if (e.target.tagName === "A") return; // non intercettare il click sul link email
+      const a = atletiCache.find((x) => x.IDatleta === Number(tr.dataset.id));
+      if (a) selezionaAtleta(a);
+    });
+  });
+
+  if (selectedAtleta) {
+    const tr = tbody.querySelector(`.atleta-data-row[data-id="${selectedAtleta.IDatleta}"]`);
+    if (tr) tr.classList.add("selected");
+  }
 
   tbody.querySelectorAll("[data-materiali]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -400,6 +415,96 @@ async function confermaElimina() {
     await caricaAtleti();
   } catch {
     alert("Impossibile contattare il server.");
+  }
+}
+
+// ══════════════════════════════════════════
+// Chiedi all'Agente AI
+// ══════════════════════════════════════════
+
+function selezionaAtleta(atleta) {
+  selectedAtleta = atleta;
+
+  document.querySelectorAll(".atleta-data-row").forEach((tr) => tr.classList.remove("selected"));
+  const tr = document.querySelector(`.atleta-data-row[data-id="${atleta.IDatleta}"]`);
+  if (tr) tr.classList.add("selected");
+
+  const pill = document.getElementById("aiSelectedPill");
+  if (pill) {
+    pill.textContent = `Atleta selezionato: ${atleta.nome} ${atleta.cognome}`;
+    pill.classList.add("active");
+  }
+
+  const textarea = document.getElementById("aiDomanda");
+  if (textarea) {
+    textarea.value = `Analizza la situazione di ${atleta.nome} ${atleta.cognome}: `;
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+  }
+}
+
+function deselezionaAtleta() {
+  selectedAtleta = null;
+
+  document.querySelectorAll(".atleta-data-row").forEach((tr) => tr.classList.remove("selected"));
+
+  const pill = document.getElementById("aiSelectedPill");
+  if (pill) {
+    pill.textContent = "Nessun atleta selezionato";
+    pill.classList.remove("active");
+  }
+
+  const textarea = document.getElementById("aiDomanda");
+  if (textarea) textarea.value = "";
+}
+
+async function inviaDomandaAgente() {
+  clearMsg("aiMsgBox");
+
+  const textarea = document.getElementById("aiDomanda");
+  const domanda = (textarea?.value || "").trim();
+  if (domanda.length < 3) {
+    showMsg("aiMsgBox", "Scrivi una domanda più dettagliata.", "error");
+    return;
+  }
+
+  const sendBtn = document.getElementById("aiSendBtn");
+  const responseBox = document.getElementById("aiResponse");
+  const responseText = document.getElementById("aiResponseText");
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Sto pensando...";
+  responseBox.style.display = "none";
+
+  try {
+    const res = await fetch(`${API_URL}/coach/query`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({
+        domanda,
+        id_atleta: selectedAtleta ? selectedAtleta.IDatleta : null,
+      }),
+    });
+
+    if (res.status === 401) {
+      logout();
+      return;
+    }
+
+    const body = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      showMsg("aiMsgBox", body.detail || "Errore durante l'interrogazione dell'agente.", "error");
+      return;
+    }
+
+    responseText.textContent = body.risposta;
+    responseBox.style.display = "block";
+  } catch {
+    showMsg("aiMsgBox", "Impossibile contattare il server.", "error");
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = "Invia richiesta";
   }
 }
 
