@@ -101,10 +101,37 @@ def elimina_atleta(id_atleta: int, id_istruttore: int):
     try:
         with conn, conn.cursor() as cur:
             cur.execute(
-                'DELETE FROM "Tatleti" WHERE "IDatleta" = %s AND "IDistruttore" = %s RETURNING "IDutente"',
+                'SELECT "IDutente" FROM "Tatleti" WHERE "IDatleta" = %s AND "IDistruttore" = %s',
                 (id_atleta, id_istruttore)
             )
             row = cur.fetchone()
-            return row[0] if row else None
+            if row is None:
+                return None
+            id_utente_atleta = row[0]
+
+            # elimina in cascata i dettagli di ogni piano di allenamento dell'atleta
+            # (nessuna FK ha ON DELETE CASCADE)
+            sotto_query_allenamenti = '(SELECT "IDallenamento" FROM "Tallenamenti" WHERE "IDatleta" = %s)'
+            for tabella in (
+                "TdetStretching", "TdetRiscaldamento", "TdetTecForCor",
+                "TdetAllFisForRes", "TdetAllFisCor", "TdetNoteAtleta",
+                "TdetAllenamenti", "Tpianogare",
+            ):
+                cur.execute(
+                    f'DELETE FROM "{tabella}" WHERE "IDallenamento" IN {sotto_query_allenamenti}',
+                    (id_atleta,)
+                )
+            cur.execute('DELETE FROM "Tallenamenti" WHERE "IDatleta" = %s', (id_atleta,))
+
+            # elimina il resto dei dati anagrafici collegati all'atleta
+            cur.execute('DELETE FROM "Tmateriali" WHERE "IDatleta" = %s', (id_atleta,))
+            cur.execute('DELETE FROM "Tvisitemediche" WHERE "IDatleta" = %s', (id_atleta,))
+            cur.execute('DELETE FROM "Tantidoping" WHERE "IDatleta" = %s', (id_atleta,))
+
+            cur.execute(
+                'DELETE FROM "Tatleti" WHERE "IDatleta" = %s AND "IDistruttore" = %s',
+                (id_atleta, id_istruttore)
+            )
+            return id_utente_atleta
     finally:
         conn.close()

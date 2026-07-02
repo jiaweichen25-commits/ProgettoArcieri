@@ -41,6 +41,38 @@
     </div>
   </div>
 
+  <!-- Sezione Chiedi all'Agente AI -->
+  <div class="section section-ai">
+    <div class="section-head">
+      <div class="section-title">Chiedi all'Agente AI</div>
+      <div class="ai-selected-pill" id="aiSelectedPill">Nessun atleta selezionato</div>
+    </div>
+    <p class="ai-hint">
+      Clicca su un atleta nella lista qui sotto per contestualizzare la domanda,
+      oppure scrivi una domanda generale.
+    </p>
+
+    <div class="ai-box">
+      <textarea
+        id="aiDomanda"
+        class="ai-textarea"
+        rows="3"
+        placeholder="Es. Come sta procedendo il piano di allenamento di questo atleta?"
+      ></textarea>
+      <div class="ai-actions">
+        <button class="btn btn-outline" type="button" id="aiClearBtn" onclick="deselezionaAtleta()">Deseleziona atleta</button>
+        <button class="btn btn-red" type="button" id="aiSendBtn" onclick="inviaDomandaAgente()">Invia richiesta</button>
+      </div>
+    </div>
+
+    <div class="msg-box" id="aiMsgBox"></div>
+
+    <div class="ai-response" id="aiResponse" style="display: none;">
+      <div class="ai-response-label">Risposta dell'agente</div>
+      <div class="ai-response-text" id="aiResponseText"></div>
+    </div>
+  </div>
+
   <!-- Sezione atleti -->
   <div class="section">
     <div class="section-head">

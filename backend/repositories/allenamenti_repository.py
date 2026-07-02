@@ -59,6 +59,23 @@ def elimina_allenamento(id_allenamento: int, id_atleta: int):
     try:
         with conn, conn.cursor() as cur:
             cur.execute(
+                'SELECT 1 FROM "Tallenamenti" WHERE "IDallenamento" = %s AND "IDatleta" = %s',
+                (id_allenamento, id_atleta)
+            )
+            if cur.fetchone() is None:
+                return False
+
+            # elimina prima tutti i dettagli collegati (nessuna FK ha ON DELETE CASCADE)
+            cur.execute('DELETE FROM "TdetStretching" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetRiscaldamento" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetTecForCor" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetAllFisForRes" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetAllFisCor" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetNoteAtleta" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "TdetAllenamenti" WHERE "IDallenamento" = %s', (id_allenamento,))
+            cur.execute('DELETE FROM "Tpianogare" WHERE "IDallenamento" = %s', (id_allenamento,))
+
+            cur.execute(
                 'DELETE FROM "Tallenamenti" WHERE "IDallenamento" = %s AND "IDatleta" = %s',
                 (id_allenamento, id_atleta)
             )
