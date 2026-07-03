@@ -422,6 +422,14 @@ async function confermaElimina() {
 // Chiedi all'Agente AI
 // ══════════════════════════════════════════
 
+function toggleSectionAi() {
+  const panel = document.getElementById("sectionAi");
+  const backdrop = document.getElementById("aiBackdrop");
+  if (!panel) return;
+  panel.classList.toggle("open");
+  if (backdrop) backdrop.classList.toggle("open");
+}
+
 function selezionaAtleta(atleta) {
   selectedAtleta = atleta;
 
@@ -441,6 +449,9 @@ function selezionaAtleta(atleta) {
     textarea.focus();
     textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
   }
+
+  document.getElementById("sectionAi")?.classList.add("open");
+  document.getElementById("aiBackdrop")?.classList.add("open");
 }
 
 function deselezionaAtleta() {
@@ -456,6 +467,9 @@ function deselezionaAtleta() {
 
   const textarea = document.getElementById("aiDomanda");
   if (textarea) textarea.value = "";
+
+  document.getElementById("sectionAi")?.classList.remove("open");
+  document.getElementById("aiBackdrop")?.classList.remove("open");
 }
 
 async function inviaDomandaAgente() {

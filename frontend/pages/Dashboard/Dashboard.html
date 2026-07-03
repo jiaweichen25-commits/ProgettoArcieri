@@ -41,11 +41,14 @@
     </div>
   </div>
 
-  <!-- Sezione Chiedi all'Agente AI -->
-  <div class="section section-ai">
-    <div class="section-head">
-      <div class="section-title">Chiedi all'Agente AI</div>
-      <div class="ai-selected-pill" id="aiSelectedPill">Nessun atleta selezionato</div>
+  <!-- Backdrop del pannello AI -->
+  <div class="backdrop" id="aiBackdrop" onclick="toggleSectionAi()"></div>
+
+  <!-- Sezione Chiedi all'Agente AI (pannello scorrevole da destra) -->
+  <div class="panel-ai" id="sectionAi">
+    <div class="panel-header">
+      <h3>Chiedi all'Agente AI</h3>
+      <span class="ai-selected-pill" id="aiSelectedPill">Nessun atleta selezionato</span>
     </div>
     <p class="ai-hint">
       Clicca su un atleta nella lista qui sotto per contestualizzare la domanda,
@@ -117,6 +120,10 @@
       <div class="empty-state" id="emptyState">
         <p>Nessun atleta trovato. Aggiungi il primo!</p>
       </div>
+    </div>
+
+    <div style="text-align:right; margin-top:20px;">
+      <button class="btn btn-red" type="button" id="btnAssistenteIA" onclick="toggleSectionAi()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">+ Assistente IA</button>
     </div>
   </div>
 </div>

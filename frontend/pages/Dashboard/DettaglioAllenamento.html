@@ -149,6 +149,23 @@
    @media print {
     nav, .btn, .selettore-box button { display: none !important; }
    }
+   .nav-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; 
+    gap: 6px;
+   }
+   .nav-right .btn-logout {
+    white-space: nowrap;
+    width: 140px;
+    text-align: center;
+   }
+     #btnStampa {
+     order: 2;
+   }
+   .nav-right .btn-logout:not(#btnStampa) {
+     order: 1;
+   }
  </style>
 </head>
 <body>
@@ -161,9 +178,9 @@
       <strong id="titoloAtleta">—</strong>
     </div>
   </div>
-  <div class="nav-right">
-    <button id="btnStampa" class="btn-logout" style="display: none" onclick="window.print()">🖨️ Stampa</button>
-    <button class="btn-logout" onclick="tornaAllenamenti()">← Allenamenti</button>
+  <div class="nav-right" style="flex-direction: column; align-items: flex-end; gap: 6px;">
+    <button id="btnStampa" class="btn-logout" style="display: none; padding: 4px 10px; font-size: 0.62rem; width: 120px;" onclick="window.print()">🖨️ Stampa</button>
+    <button class="btn-logout" style="width: 120px;" onclick="tornaAllenamenti()">← Allenamenti</button>
   </div>
 </nav>
 

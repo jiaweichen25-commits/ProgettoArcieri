@@ -17,7 +17,7 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  height: 60px;
+  min-height: 60px;
   background: #1a1a1a;
   border-bottom: 5px solid #c0392b;
 }

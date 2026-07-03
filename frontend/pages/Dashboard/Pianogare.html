@@ -7,7 +7,16 @@
   <link rel="stylesheet" href="Materiali.css" />
   <style>
     @media print {
-      nav, .btn { display: none !important; }
+      nav, .btn, .overlay { display: none !important; }
+    }
+    #formModal .modal { position: relative; }
+    #btnStampaModal {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: auto;
+      padding: 4px 10px;
+      font-size: 0.62rem;
     }
   </style>
 </head>
@@ -22,7 +31,7 @@
     </div>
   </div>
   <div class="nav-right">
-    <button id="btnStampa" class="btn-logout" style="display:none" onclick="window.print()">🖨️ Stampa</button>
+    <button id="btnLista" class="btn-logout" onclick="tornaAllenamenti()">⬅ Allenamenti</button>
   </div>
 </nav>
 
@@ -55,6 +64,7 @@
 ══════════════════════════════════════════ -->
 <div class="overlay" id="formModal">
   <div class="modal">
+    <button id="btnStampaModal" class="btn-logout" onclick="window.print()">🖨️ Stampa</button>
     <div class="modal-pill" id="formModalPill">Nuova Gara</div>
     <h2 id="formModalTitle">Aggiungi gara</h2>
     <div class="modal-divider"></div>
