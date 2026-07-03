@@ -353,7 +353,7 @@ CREATE TABLE IF NOT EXISTS public."Tsegnapunti"
     PRIMARY KEY ("IDsegnapunto")
 );
 
-CREATE TABLE IF NOT EXISTS public."Tsegnapunti_volee"
+CREATE TABLE IF NOT EXISTS public."TsegnapuntiVolee"
 (
     "IDvolee"      serial NOT NULL,
     "IDsegnapunto" integer NOT NULL,
@@ -457,7 +457,7 @@ ALTER TABLE IF EXISTS public."Tsegnapunti"
     ADD FOREIGN KEY ("IDatleta")
     REFERENCES public."Tatleti" ("IDatleta") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-ALTER TABLE IF EXISTS public."Tsegnapunti_volee"
+ALTER TABLE IF EXISTS public."TsegnapuntiVolee"
     ADD FOREIGN KEY ("IDsegnapunto")
     REFERENCES public."Tsegnapunti" ("IDsegnapunto") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
