@@ -34,6 +34,7 @@ def genera_risposta(system_prompt: str, messaggio_utente: str) -> str:
         )
 
     if resp.status_code != 200:
+        print(f"[GEMINI ERROR] status={resp.status_code} body={resp.text[:500]}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Il servizio AI ha restituito un errore, riprova più tardi.",

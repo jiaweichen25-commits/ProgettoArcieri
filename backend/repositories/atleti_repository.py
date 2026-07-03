@@ -121,6 +121,8 @@ def elimina_atleta(id_atleta: int, id_istruttore: int):
                     f'DELETE FROM "{tabella}" WHERE "IDallenamento" IN {sotto_query_allenamenti}',
                     (id_atleta,)
                 )
+            cur.execute('DELETE FROM "TsegnapuntiVolee" WHERE "IDsegnapunto" IN (SELECT "IDsegnapunto" FROM "Tsegnapunti" WHERE "IDatleta" = %s)', (id_atleta,))
+            cur.execute('DELETE FROM "Tsegnapunti" WHERE "IDatleta" = %s', (id_atleta,))    
             cur.execute('DELETE FROM "Tallenamenti" WHERE "IDatleta" = %s', (id_atleta,))
 
             # elimina il resto dei dati anagrafici collegati all'atleta
