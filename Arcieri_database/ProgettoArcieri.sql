@@ -341,6 +341,37 @@ CREATE TABLE IF NOT EXISTS public."TSserie"
 COMMENT ON TABLE public."TSserie"
     IS 'lookup serie di tiro (es. 6x12) con numero di frecce corrispondente, usata per il conteggio frecce in TdetTecForCor';
 
+CREATE TABLE IF NOT EXISTS public."Tsegnapunti"
+(
+    "IDsegnapunto"     serial NOT NULL,
+    "IDatleta"         integer NOT NULL,
+    "data"             date NOT NULL,
+    "distanza"         character varying(10) NOT NULL,
+    "frecce_per_volee" integer NOT NULL DEFAULT 3,
+    "note_istruttore"  text,
+    "note_atleta"      text,
+    PRIMARY KEY ("IDsegnapunto")
+);
+
+CREATE TABLE IF NOT EXISTS public."Tsegnapunti_volee"
+(
+    "IDvolee"      serial NOT NULL,
+    "IDsegnapunto" integer NOT NULL,
+    "mezza"        integer NOT NULL,
+    "numero"       integer NOT NULL,
+    "f1"           character varying(2),
+    "f2"           character varying(2),
+    "f3"           character varying(2),
+    "f4"           character varying(2),
+    "f5"           character varying(2),
+    "f6"           character varying(2),
+    "somma"        integer,
+    "totale"       integer,
+    PRIMARY KEY ("IDvolee"),
+    UNIQUE ("IDsegnapunto", "mezza", "numero")
+);
+
+
 -- ==========================================
 -- VINCOLI E CHIAVI ESTERNE (ALTER TABLES)
 -- ==========================================
@@ -421,5 +452,13 @@ ALTER TABLE IF EXISTS public."Tpianogare"
     REFERENCES public."Tallenamenti" ("IDallenamento") ON UPDATE NO ACTION ON DELETE NO ACTION,
     ADD FOREIGN KEY ("IDtipogara")
     REFERENCES public."TStipigare" ("IDtipogara") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE IF EXISTS public."Tsegnapunti"
+    ADD FOREIGN KEY ("IDatleta")
+    REFERENCES public."Tatleti" ("IDatleta") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE IF EXISTS public."Tsegnapunti_volee"
+    ADD FOREIGN KEY ("IDsegnapunto")
+    REFERENCES public."Tsegnapunti" ("IDsegnapunto") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 COMMIT;
