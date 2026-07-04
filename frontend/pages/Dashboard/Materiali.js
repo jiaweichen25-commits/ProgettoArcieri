@@ -155,7 +155,6 @@ async function caricaMateriali() {
     }
     materialiCache = await res.json();
     renderList();
-    document.getElementById("btnStampa").style.display = "inline-block";
   } catch {
     showMsg("pageMsgBox", "Impossibile contattare il server.", "error");
   }
