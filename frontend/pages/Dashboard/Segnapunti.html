@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Segnapunti</title>
+  <link rel="stylesheet" href="Materiali.css" />
+  <style>
+    /* Manteniamo i tuoi stili custom per la griglia dei punteggi */
+    .score-grid {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .score-grid th {
+      background: #1a1a1a;
+      color: #c0392b;
+      padding: 8px 10px;
+      text-align: center;
+      border: 1px solid #333;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .score-grid td {
+      border: 1px solid #2a2a2a;
+      padding: 6px 8px;
+      text-align: center;
+      background: #111;
+    }
+    .score-grid td.num { color: #888; font-size: 0.8rem; }
+    .score-grid td.somma { font-weight: 700; color: #eee; }
+    .score-grid td.totale { font-weight: 700; color: #c0392b; }
+    .score-grid td.contatori { color: #aaa; font-size: 0.82rem; }
+    .score-grid input.freccia {
+      width: 38px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: white;
+      text-align: center;
+      padding: 4px;
+      border-radius: 2px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    .score-grid input.freccia:focus {
+      outline: none;
+      border-color: #c0392b;
+    }
+    .score-grid tr.mezza-header td {
+      background: #1a1a1a;
+      color: #888;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 8px;
+    }
+    .score-grid tr.totale-row td {
+      background: #1a1a1a;
+      font-weight: 700;
+      border-top: 2px solid #c0392b;
+    }
+    .totale-finale {
+      text-align: right;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #c0392b;
+      margin-bottom: 24px;
+    }
+    .mezza-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .mezza-tab {
+      padding: 8px 20px;
+      border: 1px solid #333;
+      background: #111;
+      color: #aaa;
+      cursor: pointer;
+      border-radius: 2px;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+    .mezza-tab.active {
+      border-color: #c0392b;
+      color: white;
+      background: rgba(192,57,43,0.12);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Segnapunti</span>
+      <strong id="titoloAtleta">—</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="btn-logout" onclick="tornaDashboard()">← Dashboard</button>
+    <button class="btn-logout" onclick="logout()" style="margin-left: 10px;">Esci</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Area Istruttore</div>
+    <h1>Sessioni di Tiro</h1>
+  </div>
+
+  <div class="msg-box" id="pageMsgBox"></div>
+
+  <div class="section" id="listaSezione">
+    <div class="section-head">
+      <div class="section-title">Storico Sessioni</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuova sessione</button>
+    </div>
+    <div id="segnapuntiList"></div>
+    <div id="emptyState" class="empty-state" style="display:none;">
+      Nessuna sessione registrata per questo atleta.
+    </div>
+  </div>
+
+  <div class="section" id="scoreSezione" style="display:none;">
+    <div class="section-head">
+      <div class="section-title" id="scoreTitolo">Sessione</div>
+      <button class="btn btn-outline" onclick="chiudiScore()">← Lista sessioni</button>
+    </div>
+
+    <div class="mezza-tabs">
+      <button class="mezza-tab active" id="tab1" onclick="switchMezza(1)">Mezza 1</button>
+      <button class="mezza-tab" id="tab2" onclick="switchMezza(2)">Mezza 2</button>
+    </div>
+
+    <table class="score-grid" id="scoreTable">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+          <th id="thF4" style="display:none;">4</th>
+          <th id="thF5" style="display:none;">5</th>
+          <th id="thF6" style="display:none;">6</th>
+          <th>Somma</th>
+          <th>Tot.</th>
+          <th>10</th>
+          <th>X</th>
+        </tr>
+      </thead>
+      <tbody id="scoreBody"></tbody>
+    </table>
+
+    <div class="totale-finale" id="totaleFinalBox" style="display:none;"></div>
+
+    <div class="msg-box" id="scoreMsgBox"></div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+      <button class="btn btn-red" onclick="salvaVolee()">Salva Tabella</button>
+    </div>
+
+    <div style="display:flex; gap:16px; margin-top:24px; flex-wrap:wrap;">
+      <div class="field" style="flex:1; min-width:200px;">
+        <label>Note Istruttore</label>
+        <textarea id="noteIstruttore" rows="3" style="width:100%;background:#111;border:1px solid #333;color:white;padding:10px;border-radius:2px;font-family:inherit;resize:vertical;"></textarea>
+      </div>
+      <div class="field" style="flex:1; min-width:200px;">
+        <label>Note Atleta</label>
+        <textarea id="noteAtleta" rows="3" style="width:100%;background:#111;border:1px solid #333;color:white;padding:10px;border-radius:2px;font-family:inherit;resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+      <button class="btn btn-red" onclick="salvaNoteCorrente()">Salva Note</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="formModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-pill">Nuova sessione</span>
+      <h2 class="modal-title">Crea segnapunti</h2>
+    </div>
+    <div class="field">
+      <label>Data</label>
+      <input type="date" id="fData" />
+    </div>
+    <div class="field">
+      <label>Distanza</label>
+      <select id="fDistanza">
+        <option value="18m">18m</option>
+        <option value="25m">25m</option>
+        <option value="50m">50m</option>
+        <option value="70m">70m</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Frecce per volée</label>
+      <select id="fFrecce">
+        <option value="3">3 (indoor)</option>
+        <option value="6">6 (outdoor)</option>
+      </select>
+    </div>
+    <div class="msg-box" id="formMsgBox"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
+      <button class="btn btn-red" onclick="creaSessione()">Crea</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="deleteModal">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <span class="modal-pill">Attenzione</span>
+      <h2 class="modal-title">Conferma eliminazione</h2>
+    </div>
+    <p id="deleteMsg" style="color:#aaa; margin-bottom:20px;"></p>
+    <input type="hidden" id="deleteId" />
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<script src="Segnapunti.js"></script>
+</body>
+</html>

@@ -166,6 +166,7 @@ function renderTable(lista) {
           <button class="btn btn-sm btn-outline" type="button" data-visite="${id}">Visite</button>
           <button class="btn btn-sm btn-outline" type="button" data-antidoping="${id}">Antidoping</button>
           <button class="btn btn-sm btn-outline" type="button" data-allenamenti="${id}">Allenamenti</button>
+          <button class="btn btn-sm btn-outline" type="button" data-segnapunti="${id}">Segnapunti</button>
           <button class="btn btn-sm btn-outline" type="button" data-edit="${id}">Modifica</button>
           <button class="btn btn-sm btn-red" type="button" data-delete="${id}">Elimina</button>
         </div>
@@ -230,6 +231,17 @@ function renderTable(lista) {
       }
     });
   });
+
+  tbody.querySelectorAll("[data-segnapunti]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.segnapunti));
+      if (a) {
+        const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
+        window.location.href = `Segnapunti.html?${q.toString()}`;
+      }
+    });
+  });
+
   tbody.querySelectorAll("[data-edit]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.edit));
