@@ -493,10 +493,25 @@ async function salvaNoteCorrente() {
 
 // ─── Init ────────────────────────────────────────────────
 
+// ─── Init ────────────────────────────────────────────────
+
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
   if (!ID_ATLETA) { window.location.href = "Dashboard.html"; return; }
-  const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
-  document.getElementById("titoloAtleta").textContent = titolo || "—";
+  
+  const nomeCompleto = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
+  
+  // 1. Scrive nel titolo principale grande e bianco (es. "Segnapunti: Mario Rossi")
+  const t = document.getElementById("titoloAtleta");
+  if (t) {
+    t.textContent = nomeCompleto ? `Segnapunti: ${nomeCompleto}` : "Segnapunti atleta";
+  }
+  
+  // 2. Scrive nella barra di navigazione in alto a sinistra
+  const tNav = document.getElementById("titoloAtletaNav");
+  if (tNav) {
+    tNav.textContent = nomeCompleto || "—";
+  }
+  
   caricaSegnapunti();
 });

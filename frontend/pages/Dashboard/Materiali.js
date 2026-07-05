@@ -53,6 +53,10 @@ function requireAuth() {
   }
 }
 
+function tornaDashboard() {
+  window.location.href = "../Dashboard/Dashboard.html";
+}
+
 function logout() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("currentUser");
@@ -286,13 +290,28 @@ async function confermaElimina() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  // 1. Controllo sicurezza e login
   if (!requireAuth()) return;
   if (!ID_ATLETA) {
     window.location.href = "Dashboard.html";
     return;
   }
-  const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
-  document.getElementById("titoloAtleta").textContent =
-    titolo ? `Materiali: ${titolo}` : "Materiali atleta";
+
+  // 2. Prende il nome e cognome
+  const nomeCompleto = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
+
+  // 3. Scrive nel titolo principale al centro della pagina
+  const t = document.getElementById("titoloAtleta");
+  if (t) {
+    t.textContent = nomeCompleto ? `Materiali: ${nomeCompleto}` : "Materiali atleta";
+  }
+
+  // 4. Scrive nella barra di navigazione in alto a sinistra (la modifica nuova!)
+  const tNav = document.getElementById("titoloAtletaNav");
+  if (tNav) {
+    tNav.textContent = nomeCompleto || "—";
+  }
+
+  // 5. Carica i dati dal server
   caricaMateriali();
 });
