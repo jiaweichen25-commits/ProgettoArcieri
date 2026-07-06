@@ -8,9 +8,6 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     DASHBOARD PRINCIPALE
-══════════════════════════════════════════ -->
 <nav>
   <div class="brand">
     <div class="brand-accent"></div>
@@ -32,7 +29,6 @@
     <p>Gestione dei tuoi atleti</p>
   </div>
 
-  <!-- Contatori -->
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">I miei atleti</div>
@@ -41,14 +37,12 @@
     </div>
   </div>
 
-  <!-- Sezione atleti -->
   <div class="section">
     <div class="section-head">
       <div class="section-title">Lista Atleti</div>
       <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Atleta</button>
     </div>
 
-    <!-- Barra ricerca -->
     <div class="searchbar">
       <input
         type="text"
@@ -58,7 +52,6 @@
       />
     </div>
 
-    <!-- Tabella atleti -->
     <div class="table-wrap">
       <table id="atletiTable">
         <thead>
@@ -77,22 +70,46 @@
           </tr>
         </thead>
         <tbody id="atletiBody">
-          <!-- Le righe vengono inserite dal JS -->
-        </tbody>
+          </tbody>
       </table>
 
-      <!-- Stato vuoto -->
       <div class="empty-state" id="emptyState">
         <p>Nessun atleta trovato. Aggiungi il primo!</p>
       </div>
     </div>
+
+    <div style="text-align:right; margin-top:20px;">
+      <button class="btn btn-red" type="button" id="btnAssistenteIA" onclick="toggleSectionAi()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">+ Assistente IA</button>
+    </div>
   </div>
+</div>
+<div class="backdrop" id="aiBackdrop" onclick="deselezionaAtleta()"></div>
+
+<div class="panel-ai" id="sectionAi">
+  <div class="panel-header">
+    <h3>Chiedi all'Agente AI</h3>
+    <span class="ai-selected-pill" id="aiSelectedPill">Nessun atleta selezionato</span>
+  </div>
+  <p class="ai-hint">
+    Clicca su "Assistente IA" accanto a un atleta per contestualizzare la domanda,
+    oppure usa il pulsante in basso a destra per una domanda generale.
+  </p>
+
+  <div class="field">
+    <label>La tua domanda</label>
+    <textarea id="aiDomanda" rows="5" placeholder="Es. quali materiali ha in prestito questo atleta?"></textarea>
+  </div>
+
+  <div class="modal-actions">
+    <button class="btn btn-outline" type="button" onclick="deselezionaAtleta()">Chiudi</button>
+    <button class="btn btn-red" type="button" onclick="inviaDomandaAgente()">Invia</button>
+  </div>
+
+  <div class="ai-loading" id="aiLoading">L'agente sta rispondendo…</div>
+  <div class="ai-response" id="aiResponse"></div>
 </div>
 
 
-<!-- ══════════════════════════════════════════
-     MODAL: Nuovo Atleta
-══════════════════════════════════════════ -->
 <div class="overlay" id="addModal">
   <div class="modal">
     <div class="modal-pill">Nuovo Atleta</div>
@@ -162,9 +179,6 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════
-     MODAL: Modifica Atleta (Anagrafica)
-══════════════════════════════════════════ -->
 <div class="overlay" id="editModal">
   <div class="modal">
     <div class="modal-pill">Anagrafica</div>
@@ -173,7 +187,6 @@
 
     <div class="msg-box" id="editMsgBox"></div>
 
-    <!-- ID nascosto, serve al JS per sapere quale atleta modificare -->
     <input type="hidden" id="editId" />
 
     <div class="form-row">
@@ -237,9 +250,6 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════
-     MODAL: Conferma Eliminazione
-══════════════════════════════════════════ -->
 <div class="overlay" id="deleteModal">
   <div class="modal modal-small">
     <div class="modal-pill">Attenzione</div>
@@ -253,7 +263,6 @@
     </div>
   </div>
 </div>
-
 
 <script src="Dashboard.js"></script>
 </body>

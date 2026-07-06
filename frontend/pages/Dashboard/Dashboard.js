@@ -1,6 +1,7 @@
 const API_URL = "http://localhost:8000";
 
 let atletiCache = [];
+let selectedAtleta = null;
 
 function getToken() {
   return localStorage.getItem("access_token");
@@ -165,6 +166,7 @@ function renderTable(lista) {
           <button class="btn btn-sm btn-outline" type="button" data-antidoping="${id}">Antidoping</button>
           <button class="btn btn-sm btn-outline" type="button" data-allenamenti="${id}">Allenamenti</button>
           <button class="btn btn-sm btn-outline" type="button" data-segnapunti="${id}">Segnapunti</button>
+          <button class="btn btn-sm btn-outline" type="button" data-ai="${id}">Assistente IA</button>
           <button class="btn btn-sm btn-outline" type="button" data-edit="${id}">Modifica</button>
           <button class="btn btn-sm btn-red" type="button" data-delete="${id}">Elimina</button>
         </div>
@@ -224,6 +226,13 @@ function renderTable(lista) {
         const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
         window.location.href = `Segnapunti.html?${q.toString()}`;
       }
+    });
+  });
+
+  tbody.querySelectorAll("[data-ai]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.ai));
+      if (a) selezionaAtleta(a);
     });
   });
 
@@ -412,6 +421,104 @@ async function confermaElimina() {
     await caricaAtleti();
   } catch {
     alert("Impossibile contattare il server.");
+  }
+}
+
+// ══════════════════════════════════════════
+// Chiedi all'Agente AI
+// ══════════════════════════════════════════
+
+function toggleSectionAi() {
+  const panel = document.getElementById("sectionAi");
+  const backdrop = document.getElementById("aiBackdrop");
+  if (!panel) return;
+  panel.classList.toggle("open");
+  if (backdrop) backdrop.classList.toggle("open");
+}
+
+function selezionaAtleta(atleta) {
+  selectedAtleta = atleta;
+
+  const pill = document.getElementById("aiSelectedPill");
+  if (pill) {
+    pill.textContent = `${atleta.nome} ${atleta.cognome}`;
+    pill.classList.add("active");
+  }
+
+  const textarea = document.getElementById("aiDomanda");
+  if (textarea) {
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+  }
+
+  document.getElementById("sectionAi")?.classList.add("open");
+  document.getElementById("aiBackdrop")?.classList.add("open");
+}
+
+function deselezionaAtleta() {
+  selectedAtleta = null;
+
+  const pill = document.getElementById("aiSelectedPill");
+  if (pill) {
+    pill.textContent = "Nessun atleta selezionato";
+    pill.classList.remove("active");
+  }
+
+  const textarea = document.getElementById("aiDomanda");
+  if (textarea) textarea.value = "";
+
+  document.getElementById("sectionAi")?.classList.remove("open");
+  document.getElementById("aiBackdrop")?.classList.remove("open");
+}
+
+async function inviaDomandaAgente() {
+  const textarea = document.getElementById("aiDomanda");
+  const domanda = textarea ? textarea.value.trim() : "";
+  const responseBox = document.getElementById("aiResponse");
+  const loadingBox = document.getElementById("aiLoading");
+
+  if (!domanda) {
+    if (responseBox) {
+      responseBox.textContent = "Scrivi una domanda prima di inviare.";
+      responseBox.classList.add("show");
+    }
+    return;
+  }
+
+  if (responseBox) responseBox.classList.remove("show");
+  if (loadingBox) loadingBox.classList.add("show");
+
+  try {
+    const res = await fetch(`${API_URL}/ai_assistant/query`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({
+        domanda,
+        id_atleta: selectedAtleta ? selectedAtleta.IDatleta : null,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      if (responseBox) {
+        responseBox.textContent = body.detail || "Errore durante la richiesta all'agente.";
+        responseBox.classList.add("show");
+      }
+      return;
+    }
+
+    const data = await res.json();
+    if (responseBox) {
+      responseBox.textContent = data.risposta || "Nessuna risposta ricevuta.";
+      responseBox.classList.add("show");
+    }
+  } catch {
+    if (responseBox) {
+      responseBox.textContent = "Impossibile contattare il server.";
+      responseBox.classList.add("show");
+    }
+  } finally {
+    if (loadingBox) loadingBox.classList.remove("show");
   }
 }
 

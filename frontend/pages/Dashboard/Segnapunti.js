@@ -203,6 +203,11 @@ async function confermaElimina() {
 // ─── Score ────────────────────────────────────────────────
 
 async function apriScore(s) {
+  // Ripulisci i dati SOLO se è un segnapunto diverso da quello attuale
+  if (!segnapuntoCorrente || segnapuntoCorrente.IDsegnapunto !== s.IDsegnapunto) {
+    voleeData = {};
+  }
+  
   segnapuntoCorrente = s;
 
   document.getElementById("listaSezione").style.display = "none";
@@ -226,6 +231,7 @@ async function apriScore(s) {
 
 function chiudiScore() {
   segnapuntoCorrente = null;
+  voleeData = {};
   document.getElementById("scoreSezione").style.display = "none";
   document.getElementById("listaSezione").style.display = "block";
   document.getElementById("totaleFinalBox").style.display = "none";
@@ -237,9 +243,21 @@ async function switchMezza(m, isInit = false) {
   if (mezzaAttiva === m && !isInit) return;
 
   // Se non stiamo semplicemente aprendo la pagina per la prima volta,
-  // esegui un salvataggio della mezza corrente PRIMA di cambiare scheda.
+  // salva i dati della mezza corrente PRIMA di cambiare scheda
   if (!isInit && segnapuntoCorrente) {
-    await salvaVolee(true); // Passiamo true per un salvataggio "silenzioso"
+    // Salva i dati dagli input DOM in voleeData per mantenerli in memoria
+    const s = segnapuntoCorrente;
+    const fpv = s.frecce_per_volee;
+    for (let n = 1; n <= 10; n++) {
+      const obj = { mezza: mezzaAttiva, numero: n };
+      for (let i = 1; i <= fpv; i++) {
+        const inp = document.getElementById(`f-${mezzaAttiva}-${n}-${i}`);
+        obj[`f${i}`] = inp ? inp.value.trim().toUpperCase() || null : null;
+      }
+      voleeData[`${mezzaAttiva}-${n}`] = obj;
+    }
+    // Salva al server in silenzioso
+    await salvaVolee(true);
   }
 
   mezzaAttiva = m;
@@ -260,7 +278,10 @@ async function switchMezza(m, isInit = false) {
 let voleeData = {};
 
 async function caricaEDisegnaVolee() {
-  voleeData = {};
+  const s = segnapuntoCorrente;
+  const fpv = s.frecce_per_volee;
+  let caricatiDalServer = false;
+  
   try {
     const res = await fetch(
       `${API_URL}/atleti/${ID_ATLETA}/segnapunti/${segnapuntoCorrente.IDsegnapunto}/volee/`,
@@ -268,11 +289,22 @@ async function caricaEDisegnaVolee() {
     );
     if (res.ok) {
       const rows = await res.json();
+      voleeData = {}; // Reset SOLO se il fetch è riuscito
       rows.forEach((r) => {
         voleeData[`${r.mezza}-${r.numero}`] = r;
       });
+      caricatiDalServer = true;
     }
-  } catch { /* ignora, la tabella sarà vuota */ }
+  } catch { 
+    /* ignora, mantieni i dati locali */
+  }
+  
+  // Se non sono riuscito a caricare dal server, mantieni i dati che hai in voleeData
+  if (!caricatiDalServer && Object.keys(voleeData).length === 0) {
+    // Se voleeData è vuoto E il fetch è fallito, è la prima volta che lo apri
+    voleeData = {};
+  }
+  
   disegnaTabella();
   aggiornaTotaleFinale();
 }
