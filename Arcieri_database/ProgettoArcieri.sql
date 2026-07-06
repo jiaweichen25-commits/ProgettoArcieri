@@ -284,6 +284,7 @@ CREATE TABLE IF NOT EXISTS public."TdetNoteAtleta"
     "IDallenamento"             integer NOT NULL,
     "IDsettimana"               integer NOT NULL,
     "Nota"                      text,
+    "NotaAtleta"                text,
     PRIMARY KEY ("IDnota"),
     FOREIGN KEY ("IDallenamento")
         REFERENCES public."Tallenamenti" ("IDallenamento")
