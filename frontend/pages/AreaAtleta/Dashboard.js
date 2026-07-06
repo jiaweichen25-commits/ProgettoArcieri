@@ -425,6 +425,19 @@ async function caricaPianoGare() {
   }
 }
 
+// ══ PDF ══
+function scaricaPDF() {
+  const nome = document.getElementById("nomeAtleta")?.textContent?.trim().replace(/\s+/g, "_") || "profilo";
+  html2pdf().set({
+    margin: 10,
+    filename: `${nome}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, backgroundColor: "#111111" },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: ["css", "legacy"] },
+  }).from(document.querySelector(".page")).save();
+}
+
 // ══ INIT ══
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;

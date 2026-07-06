@@ -189,6 +189,23 @@ nav {
   border-radius: 4px;
 }
 
+/* ══ STAMPA ══ */
+@media print {
+  nav { display: none !important; }
+  body { background: white; color: black; }
+  .page { max-width: 100%; padding: 12px; }
+  .section { background: white; border: 1px solid #ccc; break-inside: avoid; }
+  .section-title, .page-header h1 { color: black; }
+  .info-value, .info-date, .dettaglio-table th, .dettaglio-table td { color: black; }
+
+  .btn-dettaglio { display: none !important; }
+  .dettaglio-container { display: block !important; }
+  .table-wrapper { overflow-x: visible !important; }
+  .dettaglio-table { width: 100% !important; min-width: 0 !important; table-layout: auto; }
+  .dettaglio-table th, .dettaglio-table td { white-space: nowrap; font-size: 0.68rem; padding: 3px 5px; }
+  .dettaglio-table th.day-col, .dettaglio-table td.day-col { width: 28px; text-align: center; }
+}
+
 /* ══ RESPONSIVE ══ */
 @media (max-width: 640px) {
   .info-grid { grid-template-columns: 1fr; }
@@ -439,6 +456,14 @@ nav {
   width: 8%;
   text-align: center;
   color: #aaa;
+}
+
+/* Ultime 7 colonne (giorni L M M G V S D): larghezza fissa, no wrap, centrate perfettamente */
+.dettaglio-table th:nth-last-child(-n+7),
+.dettaglio-table td:nth-last-child(-n+7) {
+  width: 36px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
 }
 
 .dettaglio-table td.day-col.has-value {

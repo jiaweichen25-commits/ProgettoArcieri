@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arcieri Vicenza – Area Atleta</title>
   <link rel="stylesheet" href="Dashboard.css" />
+  <style>
+    @media print {
+      @page { margin: 0; }
+      body { margin: 1.6cm; }
+    }
+  </style>
 </head>
 <body>
 
@@ -19,6 +25,8 @@
   <div class="nav-right">
     <div class="nav-user">Benvenuto, <strong id="navUser">Atleta</strong></div>
     <button class="btn-logout" onclick="logout()">Esci</button>
+    <button class="btn-logout" onclick="window.print()">🖨️ Stampa</button>
+    <button class="btn-logout" onclick="scaricaPDF()">📄 PDF</button>
   </div>
 </nav>
 
@@ -101,6 +109,7 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="Dashboard.js"></script>
 </body>
 </html>
