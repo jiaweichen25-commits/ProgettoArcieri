@@ -8,10 +8,11 @@ const COGNOME_ATLETA = params.get("cognome") || "";
 let segnapuntiCache = [];
 let segnapuntoCorrente = null;
 let mezzaAttiva = 1;
+let voleeData = {}; // Stato globale in memoria delle volée correnti
 
-function getToken() {
-  return localStorage.getItem("access_token");
-}
+// ─── Helper Funzioni ─────────────────────────────────────
+
+function getToken() { return localStorage.getItem("access_token"); }
 
 function authHeaders() {
   return {
@@ -54,6 +55,11 @@ function clearMsg(id) {
   if (box) box.className = "msg-box";
 }
 
+function setTxt(id, testo) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = testo;
+}
+
 function openModal(id) { document.getElementById(id).classList.add("open"); }
 
 function closeModal(id) {
@@ -68,13 +74,18 @@ function formatDate(iso) {
   return d.toLocaleDateString("it-IT");
 }
 
+function punti(v) {
+  if (!v || v === "M") return 0;
+  if (v === "X") return 10;
+  const n = parseInt(v);
+  return isNaN(n) ? 0 : n;
+}
+
 // ─── Lista sessioni ───────────────────────────────────────
 
 async function caricaSegnapunti() {
   try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/`, {
-      headers: authHeaders(),
-    });
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/`, { headers: authHeaders() });
     if (res.status === 401) { logout(); return; }
     if (!res.ok) {
       showMsg("pageMsgBox", "Errore nel caricamento delle sessioni.", "error");
@@ -134,7 +145,7 @@ function renderLista() {
   });
 }
 
-// ─── Crea sessione ────────────────────────────────────────
+// ─── Crea ed Elimina Sessione ─────────────────────────────
 
 function openAddModal() {
   clearMsg("formMsgBox");
@@ -173,12 +184,9 @@ async function creaSessione() {
   }
 }
 
-// ─── Elimina ──────────────────────────────────────────────
-
 function openDeleteModal(s) {
   document.getElementById("deleteId").value = s.IDsegnapunto;
-  document.getElementById("deleteMsg").textContent =
-    `Eliminare la sessione del ${formatDate(s.data)} a ${s.distanza}?`;
+  document.getElementById("deleteMsg").textContent = `Eliminare la sessione del ${formatDate(s.data)} a ${s.distanza}?`;
   openModal("deleteModal");
 }
 
@@ -200,191 +208,122 @@ async function confermaElimina() {
   }
 }
 
-// ─── Score ────────────────────────────────────────────────
+// ─── Score Gestione Tabella ───────────────────────────────
 
 async function apriScore(s) {
-  // Ripulisci i dati SOLO se è un segnapunto diverso da quello attuale
   if (!segnapuntoCorrente || segnapuntoCorrente.IDsegnapunto !== s.IDsegnapunto) {
     voleeData = {};
   }
-  
   segnapuntoCorrente = s;
 
   document.getElementById("listaSezione").style.display = "none";
   document.getElementById("scoreSezione").style.display = "block";
-  document.getElementById("scoreTitolo").textContent =
-    `${formatDate(s.data)} — ${s.distanza} — ${s.frecce_per_volee} frecce/volée`;
+  document.getElementById("scoreTitolo").textContent = `${formatDate(s.data)} — ${s.distanza} — ${s.frecce_per_volee} frecce/volée`;
 
   document.getElementById("noteIstruttore").value = s.note_istruttore || "";
   document.getElementById("noteAtleta").value = s.note_atleta || "";
 
-  // mostra/nasconde colonne f4-f6 in base a frecce_per_volee
   const sei = s.frecce_per_volee === 6;
   ["thF4", "thF5", "thF6"].forEach((id) => {
-    document.getElementById(id).style.display = sei ? "" : "none";
+    const el = document.getElementById(id);
+    if (el) el.style.display = sei ? "" : "none";
   });
 
-  // isInit = true evita il salvataggio automatico durante l'apertura
-  await switchMezza(1, true);
+  switchMezza(1, true);
   await caricaEDisegnaVolee();
 }
 
 function chiudiScore() {
   segnapuntoCorrente = null;
-  voleeData = {};
+  voleeData = {}; // Svuota la memoria locale: le modifiche non salvate spariscono!
   document.getElementById("scoreSezione").style.display = "none";
   document.getElementById("listaSezione").style.display = "block";
   document.getElementById("totaleFinalBox").style.display = "none";
 }
 
-// Nuova funzione asincrona con salvataggio automatico
-async function switchMezza(m, isInit = false) {
-  // Se clicco sulla mezza già attiva, ignoro (tranne durante l'init)
+function switchMezza(m, isInit = false) {
   if (mezzaAttiva === m && !isInit) return;
 
-  // Se non stiamo semplicemente aprendo la pagina per la prima volta,
-  // salva i dati della mezza corrente PRIMA di cambiare scheda
-  if (!isInit && segnapuntoCorrente) {
-    // Salva i dati dagli input DOM in voleeData per mantenerli in memoria
-    const s = segnapuntoCorrente;
-    const fpv = s.frecce_per_volee;
-    for (let n = 1; n <= 10; n++) {
-      const obj = { mezza: mezzaAttiva, numero: n };
-      for (let i = 1; i <= fpv; i++) {
-        const inp = document.getElementById(`f-${mezzaAttiva}-${n}-${i}`);
-        obj[`f${i}`] = inp ? inp.value.trim().toUpperCase() || null : null;
-      }
-      voleeData[`${mezzaAttiva}-${n}`] = obj;
-    }
-    // Salva al server in silenzioso
-    await salvaVolee(true);
-  }
-
   mezzaAttiva = m;
-  const tab1 = document.getElementById("tab1");
-  const tab2 = document.getElementById("tab2");
+  ["tab1", "tab2"].forEach((id, idx) => {
+    const tab = document.getElementById(id);
+    if (tab) tab.className = "mezza-tab" + (m === (idx + 1) ? " active" : "");
+  });
   
-  if (tab1) tab1.className = "mezza-tab" + (m === 1 ? " active" : "");
-  if (tab2) tab2.className = "mezza-tab" + (m === 2 ? " active" : "");
-  
-  // Ricarica i dati salvati della nuova mezza dal server
-  if (!isInit) {
-    await caricaEDisegnaVolee();
-  } else {
-    disegnaTabella();
-  }
+  // Ridisegna semplicemente la tabella basandosi sulla memoria locale corrente
+  disegnaTabella();
 }
 
-let voleeData = {};
-
 async function caricaEDisegnaVolee() {
-  const s = segnapuntoCorrente;
-  const fpv = s.frecce_per_volee;
-  let caricatiDalServer = false;
-  
   try {
-    const res = await fetch(
-      `${API_URL}/atleti/${ID_ATLETA}/segnapunti/${segnapuntoCorrente.IDsegnapunto}/volee/`,
-      { headers: authHeaders() }
-    );
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/${segnapuntoCorrente.IDsegnapunto}/volee/`, { headers: authHeaders() });
     if (res.ok) {
       const rows = await res.json();
-      voleeData = {}; // Reset SOLO se il fetch è riuscito
+      voleeData = {}; 
       rows.forEach((r) => {
         voleeData[`${r.mezza}-${r.numero}`] = r;
       });
-      caricatiDalServer = true;
     }
-  } catch { 
-    /* ignora, mantieni i dati locali */
-  }
-  
-  // Se non sono riuscito a caricare dal server, mantieni i dati che hai in voleeData
-  if (!caricatiDalServer && Object.keys(voleeData).length === 0) {
-    // Se voleeData è vuoto E il fetch è fallito, è la prima volta che lo apri
-    voleeData = {};
-  }
+  } catch { /* In caso di offline, mantiene i dati temporanei correnti */ }
   
   disegnaTabella();
-  aggiornaTotaleFinale();
-}
-
-function punti(v) {
-  if (!v || v === "M") return 0;
-  if (v === "X") return 10;
-  const n = parseInt(v);
-  return isNaN(n) ? 0 : n;
 }
 
 function disegnaTabella() {
   const tbody = document.getElementById("scoreBody");
+  if (!tbody || !segnapuntoCorrente) return;
   tbody.innerHTML = "";
-  const s = segnapuntoCorrente;
-  const fpv = s.frecce_per_volee;
-
-  let totaleProgressivo = 0;
-  if (mezzaAttiva === 2) {
-    for (let n = 1; n <= 10; n++) {
-      const key = `1-${n}`;
-      if (voleeData[key]) totaleProgressivo += (voleeData[key].somma || 0);
-    }
-  }
+  
+  const fpv = segnapuntoCorrente.frecce_per_volee;
 
   for (let n = 1; n <= 10; n++) {
     const key = `${mezzaAttiva}-${n}`;
     const saved = voleeData[key] || {};
-
     const tr = document.createElement("tr");
+    
     let celleFrecce = "";
     for (let i = 1; i <= 6; i++) {
       const val = saved[`f${i}`] || "";
       const hidden = i > fpv ? "style='display:none;'" : "";
-      celleFrecce += `<td ${hidden}>
-        <input class="freccia" id="f-${mezzaAttiva}-${n}-${i}"
-               value="${val}" maxlength="2"
-               autocomplete="off"
-               oninput="onFrecciaInput(${mezzaAttiva},${n})" />
-      </td>`;
+      celleFrecce += `
+        <td ${hidden}>
+          <input class="freccia" id="f-${mezzaAttiva}-${n}-${i}"
+                 value="${val}" maxlength="2" autocomplete="off"
+                 oninput="aggiornaRighe()" />
+        </td>`;
     }
-
-    const sommaRiga = saved.somma ?? "";
-    const totRiga = saved.totale ?? "";
 
     tr.innerHTML = `
       <td class="num">${n}</td>
       ${celleFrecce}
-      <td class="somma" id="somma-${mezzaAttiva}-${n}">${sommaRiga}</td>
-      <td class="totale" id="totale-${mezzaAttiva}-${n}">${totRiga}</td>
-      <td class="contatori" id="c10-${mezzaAttiva}-${n}"></td>
-      <td class="contatori" id="cX-${mezzaAttiva}-${n}"></td>
+      <td class="somma" id="somma-${mezzaAttiva}-${n}">0</td>
+      <td class="totale" id="totale-${mezzaAttiva}-${n}">0</td>
+      <td class="contatori" id="c10-${mezzaAttiva}-${n}">0</td>
+      <td class="contatori" id="cX-${mezzaAttiva}-${n}">0</td>
     `;
     tbody.appendChild(tr);
   }
 
   const trTot = document.createElement("tr");
   trTot.className = "totale-row";
-  const colFrecce = fpv === 6 ? 6 : 3;
   trTot.innerHTML = `
-    <td colspan="${1 + colFrecce}">TOTALE MEZZA ${mezzaAttiva}</td>
-    <td class="somma" id="totMezza-somma"></td>
-    <td class="totale" id="totMezza-totale"></td>
-    <td class="contatori" id="totMezza-10"></td>
-    <td class="contatori" id="totMezza-X"></td>
+    <td colspan="${1 + fpv}">TOTALE MEZZA ${mezzaAttiva}</td>
+    <td class="somma" id="totMezza-somma">0</td>
+    <td class="totale" id="totMezza-totale">0</td>
+    <td class="contatori" id="totMezza-10">0</td>
+    <td class="contatori" id="totMezza-X">0</td>
   `;
   tbody.appendChild(trTot);
 
   aggiornaRighe();
 }
 
-function onFrecciaInput(mezza, numero) {
-  aggiornaRighe();
-}
-
 function aggiornaRighe() {
-  const s = segnapuntoCorrente;
-  const fpv = s.frecce_per_volee;
+  if (!segnapuntoCorrente) return;
+  const fpv = segnapuntoCorrente.frecce_per_volee;
 
   let totProg = 0;
+  // Se siamo nella seconda metà, recuperiamo il progressivo della prima metà
   if (mezzaAttiva === 2) {
     for (let n = 1; n <= 10; n++) {
       const key = `1-${n}`;
@@ -392,55 +331,64 @@ function aggiornaRighe() {
     }
   }
 
-  let sommaMezza = 0;
-  let tot10 = 0;
-  let totX = 0;
+  let sommaMezza = 0, tot10 = 0, totX = 0;
 
   for (let n = 1; n <= 10; n++) {
+    const key = `${mezzaAttiva}-${n}`;
     const vals = [];
-    for (let i = 1; i <= fpv; i++) {
-      const inp = document.getElementById(`f-${mezzaAttiva}-${n}-${i}`);
-      vals.push(inp ? inp.value.trim().toUpperCase() : "");
+    
+    if (!voleeData[key]) {
+      voleeData[key] = { mezza: mezzaAttiva, numero: n };
     }
+    
+    // Legge i valori in tempo reale dal DOM e aggiorna lo stato locale 'voleeData'
+    for (let i = 1; i <= 6; i++) {
+      if (i <= fpv) {
+        const inp = document.getElementById(`f-${mezzaAttiva}-${n}-${i}`);
+        const val = inp ? inp.value.trim().toUpperCase() : "";
+        vals.push(val);
+        voleeData[key][`f${i}`] = val || null;
+      } else {
+        voleeData[key][`f${i}`] = null;
+      }
+    }
+
     const somma = vals.reduce((acc, v) => acc + punti(v), 0);
     totProg += somma;
     sommaMezza += somma;
+    
+    voleeData[key].somma = somma;
+    voleeData[key].totale = totProg;
+
     const cnt10 = vals.filter((v) => v === "10").length;
     const cntX  = vals.filter((v) => v === "X").length;
     tot10 += cnt10;
     totX  += cntX;
 
-    const cellSomma = document.getElementById(`somma-${mezzaAttiva}-${n}`);
-    const cellTotale = document.getElementById(`totale-${mezzaAttiva}-${n}`);
-    const cell10 = document.getElementById(`c10-${mezzaAttiva}-${n}`);
-    const cellX  = document.getElementById(`cX-${mezzaAttiva}-${n}`);
-    if (cellSomma) cellSomma.textContent = somma || "0";
-    if (cellTotale) cellTotale.textContent = totProg || "0";
-    if (cell10) cell10.textContent = cnt10 || "0";
-    if (cellX)  cellX.textContent  = cntX  || "0";
+    setTxt(`somma-${mezzaAttiva}-${n}`, somma);
+    setTxt(`totale-${mezzaAttiva}-${n}`, totProg);
+    setTxt(`c10-${mezzaAttiva}-${n}`, cnt10);
+    setTxt(`cX-${mezzaAttiva}-${n}`, cntX);
   }
 
-  const totSomma  = document.getElementById("totMezza-somma");
-  const totTotale = document.getElementById("totMezza-totale");
-  const tot10El   = document.getElementById("totMezza-10");
-  const totXEl    = document.getElementById("totMezza-X");
-  if (totSomma)  totSomma.textContent  = sommaMezza;
-  if (totTotale) totTotale.textContent = totProg;
-  if (tot10El)   tot10El.textContent   = tot10;
-  if (totXEl)    totXEl.textContent    = totX;
+  setTxt("totMezza-somma", sommaMezza);
+  setTxt("totMezza-totale", totProg);
+  setTxt("totMezza-10", tot10);
+  setTxt("totMezza-X", totX);
+
+  aggiornaTotaleFinale();
 }
 
 function aggiornaTotaleFinale() {
-  let tot = 0;
-  let t10 = 0;
-  let tX  = 0;
+  if (!segnapuntoCorrente) return;
+  let tot = 0, t10 = 0, tX = 0;
+  const fpv = segnapuntoCorrente.frecce_per_volee;
+
   for (let m = 1; m <= 2; m++) {
     for (let n = 1; n <= 10; n++) {
-      const key = `${m}-${n}`;
-      const r = voleeData[key];
+      const r = voleeData[`${m}-${n}`];
       if (r) {
         tot += r.somma || 0;
-        const fpv = segnapuntoCorrente.frecce_per_volee;
         for (let i = 1; i <= fpv; i++) {
           if (r[`f${i}`] === "10") t10++;
           if (r[`f${i}`] === "X")  tX++;
@@ -449,43 +397,33 @@ function aggiornaTotaleFinale() {
     }
   }
   const box = document.getElementById("totaleFinalBox");
-  box.textContent = `Totale Complessivo: ${tot} — 10: ${t10} — X: ${tX}`;
-  box.style.display = tot > 0 ? "block" : "none";
+  if (box) {
+    box.textContent = `Totale Complessivo: ${tot} — 10: ${t10} — X: ${tX}`;
+    box.style.display = tot > 0 ? "block" : "none";
+  }
 }
 
-// ─── Salva volée ─────────────────────────────────────────
+// ─── Salva Volée e Note ───────────────────────────────────
 
 async function salvaVolee(silenzioso = false) {
   if (!silenzioso) clearMsg("scoreMsgBox");
-  const s = segnapuntoCorrente;
-  const fpv = s.frecce_per_volee;
-  const volee = [];
+  if (!segnapuntoCorrente) return;
 
-  for (let n = 1; n <= 10; n++) {
-    const obj = { mezza: mezzaAttiva, numero: n };
-    for (let i = 1; i <= fpv; i++) {
-      const inp = document.getElementById(`f-${mezzaAttiva}-${n}-${i}`);
-      obj[`f${i}`] = inp ? (inp.value.trim().toUpperCase() || null) : null;
-    }
-    for (let i = fpv + 1; i <= 6; i++) obj[`f${i}`] = null;
-    volee.push(obj);
-  }
+  // Siccome voleeData contiene TUTTE le righe aggiornate (Mezza 1 + Mezza 2),
+  // estraiamo semplicemente i valori totali per mandarli al database.
+  const volee = Object.values(voleeData);
 
   try {
-    const res = await fetch(
-      `${API_URL}/atleti/${ID_ATLETA}/segnapunti/${s.IDsegnapunto}/volee/`,
-      {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(volee),
-      }
-    );
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/${segnapuntoCorrente.IDsegnapunto}/volee/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(volee),
+    });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       if (!silenzioso) showMsg("scoreMsgBox", err.detail || "Errore nel salvataggio.", "error");
       return;
     }
-    // Ricarica per consolidare i dati (tranne se è in background)
     if (!silenzioso) {
       await caricaEDisegnaVolee();
       showMsg("scoreMsgBox", "Tabella salvata con successo.", "success");
@@ -495,22 +433,17 @@ async function salvaVolee(silenzioso = false) {
   }
 }
 
-// ─── Salva note ──────────────────────────────────────────
-
 async function salvaNoteCorrente() {
   const note_istruttore = document.getElementById("noteIstruttore").value.trim() || null;
   const note_atleta = document.getElementById("noteAtleta").value.trim() || null;
   const s = segnapuntoCorrente;
 
   try {
-    const res = await fetch(
-      `${API_URL}/atleti/${ID_ATLETA}/segnapunti/${s.IDsegnapunto}`,
-      {
-        method: "PUT",
-        headers: authHeaders(),
-        body: JSON.stringify({ note_istruttore, note_atleta }),
-      }
-    );
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/${s.IDsegnapunto}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ note_istruttore, note_atleta }),
+    });
     if (!res.ok) {
       alert("Errore nel salvataggio delle note.");
       return;
@@ -525,25 +458,17 @@ async function salvaNoteCorrente() {
 
 // ─── Init ────────────────────────────────────────────────
 
-// ─── Init ────────────────────────────────────────────────
-
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
   if (!ID_ATLETA) { window.location.href = "Dashboard.html"; return; }
   
   const nomeCompleto = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
   
-  // 1. Scrive nel titolo principale grande e bianco (es. "Segnapunti: Mario Rossi")
   const t = document.getElementById("titoloAtleta");
-  if (t) {
-    t.textContent = nomeCompleto ? `Segnapunti: ${nomeCompleto}` : "Segnapunti atleta";
-  }
+  if (t) t.textContent = nomeCompleto ? `Segnapunti: ${nomeCompleto}` : "Segnapunti atleta";
   
-  // 2. Scrive nella barra di navigazione in alto a sinistra
   const tNav = document.getElementById("titoloAtletaNav");
-  if (tNav) {
-    tNav.textContent = nomeCompleto || "—";
-  }
+  if (tNav) tNav.textContent = nomeCompleto || "—";
   
   caricaSegnapunti();
 });
