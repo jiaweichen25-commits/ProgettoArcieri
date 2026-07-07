@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bersaglio Indoor 40 cm</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', "Segoe UI", Arial, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      padding: 16px;
+    }
+    .target-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    #target {
+      cursor: crosshair;
+      touch-action: none;
+      max-width: 100%;
+      height: auto;
+    }
+    .impact {
+      fill: #ffffff;
+      stroke: #111111;
+      stroke-width: 1.5;
+    }
+    .impact.impact-x {
+      fill: #111111;
+      stroke: #ffffff;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      padding: 10px;
+      text-align: center;
+    }
+    .stat-card p.label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .stat-card p.value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      color: #eee;
+    }
+    .target-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 2px;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .btn-red { background: #c0392b; color: white; }
+    .btn-red:hover { background: #a93226; }
+    .btn-outline { background: transparent; color: #888; border: 1px solid #333; }
+    .btn-outline:hover { color: white; border-color: #c0392b; }
+    .hits-log {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+    .hit-chip {
+      min-width: 24px;
+      padding: 3px 6px;
+      text-align: center;
+      border-radius: 2px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #111;
+      border: 1px solid #333;
+      color: #ddd;
+    }
+    .hit-chip.chip-x { color: #c0392b; border-color: #c0392b; }
+  </style>
+</head>
+<body>
+
+<div class="target-wrap">
+  <svg id="target" viewBox="0 0 300 300" width="280" height="280" role="img" aria-label="Bersaglio indoor 40 cm cliccabile">
+    <circle cx="150" cy="150" r="140" fill="#F5F3EE" stroke="#333" stroke-width="1.5"/>
+    <circle cx="150" cy="150" r="112" fill="#1A1A1A" stroke="#333" stroke-width="1.5"/>
+    <circle cx="150" cy="150" r="84" fill="#157CC4" stroke="#333" stroke-width="1.5"/>
+    <circle cx="150" cy="150" r="56" fill="#E2231A" stroke="#333" stroke-width="1.5"/>
+    <circle cx="150" cy="150" r="28" fill="#FFD500" stroke="#333" stroke-width="1.5"/>
+
+    <circle cx="150" cy="150" r="126" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="1"/>
+    <circle cx="150" cy="150" r="98" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    <circle cx="150" cy="150" r="70" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    <circle cx="150" cy="150" r="42" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    <circle cx="150" cy="150" r="14" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="1"/>
+    <circle cx="150" cy="150" r="7" fill="none" stroke="rgba(0,0,0,0.5)" stroke-width="1"/>
+
+    <g id="impacts"></g>
+  </svg>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <p class="label">Frecce</p>
+    <p class="value" id="stat-count">0</p>
+  </div>
+  <div class="stat-card">
+    <p class="label">Totale</p>
+    <p class="value" id="stat-total">0</p>
+  </div>
+  <div class="stat-card">
+    <p class="label">Media</p>
+    <p class="value" id="stat-avg">0.0</p>
+  </div>
+</div>
+
+<div class="target-actions">
+  <button class="btn btn-outline" onclick="annullaUltimo()">← Annulla ultimo</button>
+  <button class="btn btn-red" onclick="resetBersaglio()">Reset</button>
+</div>
+
+<div class="hits-log" id="hitsLog"></div>
+
+<script src="Bersaglio.js"></script>
+</body>
+</html>

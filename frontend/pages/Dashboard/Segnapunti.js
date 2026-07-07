@@ -9,6 +9,7 @@ let segnapuntiCache = [];
 let segnapuntoCorrente = null;
 let mezzaAttiva = 1;
 let voleeData = {}; // Stato globale in memoria delle volée correnti
+let impattiBersaglio = []; // Tiri correnti sul bersaglio (sincronizzati con l'iframe)
 
 // ─── Helper Funzioni ─────────────────────────────────────
 
@@ -229,6 +230,9 @@ async function apriScore(s) {
     if (el) el.style.display = sei ? "" : "none";
   });
 
+  impattiBersaglio = s.ImpattiBersaglio || [];
+  inviaHitsAllIframe();
+
   switchMezza(1, true);
   await caricaEDisegnaVolee();
 }
@@ -236,10 +240,26 @@ async function apriScore(s) {
 function chiudiScore() {
   segnapuntoCorrente = null;
   voleeData = {}; // Svuota la memoria locale: le modifiche non salvate spariscono!
+  impattiBersaglio = [];
   document.getElementById("scoreSezione").style.display = "none";
   document.getElementById("listaSezione").style.display = "block";
   document.getElementById("totaleFinalBox").style.display = "none";
 }
+
+// ─── Bersaglio interattivo (widget in iframe) ─────────────
+
+function inviaHitsAllIframe() {
+  const frame = document.getElementById("bersaglioFrame");
+  if (frame) {
+    frame.contentWindow.postMessage({ type: "bersaglio-load", hits: impattiBersaglio }, "*");
+  }
+}
+
+window.addEventListener("message", (evt) => {
+  if (evt.data && evt.data.type === "bersaglio-hits") {
+    impattiBersaglio = evt.data.hits || [];
+  }
+});
 
 function switchMezza(m, isInit = false) {
   if (mezzaAttiva === m && !isInit) return;
@@ -442,7 +462,7 @@ async function salvaNoteCorrente() {
     const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/${s.IDsegnapunto}`, {
       method: "PUT",
       headers: authHeaders(),
-      body: JSON.stringify({ note_istruttore, note_atleta }),
+      body: JSON.stringify({ note_istruttore, note_atleta, ImpattiBersaglio: impattiBersaglio }),
     });
     if (!res.ok) {
       alert("Errore nel salvataggio delle note.");
@@ -450,6 +470,7 @@ async function salvaNoteCorrente() {
     }
     segnapuntoCorrente.note_istruttore = note_istruttore;
     segnapuntoCorrente.note_atleta = note_atleta;
+    segnapuntoCorrente.ImpattiBersaglio = impattiBersaglio;
     showMsg("scoreMsgBox", "Note aggiornate.", "success");
   } catch {
     alert("Impossibile contattare il server.");
