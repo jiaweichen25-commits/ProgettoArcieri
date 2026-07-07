@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = `http://${window.location.hostname}:8000`;
 
 function getToken() {
   return localStorage.getItem("access_token");
