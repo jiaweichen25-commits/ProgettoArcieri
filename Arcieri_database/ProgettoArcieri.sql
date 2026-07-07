@@ -351,6 +351,7 @@ CREATE TABLE IF NOT EXISTS public."Tsegnapunti"
     "frecce_per_volee" integer NOT NULL DEFAULT 3,
     "note_istruttore"  text,
     "note_atleta"      text,
+    "ImpattiBersaglio" jsonb,
     PRIMARY KEY ("IDsegnapunto")
 );
 

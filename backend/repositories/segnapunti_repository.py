@@ -1,4 +1,5 @@
 from config.database import get_db_conn
+from psycopg2.extras import Json
 
 
 def _freccia_to_punti(v: str | None) -> int:
@@ -18,7 +19,8 @@ def get_segnapunti(id_atleta: int):
         with conn.cursor() as cur:
             cur.execute(
                 '''SELECT "IDsegnapunto", "IDatleta", "data", "distanza",
-                          "frecce_per_volee", "note_istruttore", "note_atleta"
+                          "frecce_per_volee", "note_istruttore", "note_atleta",
+                          "ImpattiBersaglio"
                    FROM "Tsegnapunti"
                    WHERE "IDatleta" = %s
                    ORDER BY "data" DESC''',
@@ -35,7 +37,8 @@ def get_segnapunto(id_segnapunto: int):
         with conn.cursor() as cur:
             cur.execute(
                 '''SELECT "IDsegnapunto", "IDatleta", "data", "distanza",
-                          "frecce_per_volee", "note_istruttore", "note_atleta"
+                          "frecce_per_volee", "note_istruttore", "note_atleta",
+                          "ImpattiBersaglio"
                    FROM "Tsegnapunti"
                    WHERE "IDsegnapunto" = %s''',
                 (id_segnapunto,)
@@ -73,13 +76,16 @@ def aggiorna_segnapunto(id_segnapunto: int, id_atleta: int, dati: dict):
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
+            impatti = dati.get("ImpattiBersaglio")
             cur.execute(
                 '''UPDATE "Tsegnapunti"
-                   SET "note_istruttore" = %s, "note_atleta" = %s
+                   SET "note_istruttore" = %s, "note_atleta" = %s,
+                       "ImpattiBersaglio" = COALESCE(%s, "ImpattiBersaglio")
                    WHERE "IDsegnapunto" = %s AND "IDatleta" = %s''',
                 (
                     dati.get("note_istruttore"),
                     dati.get("note_atleta"),
+                    Json(impatti) if impatti is not None else None,
                     id_segnapunto,
                     id_atleta,
                 )

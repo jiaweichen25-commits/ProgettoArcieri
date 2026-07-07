@@ -59,6 +59,7 @@ class SegnapuntoCreate(BaseModel):
 class SegnapuntoUpdate(BaseModel):
     note_istruttore: Optional[str] = None
     note_atleta: Optional[str] = None
+    ImpattiBersaglio: Optional[list] = None
 
 
 class SegnapuntoOut(BaseModel):
@@ -69,3 +70,4 @@ class SegnapuntoOut(BaseModel):
     frecce_per_volee: int
     note_istruttore: Optional[str] = None
     note_atleta: Optional[str] = None
+    ImpattiBersaglio: Optional[list] = None

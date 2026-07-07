@@ -27,6 +27,7 @@ def _row_to_dict(r):
         "frecce_per_volee": r[4],
         "note_istruttore": r[5],
         "note_atleta":     r[6],
+        "ImpattiBersaglio": r[7],
     }
 
 
