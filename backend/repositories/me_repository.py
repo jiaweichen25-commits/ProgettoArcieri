@@ -141,16 +141,43 @@ def get_all_fis_cor_con_nomi(id_allenamento: int, id_settimana: int, id_seduta: 
 
 
 def get_nota_allenamento(id_allenamento: int, id_settimana: int):
-    """Nota dell'atleta per una settimana."""
+    """Nota dell'istruttore e nota personale dell'atleta per una settimana."""
     conn = get_db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                '''SELECT "IDnota", "Nota"
+                '''SELECT "IDnota", "Nota", "NotaAtleta"
                    FROM "TdetNoteAtleta"
                    WHERE "IDallenamento" = %s AND "IDsettimana" = %s''',
                 (id_allenamento, id_settimana)
             )
             return cur.fetchone()
+    finally:
+        conn.close()
+
+
+def salva_nota_atleta(id_allenamento: int, id_settimana: int, testo: str):
+    """Crea o aggiorna la nota personale scritta dall'atleta per una settimana."""
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                '''SELECT "IDnota" FROM "TdetNoteAtleta"
+                   WHERE "IDallenamento" = %s AND "IDsettimana" = %s''',
+                (id_allenamento, id_settimana)
+            )
+            riga = cur.fetchone()
+            if riga:
+                cur.execute(
+                    '''UPDATE "TdetNoteAtleta" SET "NotaAtleta" = %s WHERE "IDnota" = %s''',
+                    (testo, riga[0])
+                )
+            else:
+                cur.execute(
+                    '''INSERT INTO "TdetNoteAtleta" ("IDallenamento", "IDsettimana", "NotaAtleta")
+                       VALUES (%s, %s, %s)''',
+                    (id_allenamento, id_settimana, testo)
+                )
+            return True
     finally:
         conn.close()

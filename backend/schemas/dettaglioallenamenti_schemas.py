@@ -145,7 +145,7 @@ class AllFisCorOut(AllFisCorCreate):
 # TdetNoteAtleta
 # ─────────────────────────────────────────
 
-class NotaAtletaCreate(BaseModel):
+class NotaAtletaCreate(BaseModel):  #NoteAtleta riguardo note su l'altleta, mentre NotaPersonal sono le note dell'atleta.
     nota: Optional[str] = None
 
 class NotaAtletaUpdate(NotaAtletaCreate):
@@ -155,6 +155,10 @@ class NotaAtletaOut(NotaAtletaCreate):
     IDnota: int
     IDallenamento: int
     IDsettimana: int
+    nota_atleta: Optional[str] = None
+
+class NotaPersonaleUpdate(BaseModel):
+    nota_atleta: Optional[str] = None
 
 class TotaleFrecceOut(BaseModel):
     lunedi: int

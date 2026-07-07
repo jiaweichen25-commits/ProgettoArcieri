@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from typing import List
 from schemas.atleti_schemas import AtletaOut
 from schemas.materiali_schemas import MaterialeOut
+from schemas.dettaglioallenamenti_schemas import NotaPersonaleUpdate
 from services import me_service
 from dependencies.auth_deps import solo_atleta
 
@@ -34,3 +35,7 @@ def il_mio_piano_gare(utente: dict = Depends(solo_atleta)):
 @router.get("/allenamenti/{id_allenamento}/dettaglio")
 def il_mio_dettaglio_allenamento(id_allenamento: int, utente: dict = Depends(solo_atleta)):
     return me_service.get_dettaglio_allenamento(utente["id_utente"], id_allenamento)
+
+@router.post("/allenamenti/{id_allenamento}/settimane/{id_settimana}/nota")
+def salva_mia_nota(id_allenamento: int, id_settimana: int, dati: NotaPersonaleUpdate, utente: dict = Depends(solo_atleta)):
+    return me_service.salva_nota_atleta(utente["id_utente"], id_allenamento, id_settimana, dati.nota_atleta)

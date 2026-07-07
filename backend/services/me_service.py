@@ -102,6 +102,7 @@ def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
             dettaglio[id_settimana] = {
                 "id_settimana": id_settimana,
                 "nota": nota_row[1] if nota_row else None,
+                "nota_atleta": nota_row[2] if nota_row else None,
                 "sedute": []
             }
             
@@ -155,3 +156,12 @@ def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
         dettaglio[id_settimana]["sedute"].append(seduta_dict)
         
     return {"dettaglio": list(dettaglio.values())}
+
+def salva_nota_atleta(id_utente: int, id_allenamento: int, id_settimana: int, testo: str):
+    # Verify the allenamento belongs to the atleta
+    atleta = _get_atleta_or_404(id_utente)
+    allenamenti_atleta = allenamenti_repository.get_allenamenti_by_atleta(atleta["IDatleta"])
+    if not any(a[0] == id_allenamento for a in allenamenti_atleta):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Allenamento non trovato o non autorizzato")
+
+    return me_repository.salva_nota_atleta(id_allenamento, id_settimana, testo)
