@@ -363,6 +363,10 @@ nav {
   font-size: 0.7rem;
 }
 
+.dettaglio-table th.day-col {
+  text-align: center;
+}
+
 .dettaglio-table td.day-col {
   width: 8%;
   text-align: center;
