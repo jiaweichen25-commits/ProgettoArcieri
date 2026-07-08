@@ -215,6 +215,12 @@ async function toggleDettaglio(idAllenamento, btnObj) {
 
     const html = dettaglio.map(sett => {
       const notaHtml = sett.nota ? `<div class="settimana-nota">Nota Istruttore: ${escHtml(sett.nota)}</div>` : "";
+      const notaAtletaHtml = `
+        <div class="settimana-nota-atleta">
+          <label for="notaAtleta-${sett.id_settimana}">La tua nota personale</label>
+          <textarea id="notaAtleta-${sett.id_settimana}" rows="3">${escHtml(sett.nota_atleta || "")}</textarea>
+          <button class="btn-salva-nota" onclick="salvaNotaAtleta(${idAllenamento}, ${sett.id_settimana})">Salva nota</button>
+        </div>`;
       
       const seduteHtml = sett.sedute.map(sed => {
         let esHtml = "";
@@ -297,6 +303,7 @@ async function toggleDettaglio(idAllenamento, btnObj) {
         <div class="settimana-block">
           <div class="settimana-header">Settimana ${sett.id_settimana}</div>
           ${notaHtml}
+          ${notaAtletaHtml}
           ${seduteHtml}
         </div>
       `;
@@ -309,6 +316,22 @@ async function toggleDettaglio(idAllenamento, btnObj) {
   } catch (e) {
     console.error(e);
     alert("Errore nel caricamento del dettaglio.");
+  }
+}
+
+async function salvaNotaAtleta(idAllenamento, idSettimana) {
+  const textarea = document.getElementById(`notaAtleta-${idSettimana}`);
+  const testo = textarea.value;
+  try {
+    const res = await fetch(`${API_URL}/me/allenamenti/${idAllenamento}/settimane/${idSettimana}/nota`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ nota_atleta: testo }),
+    });
+    if (!res.ok) throw new Error();
+    alert("Nota salvata.");
+  } catch {
+    alert("Errore nel salvataggio della nota.");
   }
 }
 
