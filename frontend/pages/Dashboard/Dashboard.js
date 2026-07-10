@@ -467,6 +467,9 @@ function deselezionaAtleta() {
   const textarea = document.getElementById("aiDomanda");
   if (textarea) textarea.value = "";
 
+  const history = document.getElementById("aiHistory");
+  if (history) history.innerHTML = "";
+
   document.getElementById("sectionAi")?.classList.remove("open");
   document.getElementById("aiBackdrop")?.classList.remove("open");
 }
@@ -474,18 +477,23 @@ function deselezionaAtleta() {
 async function inviaDomandaAgente() {
   const textarea = document.getElementById("aiDomanda");
   const domanda = textarea ? textarea.value.trim() : "";
-  const responseBox = document.getElementById("aiResponse");
+  const historyBox = document.getElementById("aiHistory");
   const loadingBox = document.getElementById("aiLoading");
 
-  if (!domanda) {
-    if (responseBox) {
-      responseBox.textContent = "Scrivi una domanda prima di inviare.";
-      responseBox.classList.add("show");
-    }
-    return;
+  if (!domanda) return;
+
+  // Aggiungi la bubble dell'utente
+  if (historyBox) {
+    const userBubble = document.createElement("div");
+    userBubble.className = "ai-bubble user-bubble";
+    userBubble.textContent = domanda;
+    historyBox.appendChild(userBubble);
+    historyBox.scrollTop = historyBox.scrollHeight;
   }
 
-  if (responseBox) responseBox.classList.remove("show");
+  // Pulisci il campo input
+  if (textarea) textarea.value = "";
+
   if (loadingBox) loadingBox.classList.add("show");
 
   try {
@@ -500,22 +508,43 @@ async function inviaDomandaAgente() {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      if (responseBox) {
-        responseBox.textContent = body.detail || "Errore durante la richiesta all'agente.";
-        responseBox.classList.add("show");
+      if (historyBox) {
+        const errorBubble = document.createElement("div");
+        errorBubble.className = "ai-bubble ai-bubble-response";
+        errorBubble.style.borderColor = "#c0392b";
+        errorBubble.style.color = "#e74c3c";
+        errorBubble.textContent = body.detail || "Errore durante la richiesta all'agente.";
+        historyBox.appendChild(errorBubble);
+        historyBox.scrollTop = historyBox.scrollHeight;
       }
       return;
     }
 
     const data = await res.json();
-    if (responseBox) {
-      responseBox.textContent = data.risposta || "Nessuna risposta ricevuta.";
-      responseBox.classList.add("show");
+    if (historyBox) {
+      const aiBubble = document.createElement("div");
+      aiBubble.className = "ai-bubble ai-bubble-response";
+      aiBubble.textContent = data.risposta || "Nessuna risposta ricevuta.";
+      
+      if (data.provider && data.model) {
+        const debugInfo = document.createElement("div");
+        debugInfo.className = "ai-debug-info";
+        debugInfo.textContent = `⚡ Generato da: ${data.model} (tramite ${data.provider}) - Task: ${data.task || "generale"}`;
+        aiBubble.appendChild(debugInfo);
+      }
+      
+      historyBox.appendChild(aiBubble);
+      historyBox.scrollTop = historyBox.scrollHeight;
     }
   } catch {
-    if (responseBox) {
-      responseBox.textContent = "Impossibile contattare il server.";
-      responseBox.classList.add("show");
+    if (historyBox) {
+      const errorBubble = document.createElement("div");
+      errorBubble.className = "ai-bubble ai-bubble-response";
+      errorBubble.style.borderColor = "#c0392b";
+      errorBubble.style.color = "#e74c3c";
+      errorBubble.textContent = "Impossibile contattare il server.";
+      historyBox.appendChild(errorBubble);
+      historyBox.scrollTop = historyBox.scrollHeight;
     }
   } finally {
     if (loadingBox) loadingBox.classList.remove("show");
