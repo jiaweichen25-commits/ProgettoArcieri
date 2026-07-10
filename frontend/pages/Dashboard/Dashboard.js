@@ -554,4 +554,15 @@ async function inviaDomandaAgente() {
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
   caricaAtleti();
+
+  // Permette di inviare la domanda premendo "Invio" (Shift+Invio per andare a capo)
+  const aiInput = document.getElementById("aiDomanda");
+  if (aiInput) {
+    aiInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault(); // Evita di andare a capo
+        inviaDomandaAgente();
+      }
+    });
+  }
 });
