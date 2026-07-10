@@ -1,17 +1,16 @@
 import httpx
-from fastapi import HTTPException, status
+
 from config.settings import GEMINI_API_KEY, GEMINI_MODEL
+from services.provider_error import ProviderError
 
 _GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 )
 
+
 def genera_risposta(system_prompt: str, messaggio_utente: str) -> str:
     if not GEMINI_API_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Servizio AI non configurato. Contatta l'amministratore.",
-        )
+        raise ProviderError("gemini", "API key non configurata")
 
     url = _GEMINI_URL.format(model=GEMINI_MODEL)
     payload = {
@@ -27,24 +26,19 @@ def genera_risposta(system_prompt: str, messaggio_utente: str) -> str:
             json=payload,
             timeout=30.0,
         )
-    except httpx.RequestError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Servizio AI non raggiungibile, riprova più tardi.",
-        )
+    except httpx.RequestError as exc:
+        raise ProviderError("gemini", f"Errore di rete: {exc}") from exc
 
     if resp.status_code != 200:
         print(f"[GEMINI ERROR] status={resp.status_code} body={resp.text[:500]}")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Il servizio AI ha restituito un errore, riprova più tardi.",
+        raise ProviderError(
+            "gemini",
+            f"status={resp.status_code} body={resp.text[:300]}",
+            status_code=resp.status_code,
         )
 
     try:
         data = resp.json()
         return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except (KeyError, IndexError, ValueError):
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Risposta AI non valida, riprova più tardi.",
-        )
+    except (KeyError, IndexError, ValueError) as exc:
+        raise ProviderError("gemini", f"Risposta non valida: {exc}") from exc

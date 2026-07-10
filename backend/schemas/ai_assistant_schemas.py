@@ -8,3 +8,6 @@ class AIAssistantQueryInput(BaseModel):
 class AIAssistantQueryOutput(BaseModel):
     risposta: str
     id_atleta: Optional[int] = None
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    task: Optional[str] = None

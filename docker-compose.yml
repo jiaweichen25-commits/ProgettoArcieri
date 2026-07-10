@@ -29,6 +29,13 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-troia}@db:5432/${DB_NAME:-ProgettoArcieri}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENROUTER_MODEL_ANALISI=${OPENROUTER_MODEL_ANALISI:-qwen/qwen3-32b}
+      - OPENROUTER_MODEL_RAGIONAMENTO=${OPENROUTER_MODEL_RAGIONAMENTO:-deepseek/deepseek-chat-v3-0324}
+      - OPENROUTER_MODEL_DEFAULT=${OPENROUTER_MODEL_DEFAULT:-meta-llama/llama-3.3-70b-instruct}
+      - GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}
+      - LLM_PROVIDER_ORDER=${LLM_PROVIDER_ORDER:-openrouter,groq,gemini}
     depends_on:
       db:
         condition: service_healthy

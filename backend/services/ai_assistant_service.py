@@ -11,7 +11,8 @@ from services import (
     antidoping_service,
     pianogare_service,
     segnapunti_service,
-    gemini_client,
+    llm_router,
+    task_classifier,
 )
 
 _SYSTEM_PROMPT = """Sei l'assistente tecnico-sportivo di una associazione di tiro con l'arco (Arcieri Vicenza).
@@ -133,5 +134,16 @@ def interroga_agente(id_utente: int, id_atleta: int | None, domanda: str) -> dic
 
     messaggio = f"{blocco_dati}\n\nDOMANDA DELL'ISTRUTTORE:\n{domanda}"
 
-    risposta = gemini_client.genera_risposta(_SYSTEM_PROMPT, messaggio)
-    return {"risposta": risposta, "id_atleta": id_atleta}
+    task = task_classifier.classifica_task(
+        domanda,
+        ha_contesto_atleta=contesto is not None,
+        ha_segnapunti=bool(contesto and contesto.get("segnapunti")),
+    )
+    result = llm_router.genera_risposta(_SYSTEM_PROMPT, messaggio, task)
+    return {
+        "risposta": result.risposta,
+        "id_atleta": id_atleta,
+        "provider": result.provider,
+        "model": result.model,
+        "task": result.task,
+    }
