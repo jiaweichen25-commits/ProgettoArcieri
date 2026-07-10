@@ -38,6 +38,17 @@
       margin-bottom: 20px;
     }
 
+    .azioni-stampa {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .azioni-stampa .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .sezione-det {
       background: #1a1a1a;
       border-left: 5px solid #c0392b;
@@ -208,6 +219,17 @@
   <div id="sezioniDettaglio" style="display:none">
 
     <div class="label-sett-sed" id="labelSettSed"></div>
+
+    <div class="azioni-stampa">
+      <button class="btn btn-outline btn-sm" onclick="stampaPagina()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="6"></rect><rect x="4" y="9" width="16" height="8" rx="1"></rect><rect x="7" y="14" width="10" height="7"></rect></svg>
+
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="stampaPagina()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2H15L20 7V21H6Z"></path><polyline points="15 2 15 7 20 7"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="13" y2="17"></line></svg>
+
+      </button>
+    </div>
 
     <div class="sezione-det">
       <div class="sezione-det-head">

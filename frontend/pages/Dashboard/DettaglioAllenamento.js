@@ -72,6 +72,10 @@ function tornaAllenamenti() {
   window.location.href = `Allenamenti.html?${q.toString()}`;
 }
 
+function stampaPagina() {
+  window.print();
+}
+
 // ─────────────────────────────────────────
 // UTILS
 // ─────────────────────────────────────────
