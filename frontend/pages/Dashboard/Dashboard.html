@@ -79,34 +79,9 @@
     </div>
 
     <div style="text-align:right; margin-top:20px;">
-      <button class="btn btn-red" type="button" id="btnAssistenteIA" onclick="toggleSectionAi()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">+ Assistente IA</button>
+      <!-- Pulsante sostituito dal widget globale -->
     </div>
   </div>
-</div>
-<div class="backdrop" id="aiBackdrop" onclick="deselezionaAtleta()"></div>
-
-<div class="panel-ai" id="sectionAi">
-  <div class="panel-header">
-    <h3>Chiedi all'Agente AI</h3>
-    <span class="ai-selected-pill" id="aiSelectedPill">Nessun atleta selezionato</span>
-  </div>
-  <p class="ai-hint">
-    Clicca su "Assistente IA" accanto a un atleta per contestualizzare la domanda,
-    oppure usa il pulsante in basso a destra per una domanda generale.
-  </p>
-
-  <div class="field">
-    <label>La tua domanda</label>
-    <textarea id="aiDomanda" rows="5" placeholder="Es. quali materiali ha in prestito questo atleta?"></textarea>
-  </div>
-
-  <div class="modal-actions">
-    <button class="btn btn-outline" type="button" onclick="deselezionaAtleta()">Chiudi</button>
-    <button class="btn btn-red" type="button" onclick="inviaDomandaAgente()">Invia</button>
-  </div>
-
-  <div class="ai-history" id="aiHistory"></div>
-  <div class="ai-loading" id="aiLoading">L'agente sta elaborando...</div>
 </div>
 
 
@@ -264,6 +239,7 @@
   </div>
 </div>
 
+<script src="AIwidget.js"></script>
 <script src="Dashboard.js"></script>
 </body>
 </html>

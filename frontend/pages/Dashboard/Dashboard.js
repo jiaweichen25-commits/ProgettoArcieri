@@ -232,7 +232,9 @@ function renderTable(lista) {
   tbody.querySelectorAll("[data-ai]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.ai));
-      if (a) selezionaAtleta(a);
+      if (a && window.aiWidgetSelezionaAtleta) {
+        window.aiWidgetSelezionaAtleta(a);
+      }
     });
   });
 
@@ -424,145 +426,11 @@ async function confermaElimina() {
   }
 }
 
-// ══════════════════════════════════════════
-// Chiedi all'Agente AI
-// ══════════════════════════════════════════
 
-function toggleSectionAi() {
-  const panel = document.getElementById("sectionAi");
-  const backdrop = document.getElementById("aiBackdrop");
-  if (!panel) return;
-  panel.classList.toggle("open");
-  if (backdrop) backdrop.classList.toggle("open");
-}
-
-function selezionaAtleta(atleta) {
-  selectedAtleta = atleta;
-
-  const pill = document.getElementById("aiSelectedPill");
-  if (pill) {
-    pill.textContent = `${atleta.nome} ${atleta.cognome}`;
-    pill.classList.add("active");
-  }
-
-  const textarea = document.getElementById("aiDomanda");
-  if (textarea) {
-    textarea.focus();
-    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
-  }
-
-  document.getElementById("sectionAi")?.classList.add("open");
-  document.getElementById("aiBackdrop")?.classList.add("open");
-}
-
-function deselezionaAtleta() {
-  selectedAtleta = null;
-
-  const pill = document.getElementById("aiSelectedPill");
-  if (pill) {
-    pill.textContent = "Nessun atleta selezionato";
-    pill.classList.remove("active");
-  }
-
-  const textarea = document.getElementById("aiDomanda");
-  if (textarea) textarea.value = "";
-
-  const history = document.getElementById("aiHistory");
-  if (history) history.innerHTML = "";
-
-  document.getElementById("sectionAi")?.classList.remove("open");
-  document.getElementById("aiBackdrop")?.classList.remove("open");
-}
-
-async function inviaDomandaAgente() {
-  const textarea = document.getElementById("aiDomanda");
-  const domanda = textarea ? textarea.value.trim() : "";
-  const historyBox = document.getElementById("aiHistory");
-  const loadingBox = document.getElementById("aiLoading");
-
-  if (!domanda) return;
-
-  // Aggiungi la bubble dell'utente
-  if (historyBox) {
-    const userBubble = document.createElement("div");
-    userBubble.className = "ai-bubble user-bubble";
-    userBubble.textContent = domanda;
-    historyBox.appendChild(userBubble);
-    historyBox.scrollTop = historyBox.scrollHeight;
-  }
-
-  // Pulisci il campo input
-  if (textarea) textarea.value = "";
-
-  if (loadingBox) loadingBox.classList.add("show");
-
-  try {
-    const res = await fetch(`${API_URL}/ai_assistant/query`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({
-        domanda,
-        id_atleta: selectedAtleta ? selectedAtleta.IDatleta : null,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      if (historyBox) {
-        const errorBubble = document.createElement("div");
-        errorBubble.className = "ai-bubble ai-bubble-response";
-        errorBubble.style.borderColor = "#c0392b";
-        errorBubble.style.color = "#e74c3c";
-        errorBubble.textContent = body.detail || "Errore durante la richiesta all'agente.";
-        historyBox.appendChild(errorBubble);
-        historyBox.scrollTop = historyBox.scrollHeight;
-      }
-      return;
-    }
-
-    const data = await res.json();
-    if (historyBox) {
-      const aiBubble = document.createElement("div");
-      aiBubble.className = "ai-bubble ai-bubble-response";
-      aiBubble.textContent = data.risposta || "Nessuna risposta ricevuta.";
-      
-      if (data.provider && data.model) {
-        const debugInfo = document.createElement("div");
-        debugInfo.className = "ai-debug-info";
-        debugInfo.textContent = `⚡ Generato da: ${data.model} (tramite ${data.provider}) - Task: ${data.task || "generale"}`;
-        aiBubble.appendChild(debugInfo);
-      }
-      
-      historyBox.appendChild(aiBubble);
-      historyBox.scrollTop = historyBox.scrollHeight;
-    }
-  } catch {
-    if (historyBox) {
-      const errorBubble = document.createElement("div");
-      errorBubble.className = "ai-bubble ai-bubble-response";
-      errorBubble.style.borderColor = "#c0392b";
-      errorBubble.style.color = "#e74c3c";
-      errorBubble.textContent = "Impossibile contattare il server.";
-      historyBox.appendChild(errorBubble);
-      historyBox.scrollTop = historyBox.scrollHeight;
-    }
-  } finally {
-    if (loadingBox) loadingBox.classList.remove("show");
-  }
-}
 
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
   caricaAtleti();
 
-  // Permette di inviare la domanda premendo "Invio" (Shift+Invio per andare a capo)
-  const aiInput = document.getElementById("aiDomanda");
-  if (aiInput) {
-    aiInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault(); // Evita di andare a capo
-        inviaDomandaAgente();
-      }
-    });
-  }
+  // Il tasto invio e' gestito da ai_widget.js ora
 });
