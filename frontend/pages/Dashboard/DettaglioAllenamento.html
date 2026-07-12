@@ -157,6 +157,62 @@
       flex-wrap: wrap;
     }
     .totale-frecce-box strong { color: #c0392b; }
+
+    @media print {
+      nav,
+      .selettore-box,
+      .azioni-stampa,
+      .msg-box,
+      .sezione-det-head button,
+      .nota-box button,
+      .tabella-det th:last-child,
+      .tabella-det td:last-child {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        color: #111;
+      }
+
+      .page-header h1 {
+        color: #111;
+      }
+
+      .sezione-det,
+      .nota-box {
+        background: white;
+        border: 1px solid #ddd;
+        border-left: 5px solid #c0392b;
+        break-inside: avoid;
+      }
+
+      .sezione-det-title {
+        color: #111;
+      }
+
+      .tabella-det th {
+        background: #f2f2f2;
+        color: #555;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .tabella-det td {
+        color: #222;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .totale-frecce-box {
+        background: #f2f2f2;
+        color: #333;
+      }
+
+      .nota-box textarea {
+        border: none;
+        background: transparent;
+        color: #222;
+      }
+    }
   </style>
 </head>
 <body>
@@ -223,10 +279,6 @@
     <div class="azioni-stampa">
       <button class="btn btn-outline btn-sm" onclick="stampaPagina()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="6"></rect><rect x="4" y="9" width="16" height="8" rx="1"></rect><rect x="7" y="14" width="10" height="7"></rect></svg>
-
-      </button>
-      <button class="btn btn-outline btn-sm" onclick="stampaPagina()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2H15L20 7V21H6Z"></path><polyline points="15 2 15 7 20 7"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="13" y2="17"></line></svg>
 
       </button>
     </div>
