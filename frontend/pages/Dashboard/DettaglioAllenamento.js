@@ -199,6 +199,53 @@ await fetch(
     fetchSezione("allfiscor"),
     fetchNota(),
   ]);
+
+  caricaSeduteEsistenti();
+}
+
+async function caricaSeduteEsistenti() {
+  try {
+    const res = await fetch(`${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane-sedute/`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const lista = await res.json();
+
+    const box  = document.getElementById("seduteEsistentiBox");
+    const cont = document.getElementById("seduteEsistentiList");
+
+    if (!lista.length) { box.style.display = "none"; return; }
+
+    box.style.display = "block";
+    cont.innerHTML = lista.map(s => `
+      <div class="chip-seduta${s.ha_contenuto ? " con-contenuto" : ""}" onclick="selezionaSeduta(${s.IDsettimana}, ${s.IDseduta})">
+        Sett. ${s.IDsettimana} · Sed. ${s.IDseduta}
+        ${!s.ha_contenuto ? `<span class="chip-elimina" onclick="eliminaSedutaEsistente(event, ${s.IDsettimana}, ${s.IDseduta})">×</span>` : ""}
+      </div>
+    `).join("");
+  } catch { /* ignora */ }
+}
+
+function selezionaSeduta(idSettimana, idSeduta) {
+  document.getElementById("selSettimana").value = idSettimana;
+  document.getElementById("selSeduta").value = idSeduta;
+  caricaSeduta();
+}
+
+async function eliminaSedutaEsistente(event, idSettimana, idSeduta) {
+  event.stopPropagation();
+  if (!confirm(`Eliminare la seduta ${idSettimana} — ${idSeduta}? È vuota, non contiene dati.`)) return;
+  try {
+    const res = await fetch(`${API_URL}/allenamenti/${ID_ALLENAMENTO}/settimane/${idSettimana}/sedute/${idSeduta}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok && res.status !== 204) {
+      alert("Errore nell'eliminazione.");
+      return;
+    }
+    caricaSeduteEsistenti();
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
 }
 
 async function fetchSezione(sezione) {
@@ -726,4 +773,5 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("titoloAtleta2").textContent = titolo ? `Dettaglio Allenamento: ${titolo}` : "Dettaglio Allenamento";
 
   await caricaLookup();
+  await caricaSeduteEsistenti();
 });

@@ -158,10 +158,49 @@
     }
     .totale-frecce-box strong { color: #c0392b; }
 
+    .sedute-esistenti-box { margin-bottom: 20px; }
+    .sedute-esistenti-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .sedute-esistenti-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip-seduta {
+      padding: 8px 14px;
+      border-radius: 2px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: #888;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .chip-seduta:hover { border-color: #c0392b; color: white; }
+    .chip-seduta.con-contenuto {
+      border-color: #c0392b;
+      background: rgba(192, 57, 43, 0.12);
+      color: #eee;
+    }
+    .chip-elimina {
+      margin-left: 8px;
+      color: #666;
+      font-weight: 700;
+    }
+    .chip-elimina:hover { color: #c0392b; }
+
     @media print {
       nav,
       .selettore-box,
       .azioni-stampa,
+      .sedute-esistenti-box,
       .msg-box,
       .sezione-det-head button,
       .nota-box button,
@@ -270,6 +309,11 @@
       </select>
     </div>
     <button class="btn btn-red" onclick="caricaSeduta()">Carica</button>
+  </div>
+
+  <div class="sedute-esistenti-box" id="seduteEsistentiBox" style="display:none">
+    <div class="sedute-esistenti-title">Sedute già aperte</div>
+    <div class="sedute-esistenti-list" id="seduteEsistentiList"></div>
   </div>
 
   <div id="sezioniDettaglio" style="display:none">
