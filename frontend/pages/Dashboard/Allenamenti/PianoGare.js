@@ -25,7 +25,7 @@ function authHeaders() {
 function requireAuth() {
   const token = getToken();
   if (!token) {
-    window.location.href = "../Autenticazione/Istruttore.html";
+    window.location.href = "../../Autenticazione/Istruttore.html";
     return false;
   }
   try {
@@ -34,12 +34,12 @@ function requireAuth() {
     );
     if (payload.ruolo !== "istruttore") {
       localStorage.clear();
-      window.location.href = "../Autenticazione/Istruttore.html";
+      window.location.href = "../../Autenticazione/Istruttore.html";
       return false;
     }
     return true;
   } catch {
-    window.location.href = "../Autenticazione/Istruttore.html";
+    window.location.href = "../../Autenticazione/Istruttore.html";
     return false;
   }
 }
@@ -335,7 +335,7 @@ async function promptDeleteTipoGara() {
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
   if (!ID_ALLENAMENTO) {
-    window.location.href = "Dashboard.html";
+    window.location.href = "../Dashboard.html";
     return;
   }
 

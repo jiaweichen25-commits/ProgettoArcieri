@@ -52,17 +52,17 @@ function authHeaders() {
 
 function requireAuth() {
   const token = getToken();
-  if (!token) { window.location.href = "../Autenticazione/Istruttore.html"; return false; }
+  if (!token) { window.location.href = "../../Autenticazione/Istruttore.html"; return false; }
   try {
     const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
     if (payload.ruolo !== "istruttore") {
       localStorage.clear();
-      window.location.href = "../Autenticazione/Istruttore.html";
+      window.location.href = "../../Autenticazione/Istruttore.html";
       return false;
     }
     return true;
   } catch {
-    window.location.href = "../Autenticazione/Istruttore.html";
+    window.location.href = "../../Autenticazione/Istruttore.html";
     return false;
   }
 }
@@ -764,7 +764,7 @@ async function promptDeleteLookup(endpointPath, selectId) {
 window.addEventListener("DOMContentLoaded", async () => {
   if (!requireAuth()) return;
   if (!ID_ALLENAMENTO || !ID_ATLETA) {
-    window.location.href = "Dashboard.html";
+    window.location.href = "../Dashboard.html";
     return;
   }
 

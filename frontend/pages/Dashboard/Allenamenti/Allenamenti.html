@@ -2,9 +2,10 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="../../../assets/Favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arcieri Vicenza – Piano Gare</title>
-  <link rel="stylesheet" href="Materiali.css" />
+  <title>Arcieri Vicenza – Allenamenti</title>
+  <link rel="stylesheet" href="../Materiali/Materiali.css" />
 </head>
 <body>
 
@@ -12,96 +13,75 @@
   <div class="brand">
     <div class="brand-accent"></div>
     <div class="brand-text">
-      <span>Piano Gare</span>
+      <span>Allenamenti</span>
       <strong id="titoloAtleta">—</strong>
     </div>
   </div>
   <div class="nav-right">
-    <button class="btn-logout" onclick="tornaAllenamenti()">← Allenamenti</button>
+    <button class="btn-logout" onclick="tornaDashboard()">← Dashboard</button>
   </div>
 </nav>
 
 <div class="page">
   <div class="page-header">
     <div class="pill">Area Istruttore</div>
-    <h1 id="titoloAtleta2">Piano Gare</h1>
-    <p id="periodoAllenamento">—</p>
+    <h1 id="titoloAtleta2">Allenamenti</h1>
   </div>
 
   <div class="msg-box" id="pageMsgBox"></div>
 
   <div class="section">
     <div class="section-head">
-      <div class="section-title">Elenco Gare</div>
-      <button class="btn btn-red" onclick="openAddModal()">+ Nuova Gara</button>
+      <div class="section-title">Elenco Allenamenti</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Allenamento</button>
     </div>
 
-    <div id="gareList"></div>
+    <div id="allenamentoList"></div>
 
     <div class="empty-state" id="emptyState">
-      <p>Nessuna gara programmata. Aggiungi la prima!</p>
+      <p>Nessun allenamento registrato. Aggiungi il primo!</p>
     </div>
   </div>
 </div>
 
 
 <!-- ══════════════════════════════════════════
-     MODAL: Aggiungi / Modifica Gara
+     MODAL: Aggiungi / Modifica Allenamento
 ══════════════════════════════════════════ -->
 <div class="overlay" id="formModal">
   <div class="modal">
-    <div class="modal-pill" id="formModalPill">Nuova Gara</div>
-    <h2 id="formModalTitle">Aggiungi gara</h2>
+    <div class="modal-pill" id="formModalPill">Nuovo Allenamento</div>
+    <h2 id="formModalTitle">Aggiungi allenamento</h2>
     <div class="modal-divider"></div>
 
     <div class="msg-box" id="formMsgBox"></div>
 
-    <input type="hidden" id="editGaraId" />
+    <input type="hidden" id="editAllenamentoId" />
 
-    <div class="field">
-      <label for="fTipoGara">Tipo Gara</label>
-      <div style="display:flex; gap:8px;">
-        <select id="fTipoGara" style="flex:1;"></select>
-        <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddTipoGara()">+</button>
-        <button class="btn btn-red" style="padding:0 12px;" onclick="promptDeleteTipoGara()">x</button>
+    <div class="form-row">
+      <div class="field">
+        <label>Data Inizio <span class="required">*</span></label>
+        <input type="date" id="fDataInizio" />
+      </div>
+      <div class="field">
+        <label>Data Fine <span class="required">*</span></label>
+        <input type="date" id="fDataFine" />
       </div>
     </div>
 
     <div class="field">
-      <label>Data</label>
-      <input type="date" id="fData" />
-    </div>
-
-    <div class="field">
-      <label>Luogo</label>
-      <input type="text" id="fLuogo" placeholder="es. Vicenza" />
-    </div>
-
-    <div class="field">
-      <label>Distanza</label>
-      <input type="text" id="fDistanza" placeholder="es. 18m, 25m, 50m..." />
-    </div>
-
-    <div class="field">
-      <label>Note</label>
-      <textarea id="fNote" rows="3"
-        placeholder="Note aggiuntive..."
+      <label>Obiettivi</label>
+      <textarea id="fObiettivi" rows="3"
+        placeholder="es. Migliorare la tecnica di tiro..."
         style="width:100%;background:#1e1e1e;border:1px solid #2a2a2a;color:#f0f0f0;
                padding:8px;font-family:inherit;font-size:0.88rem;border-radius:4px;
                outline:none;resize:vertical;">
       </textarea>
     </div>
 
-    <div class="field">
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-        <input type="checkbox" id="fEscludi" style="width:18px;height:18px;" />
-        <span style="color:#ccc;font-size:0.9rem;">Escludi dalla visualizzazione</span>
-      </label>
-    </div>
-
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
-      <button class="btn btn-red" onclick="salvaGara()">Salva</button>
+      <button class="btn btn-red" onclick="salvaAllenamento()">Salva</button>
     </div>
   </div>
 </div>
@@ -113,10 +93,10 @@
 <div class="overlay" id="deleteModal">
   <div class="modal modal-small">
     <div class="modal-pill">Attenzione</div>
-    <h2>Elimina Gara</h2>
+    <h2>Elimina Allenamento</h2>
     <div class="modal-divider"></div>
-    <p id="deleteMsg">Sei sicuro di voler eliminare questa gara?</p>
-    <input type="hidden" id="deleteGaraId" />
+    <p id="deleteMsg">Sei sicuro di voler eliminare questo allenamento?</p>
+    <input type="hidden" id="deleteAllenamentoId" />
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
       <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
@@ -125,7 +105,7 @@
 </div>
 
 
-<script src="AIwidget.js"></script>
-<script src="PianoGare.js"></script>
+<script src="../../../components/AIwidget.js"></script>
+<script src="Allenamenti.js"></script>
 </body>
 </html>

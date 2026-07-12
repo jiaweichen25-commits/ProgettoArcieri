@@ -2,9 +2,10 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="../../../assets/Favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arcieri Vicenza – Allenamenti</title>
-  <link rel="stylesheet" href="Materiali.css" />
+  <title>Arcieri Vicenza – Antidoping</title>
+  <link rel="stylesheet" href="../Materiali/Materiali.css" />
 </head>
 <body>
 
@@ -12,7 +13,7 @@
   <div class="brand">
     <div class="brand-accent"></div>
     <div class="brand-text">
-      <span>Allenamenti</span>
+      <span>Antidoping</span>
       <strong id="titoloAtleta">—</strong>
     </div>
   </div>
@@ -24,63 +25,60 @@
 <div class="page">
   <div class="page-header">
     <div class="pill">Area Istruttore</div>
-    <h1 id="titoloAtleta2">Allenamenti</h1>
+    <h1 id="titoloAtleta2">Antidoping</h1>
   </div>
 
   <div class="msg-box" id="pageMsgBox"></div>
 
   <div class="section">
     <div class="section-head">
-      <div class="section-title">Elenco Allenamenti</div>
-      <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Allenamento</button>
+      <div class="section-title">Elenco Antidoping</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Record</button>
     </div>
 
-    <div id="allenamentoList"></div>
+    <div id="antidopingList"></div>
 
     <div class="empty-state" id="emptyState">
-      <p>Nessun allenamento registrato. Aggiungi il primo!</p>
+      <p>Nessun record antidoping registrato. Aggiungi il primo!</p>
     </div>
   </div>
 </div>
 
 
 <!-- ══════════════════════════════════════════
-     MODAL: Aggiungi / Modifica Allenamento
+     MODAL: Aggiungi / Modifica
 ══════════════════════════════════════════ -->
 <div class="overlay" id="formModal">
   <div class="modal">
-    <div class="modal-pill" id="formModalPill">Nuovo Allenamento</div>
-    <h2 id="formModalTitle">Aggiungi allenamento</h2>
+    <div class="modal-pill" id="formModalPill">Nuovo Record</div>
+    <h2 id="formModalTitle">Aggiungi record</h2>
     <div class="modal-divider"></div>
 
     <div class="msg-box" id="formMsgBox"></div>
 
-    <input type="hidden" id="editAllenamentoId" />
+    <input type="hidden" id="editAntidopingId" />
 
-    <div class="form-row">
-      <div class="field">
-        <label>Data Inizio <span class="required">*</span></label>
-        <input type="date" id="fDataInizio" />
-      </div>
-      <div class="field">
-        <label>Data Fine <span class="required">*</span></label>
-        <input type="date" id="fDataFine" />
+    <div class="field">
+      <label>Anno <span class="required">*</span></label>
+      <input type="number" id="fAnno" placeholder="es. 2024" min="2000" max="2100" />
+    </div>
+
+    <div class="field">
+      <label>Autorizzazione Fitarco</label>
+      <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+        <input type="checkbox" id="fAutorizzazione" style="width:18px; height:18px;" />
+        <span style="color:#ccc; font-size:0.9rem;">Autorizzazione concessa</span>
       </div>
     </div>
 
     <div class="field">
-      <label>Obiettivi</label>
-      <textarea id="fObiettivi" rows="3"
-        placeholder="es. Migliorare la tecnica di tiro..."
-        style="width:100%;background:#1e1e1e;border:1px solid #2a2a2a;color:#f0f0f0;
-               padding:8px;font-family:inherit;font-size:0.88rem;border-radius:4px;
-               outline:none;resize:vertical;">
-      </textarea>
+      <label>Scadenza Autorizzazione</label>
+      <input type="date" id="fScadenza" />
     </div>
 
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
-      <button class="btn btn-red" onclick="salvaAllenamento()">Salva</button>
+      <button class="btn btn-red" onclick="salvaAntidoping()">Salva</button>
     </div>
   </div>
 </div>
@@ -92,10 +90,10 @@
 <div class="overlay" id="deleteModal">
   <div class="modal modal-small">
     <div class="modal-pill">Attenzione</div>
-    <h2>Elimina Allenamento</h2>
+    <h2>Elimina Record</h2>
     <div class="modal-divider"></div>
-    <p id="deleteMsg">Sei sicuro di voler eliminare questo allenamento?</p>
-    <input type="hidden" id="deleteAllenamentoId" />
+    <p id="deleteMsg">Sei sicuro di voler eliminare questo record?</p>
+    <input type="hidden" id="deleteAntidopingId" />
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
       <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
@@ -104,7 +102,7 @@
 </div>
 
 
-<script src="AIwidget.js"></script>
-<script src="Allenamenti.js"></script>
+<script src="../../../components/AIwidget.js"></script>
+<script src="Antidoping.js"></script>
 </body>
 </html>

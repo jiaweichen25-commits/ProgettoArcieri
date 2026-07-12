@@ -24,24 +24,24 @@ function authHeaders() {
 
 function requireAuth() {
   const token = getToken();
-  if (!token) { window.location.href = "../Autenticazione/Istruttore.html"; return false; }
+  if (!token) { window.location.href = "../../Autenticazione/Istruttore.html"; return false; }
   try {
     const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
     if (payload.ruolo !== "istruttore") {
       localStorage.clear();
-      window.location.href = "../Autenticazione/Istruttore.html";
+      window.location.href = "../../Autenticazione/Istruttore.html";
       return false;
     }
     return true;
-  } catch { window.location.href = "../Autenticazione/Istruttore.html"; return false; }
+  } catch { window.location.href = "../../Autenticazione/Istruttore.html"; return false; }
 }
 
-function tornaDashboard() { window.location.href = "Dashboard.html"; }
+function tornaDashboard() { window.location.href = "../Dashboard.html"; }
 
 function logout() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("currentUser");
-  window.location.href = "../Autenticazione/Istruttore.html";
+  window.location.href = "../../Autenticazione/Istruttore.html";
 }
 
 function showMsg(id, testo, tipo) {
@@ -481,7 +481,7 @@ async function salvaNoteCorrente() {
 
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
-  if (!ID_ATLETA) { window.location.href = "Dashboard.html"; return; }
+  if (!ID_ATLETA) { window.location.href = "../Dashboard.html"; return; }
   
   const nomeCompleto = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
   

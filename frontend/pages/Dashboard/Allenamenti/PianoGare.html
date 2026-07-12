@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="../../../assets/Favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Piano Gare</title>
+  <link rel="stylesheet" href="../Materiali/Materiali.css" />
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Piano Gare</span>
+      <strong id="titoloAtleta">—</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="btn-logout" onclick="tornaAllenamenti()">← Allenamenti</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Area Istruttore</div>
+    <h1 id="titoloAtleta2">Piano Gare</h1>
+    <p id="periodoAllenamento">—</p>
+  </div>
+
+  <div class="msg-box" id="pageMsgBox"></div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Elenco Gare</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuova Gara</button>
+    </div>
+
+    <div id="gareList"></div>
+
+    <div class="empty-state" id="emptyState">
+      <p>Nessuna gara programmata. Aggiungi la prima!</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Aggiungi / Modifica Gara
+══════════════════════════════════════════ -->
+<div class="overlay" id="formModal">
+  <div class="modal">
+    <div class="modal-pill" id="formModalPill">Nuova Gara</div>
+    <h2 id="formModalTitle">Aggiungi gara</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="formMsgBox"></div>
+
+    <input type="hidden" id="editGaraId" />
+
+    <div class="field">
+      <label for="fTipoGara">Tipo Gara</label>
+      <div style="display:flex; gap:8px;">
+        <select id="fTipoGara" style="flex:1;"></select>
+        <button class="btn btn-outline" style="padding:0 12px;" onclick="promptAddTipoGara()">+</button>
+        <button class="btn btn-red" style="padding:0 12px;" onclick="promptDeleteTipoGara()">x</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Data</label>
+      <input type="date" id="fData" />
+    </div>
+
+    <div class="field">
+      <label>Luogo</label>
+      <input type="text" id="fLuogo" placeholder="es. Vicenza" />
+    </div>
+
+    <div class="field">
+      <label>Distanza</label>
+      <input type="text" id="fDistanza" placeholder="es. 18m, 25m, 50m..." />
+    </div>
+
+    <div class="field">
+      <label>Note</label>
+      <textarea id="fNote" rows="3"
+        placeholder="Note aggiuntive..."
+        style="width:100%;background:#1e1e1e;border:1px solid #2a2a2a;color:#f0f0f0;
+               padding:8px;font-family:inherit;font-size:0.88rem;border-radius:4px;
+               outline:none;resize:vertical;">
+      </textarea>
+    </div>
+
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="fEscludi" style="width:18px;height:18px;" />
+        <span style="color:#ccc;font-size:0.9rem;">Escludi dalla visualizzazione</span>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
+      <button class="btn btn-red" onclick="salvaGara()">Salva</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: Conferma Eliminazione
+══════════════════════════════════════════ -->
+<div class="overlay" id="deleteModal">
+  <div class="modal modal-small">
+    <div class="modal-pill">Attenzione</div>
+    <h2>Elimina Gara</h2>
+    <div class="modal-divider"></div>
+    <p id="deleteMsg">Sei sicuro di voler eliminare questa gara?</p>
+    <input type="hidden" id="deleteGaraId" />
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="../../../components/AIwidget.js"></script>
+<script src="PianoGare.js"></script>
+</body>
+</html>

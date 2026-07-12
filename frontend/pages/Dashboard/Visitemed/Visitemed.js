@@ -5,7 +5,7 @@ const ID_ATLETA = Number(params.get("atleta"));
 const NOME_ATLETA = params.get("nome") || "";
 const COGNOME_ATLETA = params.get("cognome") || "";
 
-let antidopingCache = [];
+let visiteCache = [];
 
 function getToken() {
   return localStorage.getItem("access_token");
@@ -21,7 +21,7 @@ function authHeaders() {
 function requireAuth() {
   const token = getToken();
   if (!token) {
-    window.location.href = "../Autenticazione/Istruttore.html";
+    window.location.href = "../../Autenticazione/Istruttore.html";
     return false;
   }
   try {
@@ -30,24 +30,24 @@ function requireAuth() {
     );
     if (payload.ruolo !== "istruttore") {
       localStorage.clear();
-      window.location.href = "../Autenticazione/Istruttore.html";
+      window.location.href = "../../Autenticazione/Istruttore.html";
       return false;
     }
     return true;
   } catch {
-    window.location.href = "../Autenticazione/Istruttore.html";
+    window.location.href = "../../Autenticazione/Istruttore.html";
     return false;
   }
 }
 
 function tornaDashboard() {
-  window.location.href = "Dashboard.html";
+  window.location.href = "../Dashboard.html";
 }
 
 function logout() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("currentUser");
-  window.location.href = "../Autenticazione/Istruttore.html";
+  window.location.href = "../../Autenticazione/Istruttore.html";
 }
 
 function formatDate(iso) {
@@ -83,9 +83,9 @@ function closeModal(id) {
   clearMsg("formMsgBox");
 }
 
-async function caricaAntidoping() {
+async function caricaVisite() {
   try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/antidoping/`, {
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/visite/`, {
       headers: authHeaders(),
     });
     if (res.status === 401) { logout(); return; }
@@ -94,7 +94,7 @@ async function caricaAntidoping() {
       showMsg("pageMsgBox", err.detail || "Errore nel caricamento.", "error");
       return;
     }
-    antidopingCache = await res.json();
+    visiteCache = await res.json();
     renderList();
   } catch {
     showMsg("pageMsgBox", "Impossibile contattare il server.", "error");
@@ -102,35 +102,34 @@ async function caricaAntidoping() {
 }
 
 function renderList() {
-  const list = document.getElementById("antidopingList");
+  const list = document.getElementById("visitaList");
   const empty = document.getElementById("emptyState");
   list.innerHTML = "";
 
-  if (!antidopingCache.length) {
+  if (!visiteCache.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  antidopingCache.forEach((a) => {
-    const autorizzato = a.autorizzazione_fitarco;
+  visiteCache.forEach((v) => {
+    const scaduta = new Date(v.data_scadenza) < new Date();
     const card = document.createElement("div");
-    card.className = "materiale-card" + (autorizzato ? " in-uso" : "");
+    card.className = "materiale-card" + (scaduta ? "" : " in-uso");
     card.innerHTML = `
       <div>
-        <div class="materiale-data">Anno: ${a.anno}</div>
-        <span class="materiale-badge" style="background:${autorizzato ? "#276749" : "#c53030"}">
-          ${autorizzato ? "Autorizzato" : "Non autorizzato"}
+        <div class="materiale-data">Visita: ${formatDate(v.data_visita)}</div>
+        <span class="materiale-badge" style="background:${scaduta ? "#c53030" : "#276749"}">
+          ${scaduta ? "Scaduta" : "Valida"}
         </span>
       </div>
       <div class="materiale-summary">
-        <span><strong>Anno:</strong> ${a.anno}</span>
-        <span><strong>Autorizzazione Fitarco:</strong> ${autorizzato ? "Sì" : "No"}</span>
-        <span><strong>Scadenza:</strong> ${formatDate(a.scadenza_autorizzazione)}</span>
+        <span><strong>Data visita:</strong> ${formatDate(v.data_visita)}</span>
+        <span><strong>Scadenza:</strong> ${formatDate(v.data_scadenza)}</span>
       </div>
       <div class="materiale-actions">
-        <button class="btn btn-sm btn-outline" type="button" data-edit="${a.IDantidoping}">Modifica</button>
-        <button class="btn btn-sm btn-red" type="button" data-delete="${a.IDantidoping}">Elimina</button>
+        <button class="btn btn-sm btn-outline" type="button" data-edit="${v.IDvisita}">Modifica</button>
+        <button class="btn btn-sm btn-red" type="button" data-delete="${v.IDvisita}">Elimina</button>
       </div>
     `;
     list.appendChild(card);
@@ -138,89 +137,79 @@ function renderList() {
 
   list.querySelectorAll("[data-edit]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const a = antidopingCache.find((x) => x.IDantidoping === Number(btn.dataset.edit));
-      if (a) openEditModal(a);
+      const v = visiteCache.find((x) => x.IDvisita === Number(btn.dataset.edit));
+      if (v) openEditModal(v);
     });
   });
 
   list.querySelectorAll("[data-delete]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const a = antidopingCache.find((x) => x.IDantidoping === Number(btn.dataset.delete));
-      if (a) openDeleteModal(a);
+      const v = visiteCache.find((x) => x.IDvisita === Number(btn.dataset.delete));
+      if (v) openDeleteModal(v);
     });
   });
 }
 
 function openAddModal() {
   clearMsg("formMsgBox");
-  document.getElementById("editAntidopingId").value = "";
-  document.getElementById("fAnno").value = new Date().getFullYear();
-  document.getElementById("fAutorizzazione").checked = false;
-  document.getElementById("fScadenza").value = "";
-  document.getElementById("formModalPill").textContent = "Nuovo Record";
-  document.getElementById("formModalTitle").textContent = "Aggiungi record";
+  document.getElementById("editVisitaId").value = "";
+  document.getElementById("fDataVisita").value = "";
+  document.getElementById("fDataScadenza").value = "";
+  document.getElementById("formModalPill").textContent = "Nuova Visita";
+  document.getElementById("formModalTitle").textContent = "Aggiungi visita";
   openModal("formModal");
 }
 
-function openEditModal(a) {
+function openEditModal(v) {
   clearMsg("formMsgBox");
-  document.getElementById("editAntidopingId").value = a.IDantidoping;
-  document.getElementById("fAnno").value = a.anno;
-  document.getElementById("fAutorizzazione").checked = !!a.autorizzazione_fitarco;
-  document.getElementById("fScadenza").value = toInputDate(a.scadenza_autorizzazione);
+  document.getElementById("editVisitaId").value = v.IDvisita;
+  document.getElementById("fDataVisita").value = toInputDate(v.data_visita);
+  document.getElementById("fDataScadenza").value = toInputDate(v.data_scadenza);
   document.getElementById("formModalPill").textContent = "Modifica";
-  document.getElementById("formModalTitle").textContent = "Modifica record";
+  document.getElementById("formModalTitle").textContent = "Modifica visita";
   openModal("formModal");
 }
 
-function openDeleteModal(a) {
-  document.getElementById("deleteAntidopingId").value = a.IDantidoping;
+function openDeleteModal(v) {
+  document.getElementById("deleteVisitaId").value = v.IDvisita;
   document.getElementById("deleteMsg").textContent =
-    `Eliminare il record antidoping dell'anno ${a.anno}?`;
+    `Eliminare la visita del ${formatDate(v.data_visita)}?`;
   openModal("deleteModal");
 }
 
-async function salvaAntidoping() {
+async function salvaVisita() {
   clearMsg("formMsgBox");
-  const anno = document.getElementById("fAnno").value;
+  const data_visita = document.getElementById("fDataVisita").value;
+  const data_scadenza = document.getElementById("fDataScadenza").value;
 
-  if (!anno) {
-    showMsg("formMsgBox", "L'anno è obbligatorio.", "error");
+  if (!data_visita || !data_scadenza) {
+    showMsg("formMsgBox", "Entrambe le date sono obbligatorie.", "error");
     return;
   }
 
   const oggi = new Date().toISOString().slice(0, 10);
-  const scadenza = document.getElementById("fScadenza").value;
 
-  if (scadenza && scadenza < oggi) {
-    showMsg("formMsgBox", "La data di scadenza non può essere nel passato.", "error");
+  if (data_visita < oggi) {
+    showMsg("formMsgBox", "La data della visita non può essere nel passato.", "error");
     return;
   }
 
-  if (scadenza) {
-    const annoScadenza = new Date(scadenza).getFullYear();
-    if (annoScadenza < Number(anno)) {
-      showMsg("formMsgBox", "La data di scadenza non può essere precedente all'anno del record.", "error");
-      return;
-    }
+  if (data_scadenza <= data_visita) {
+    showMsg("formMsgBox", "La data di scadenza deve essere successiva alla data della visita.", "error");
+    return;
   }
-  const dati = {
-    anno: Number(anno),
-    autorizzazione_fitarco: document.getElementById("fAutorizzazione").checked,
-    scadenza_autorizzazione: scadenza || null,
-  };
 
-  const id = document.getElementById("editAntidopingId").value;
+  const id = document.getElementById("editVisitaId").value;
   const isEdit = !!id;
   const url = isEdit
-    ? `${API_URL}/atleti/${ID_ATLETA}/antidoping/${id}`
-    : `${API_URL}/atleti/${ID_ATLETA}/antidoping/`;
+    ? `${API_URL}/atleti/${ID_ATLETA}/visite/${id}`
+    : `${API_URL}/atleti/${ID_ATLETA}/visite/`;
 
   try {
     const res = await fetch(url, {
       method: isEdit ? "PUT" : "POST",
       headers: authHeaders(),
-      body: JSON.stringify(dati),
+      body: JSON.stringify({ data_visita, data_scadenza }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -228,16 +217,16 @@ async function salvaAntidoping() {
       return;
     }
     closeModal("formModal");
-    await caricaAntidoping();
+    await caricaVisite();
   } catch {
     showMsg("formMsgBox", "Impossibile contattare il server.", "error");
   }
 }
 
 async function confermaElimina() {
-  const id = document.getElementById("deleteAntidopingId").value;
+  const id = document.getElementById("deleteVisitaId").value;
   try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/antidoping/${id}`, {
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/visite/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -247,7 +236,7 @@ async function confermaElimina() {
       return;
     }
     closeModal("deleteModal");
-    await caricaAntidoping();
+    await caricaVisite();
   } catch {
     alert("Impossibile contattare il server.");
   }
@@ -256,12 +245,12 @@ async function confermaElimina() {
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
   if (!ID_ATLETA) {
-    window.location.href = "Dashboard.html";
+    window.location.href = "../Dashboard.html";
     return;
   }
   const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
   document.getElementById("titoloAtleta").textContent = titolo || "—";
   document.getElementById("titoloAtleta2").textContent =
-    titolo ? `Antidoping: ${titolo}` : "Antidoping";
-  caricaAntidoping();
+    titolo ? `Visite Mediche: ${titolo}` : "Visite Mediche";
+  caricaVisite();
 });

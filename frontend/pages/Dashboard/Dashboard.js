@@ -184,7 +184,7 @@ function renderTable(lista) {
           nome: a.nome || "",
           cognome: a.cognome || "",
         });
-        window.location.href = `Materiali.html?${q.toString()}`;
+        window.location.href = `Materiali/Materiali.html?${q.toString()}`;
       }
     });
   });
@@ -194,7 +194,7 @@ function renderTable(lista) {
       const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.visite));
       if (a) {
         const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
-        window.location.href = `Visitemed.html?${q.toString()}`;
+        window.location.href = `Visitemed/Visitemed.html?${q.toString()}`;
       }
     });
   });
@@ -204,7 +204,7 @@ function renderTable(lista) {
       const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.antidoping));
       if (a) {
         const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
-        window.location.href = `Antidoping.html?${q.toString()}`;
+        window.location.href = `Antidoping/Antidoping.html?${q.toString()}`;
       }
     });
   });
@@ -214,7 +214,7 @@ function renderTable(lista) {
       const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.allenamenti));
       if (a) {
         const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
-        window.location.href = `Allenamenti.html?${q.toString()}`;
+        window.location.href = `Allenamenti/Allenamenti.html?${q.toString()}`;
       }
     });
   });
@@ -224,7 +224,7 @@ function renderTable(lista) {
       const a = atletiCache.find((x) => x.IDatleta === Number(btn.dataset.segnapunti));
       if (a) {
         const q = new URLSearchParams({ atleta: a.IDatleta, nome: a.nome || "", cognome: a.cognome || "" });
-        window.location.href = `Segnapunti.html?${q.toString()}`;
+        window.location.href = `Segnapunti/Segnapunti.html?${q.toString()}`;
       }
     });
   });
