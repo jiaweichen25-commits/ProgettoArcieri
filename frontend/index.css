@@ -49,8 +49,9 @@ body {
     overflow: hidden;
 }
 
+/* Spazio riservato per il logo aziendale, da inserire qui in futuro.
 .card::before {
-    content: "🏹";
+    content: "🏹"; #background-image: url("logo.png")
     position: absolute;
     right: -10px;
     bottom: -30px;
@@ -59,6 +60,7 @@ body {
     pointer-events: none;
     user-select: none;
 }
+*/
 
 .tag {
     display: inline-block;
