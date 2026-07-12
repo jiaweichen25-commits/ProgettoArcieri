@@ -15,6 +15,11 @@ class DettaglioOut(BaseModel):
     IDsettimana: int
     IDseduta: int
 
+class SedutaEsistenteOut(BaseModel):
+    IDsettimana: int
+    IDseduta: int
+    ha_contenuto: bool
+
 
 # ─────────────────────────────────────────
 # TdetStretching

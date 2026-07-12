@@ -41,6 +41,18 @@ def get_sedute(id_utente: int, id_allenamento: int, id_settimana: int):
         for r in righe
     ]
 
+def get_tutte_sedute(id_utente: int, id_allenamento: int):
+    _autorizza(id_utente, id_allenamento)
+    righe = repo.get_tutte_sedute(id_allenamento)
+    return [
+        {
+            "IDsettimana":  r[0],
+            "IDseduta":     r[1],
+            "ha_contenuto": r[2],
+        }
+        for r in righe
+    ]
+
 def crea_seduta(id_utente: int, id_allenamento: int, dati: dict):
     _autorizza(id_utente, id_allenamento)
     return repo.crea_seduta(id_allenamento, dati)

@@ -20,6 +20,34 @@ def get_sedute(id_allenamento: int, id_settimana: int):
     finally:
         conn.close()
 
+def get_tutte_sedute(id_allenamento: int):
+    """Tutte le settimane/sedute già aperte per un allenamento, con indicazione se contengono già dati."""
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''SELECT ta."IDsettimana", ta."IDseduta",
+                       (
+                            EXISTS(SELECT 1 FROM "TdetStretching" s
+                                   WHERE s."IDallenamento" = ta."IDallenamento" AND s."IDsettimana" = ta."IDsettimana" AND s."IDseduta" = ta."IDseduta")
+                         OR EXISTS(SELECT 1 FROM "TdetRiscaldamento" r
+                                   WHERE r."IDallenamento" = ta."IDallenamento" AND r."IDsettimana" = ta."IDsettimana" AND r."IDseduta" = ta."IDseduta")
+                         OR EXISTS(SELECT 1 FROM "TdetTecForCor" t
+                                   WHERE t."IDallenamento" = ta."IDallenamento" AND t."IDsettimana" = ta."IDsettimana" AND t."IDseduta" = ta."IDseduta")
+                         OR EXISTS(SELECT 1 FROM "TdetAllFisForRes" f
+                                   WHERE f."IDallenamento" = ta."IDallenamento" AND f."IDsettimana" = ta."IDsettimana" AND f."IDseduta" = ta."IDseduta")
+                         OR EXISTS(SELECT 1 FROM "TdetAllFisCor" c
+                                   WHERE c."IDallenamento" = ta."IDallenamento" AND c."IDsettimana" = ta."IDsettimana" AND c."IDseduta" = ta."IDseduta")
+                       ) AS ha_contenuto
+                   FROM "TdetAllenamenti" ta
+                   WHERE ta."IDallenamento" = %s
+                   ORDER BY ta."IDsettimana", ta."IDseduta"''',
+                (id_allenamento,)
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
+
 def crea_seduta(id_allenamento: int, dati: dict):
     conn = get_db_conn()
     try:

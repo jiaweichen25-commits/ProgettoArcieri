@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Response, status
 from typing import List
 from schemas.dettaglioallenamenti_schemas import (
-    DettaglioCreate, DettaglioOut,
+    DettaglioCreate, DettaglioOut, SedutaEsistenteOut,
     StretchingCreate, StretchingUpdate, StretchingOut,
     RiscaldamentoCreate, RiscaldamentoUpdate, RiscaldamentoOut,
     TecForCorCreate, TecForCorUpdate, TecForCorOut,
@@ -36,6 +36,13 @@ def lista_sedute(
     utente: dict = Depends(solo_istruttore),
 ):
     return svc.get_sedute(utente["id_utente"], id_allenamento, id_settimana)
+
+@router.get("/{id_allenamento}/settimane-sedute/", response_model=List[SedutaEsistenteOut])
+def lista_tutte_sedute(
+    id_allenamento: int,
+    utente: dict = Depends(solo_istruttore),
+):
+    return svc.get_tutte_sedute(utente["id_utente"], id_allenamento)
 
 @router.post("/{id_allenamento}/settimane/{id_settimana}/sedute/", status_code=status.HTTP_201_CREATED)
 def aggiungi_seduta(
