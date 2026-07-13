@@ -1,9 +1,13 @@
 .env
 
-__pycache__/
-
-*.pyc
-
 venv/
+.venv/
+
+__pycache__/
+**/__pycache__/
+*.py[cod]
+**/*.py[cod]
+.pytest_cache/
+.mypy_cache/
 
 README.md
