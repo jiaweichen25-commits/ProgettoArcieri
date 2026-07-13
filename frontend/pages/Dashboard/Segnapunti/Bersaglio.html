@@ -20,6 +20,7 @@
     #target {
       cursor: crosshair;
       touch-action: none;
+      width: 100%; /* Forza l'SVG a prendersi tutto lo spazio disponibile */
       max-width: 100%;
       height: auto;
     }
@@ -104,7 +105,7 @@
 <body>
 
 <div class="target-wrap">
-  <svg id="target" viewBox="0 0 300 300" width="280" height="280" role="img" aria-label="Bersaglio indoor 40 cm cliccabile">
+  <svg id="target" viewBox="0 0 300 300" role="img" aria-label="Bersaglio indoor 40 cm cliccabile">
     <circle cx="150" cy="150" r="140" fill="#F5F3EE" stroke="#333" stroke-width="1.5"/>
     <circle cx="150" cy="150" r="112" fill="#1A1A1A" stroke="#333" stroke-width="1.5"/>
     <circle cx="150" cy="150" r="84" fill="#157CC4" stroke="#333" stroke-width="1.5"/>
@@ -144,7 +145,6 @@
 
 <div class="hits-log" id="hitsLog"></div>
 
-<script src="../../../components/AIwidget.js"></script>
 <script src="Bersaglio.js"></script>
 </body>
 </html>

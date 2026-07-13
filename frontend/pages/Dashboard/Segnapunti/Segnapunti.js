@@ -327,7 +327,7 @@ function disegnaTabella() {
   const trTot = document.createElement("tr");
   trTot.className = "totale-row";
   trTot.innerHTML = `
-    <td colspan="${1 + fpv}">TOTALE MEZZA ${mezzaAttiva}</td>
+    <td colspan="${1 + fpv}">TOTALE TURNO ${mezzaAttiva}</td>
     <td class="somma" id="totMezza-somma">0</td>
     <td class="totale" id="totMezza-totale">0</td>
     <td class="contatori" id="totMezza-10">0</td>
