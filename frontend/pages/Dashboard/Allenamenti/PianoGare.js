@@ -144,17 +144,16 @@ function renderList() {
   const empty = document.getElementById("emptyState");
   list.innerHTML = "";
 
-  const gareVisibili = gareCache.filter((g) => !g.escludi_visualizzazione);
-
-  if (!gareVisibili.length) {
+  if (!gareCache.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  gareVisibili.forEach((g) => {
+  gareCache.forEach((g) => {
     const card = document.createElement("div");
     card.className = "materiale-card" + (g.escludi_visualizzazione ? "" : " in-uso");
+    if (g.escludi_visualizzazione) card.style.background = "#2a2a2a";
     card.innerHTML = `
       <div>
         <div class="materiale-data">${formatDate(g.data)}</div>
@@ -230,6 +229,12 @@ function openDeleteModal(g) {
 async function salvaGara() {
   clearMsg("formMsgBox");
 
+  const fData = document.getElementById("fData");
+  if (!fData.checkValidity()) {
+    showMsg("formMsgBox", "La data deve essere compresa nel periodo dell'allenamento.", "error");
+    return;
+  }
+  
   const dati = {
     id_tipogara: document.getElementById("fTipoGara").value
       ? Number(document.getElementById("fTipoGara").value)
@@ -340,6 +345,9 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const titolo = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
+  const fData = document.getElementById("fData");
+  if (DATA_INIZIO) fData.min = toInputDate(DATA_INIZIO);
+  if (DATA_FINE) fData.max = toInputDate(DATA_FINE);
   document.getElementById("titoloAtleta").textContent = titolo || "—";
   document.getElementById("titoloAtleta2").textContent =
     titolo ? `Piano Gare: ${titolo}` : "Piano Gare";
