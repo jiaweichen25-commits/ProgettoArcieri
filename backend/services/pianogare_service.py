@@ -19,30 +19,30 @@ def _verifica_allenamento(id_allenamento: int, id_istruttore: int):
             detail="Allenamento non trovato o non appartiene a questo istruttore"
         )
 
-def _verifica_data_nel_periodo(id_allenamento: int, id_istruttore: int, data):
-    if data is None:
-        return
+def _verifica_allenamento_e_periodo(id_allenamento: int, id_istruttore: int, data):
     periodo = allenamenti_repository.get_periodo_allenamento(id_allenamento, id_istruttore)
     if periodo is None:
-        return
-    data_inizio, data_fine = periodo
-    if data < data_inizio or data > data_fine:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"La data deve essere compresa tra {data_inizio.strftime('%d/%m/%Y')} e {data_fine.strftime('%d/%m/%Y')}"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Allenamento non trovato o non appartiene a questo istruttore"
         )
+    if data is not None:
+        data_inizio, data_fine = periodo
+        if data < data_inizio or data > data_fine:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"La data deve essere compresa tra {data_inizio.strftime('%d/%m/%Y')} e {data_fine.strftime('%d/%m/%Y')}"
+            )
 
 def crea_gara(id_utente: int, id_allenamento: int, dati: dict):
     id_istruttore = _get_istruttore_or_404(id_utente)
-    _verifica_allenamento(id_allenamento, id_istruttore)
-    _verifica_data_nel_periodo(id_allenamento, id_istruttore, dati.get("data"))
+    _verifica_allenamento_e_periodo(id_allenamento, id_istruttore, dati.get("data"))
     new_id = pianogare_repository.crea_gara(id_allenamento, dati)
     return {"IDpianogara": new_id, "message": "Gara aggiunta con successo"}
 
 def modifica_gara(id_utente: int, id_allenamento: int, id_pianogara: int, dati: dict):
     id_istruttore = _get_istruttore_or_404(id_utente)
-    _verifica_allenamento(id_allenamento, id_istruttore)
-    _verifica_data_nel_periodo(id_allenamento, id_istruttore, dati.get("data"))
+    _verifica_allenamento_e_periodo(id_allenamento, id_istruttore, dati.get("data"))
     ok = pianogare_repository.modifica_gara(id_pianogara, id_allenamento, dati)
     if not ok:
         raise HTTPException(
