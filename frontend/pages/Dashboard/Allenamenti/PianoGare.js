@@ -157,9 +157,7 @@ function renderList() {
     card.innerHTML = `
       <div>
         <div class="materiale-data">${formatDate(g.data)}</div>
-        <span class="materiale-badge" style="background:${g.escludi_visualizzazione ? "#555" : "#276749"}">
-          ${g.escludi_visualizzazione ? "Esclusa" : "Visibile"}
-        </span>
+        <span class="materiale-badge">${g.escludi_visualizzazione ? "Esclusa" : "Visibile"}</span>
       </div>
       <div class="materiale-summary">
         <span><strong>Tipo:</strong> ${escHtml(g.tipo_gara) || "—"}</span>

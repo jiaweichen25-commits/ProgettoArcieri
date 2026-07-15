@@ -178,10 +178,11 @@ function renderList() {
   materialiCache.forEach((m) => {
     const card = document.createElement("div");
     card.className = "materiale-card" + (m.materiale_corrente ? " in-uso" : "");
+    if (!m.materiale_corrente) card.style.background = "#2a2a2a";
     card.innerHTML = `
       <div>
         <div class="materiale-data">${formatDate(m.data)}</div>
-        ${m.materiale_corrente ? '<span class="materiale-badge">In uso</span>' : ""}
+        <span class="materiale-badge">${m.materiale_corrente ? "In uso" : "Non in uso"}</span>
       </div>
       <div class="materiale-summary">
         <span><strong>Riser:</strong> ${escHtml(m.riser) || "—"}</span>
