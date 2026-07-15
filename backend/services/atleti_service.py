@@ -1,6 +1,9 @@
 from fastapi import HTTPException, status
 from repositories import atleti_repository, user_repository
 import bcrypt
+import string
+import random
+from services.email_service import invia_email_credenziali
 
 # --- FUNZIONI UTILITÀ PRIVATE ---
 
@@ -68,11 +71,15 @@ def crea_atleta(id_utente: int, dati: dict):
         id_utente_atleta = existing[2]
     else:
         # Crea account con password temporanea
-        password_temp = "123456"
+        chars = string.ascii_letters + string.digits
+        password_temp = ''.join(random.choice(chars) for _ in range(8))
         hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
-        user_repository.create_user(email_atleta, hashed, "atleta")
+        user_repository.create_user(email_atleta, hashed, "atleta", must_change_password=True)
         nuovo_utente = user_repository.get_user_by_email(email_atleta)
         id_utente_atleta = nuovo_utente[2]
+        
+        # Invia email con credenziali
+        invia_email_credenziali(email_atleta, password_temp, "atleta")
 
     new_id = atleti_repository.crea_atleta(id_istruttore, id_utente_atleta, dati)
     return {"IDatleta": new_id, "message": "Atleta creato con successo"}

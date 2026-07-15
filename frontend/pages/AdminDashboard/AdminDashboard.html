@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/Favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcieri Vicenza – Dashboard Admin</title>
+  <link rel="stylesheet" href="../Dashboard/Dashboard.css" />
+  <style>
+    /* Stili aggiuntivi specifici per l'admin */
+    .row-clickable {
+        cursor: pointer;
+    }
+    .row-clickable:hover {
+        background-color: #f1f5f9;
+    }
+    .table-sub-modal {
+        max-width: 900px;
+        width: 90%;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-accent"></div>
+    <div class="brand-text">
+      <span>Portale Ufficiale</span>
+      <strong>Arcieri Vicenza</strong>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user" style="cursor: pointer;" onclick="openProfileModal()">Benvenuto, <strong id="navUser">Admin</strong> ⚙️</div>
+    <button class="btn-logout" onclick="logout()">Esci</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="pill">Area Amministratore</div>
+    <h1>Dashboard</h1>
+    <p>Gestione degli istruttori</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Istruttori registrati</div>
+      <div class="stat-num" id="cntIstruttori">0</div>
+      <div class="stat-sub">nel sistema</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Lista Istruttori</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Istruttore</button>
+    </div>
+
+    <div class="searchbar">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Cerca per nome, cognome o email..."
+        oninput="filterTable()"
+      />
+    </div>
+
+    <div class="table-wrap">
+      <table id="istruttoriTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Qualifica</th>
+            <th>Email</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="istruttoriBody">
+          </tbody>
+      </table>
+
+      <div class="empty-state" id="emptyState">
+        <p>Nessun istruttore trovato.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Aggiunta Istruttore -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-pill">Nuovo Istruttore</div>
+    <h2>Aggiungi</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="addMsgBox"></div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Nome <span class="required">*</span></label>
+        <input type="text" id="addNome" placeholder="es. Marco" />
+      </div>
+      <div class="field">
+        <label>Cognome <span class="required">*</span></label>
+        <input type="text" id="addCognome" placeholder="es. Rossi" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Email <span class="required">*</span></label>
+        <input type="email" id="addEmail" placeholder="email@example.com" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="addUsername" placeholder="Opzionale" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Qualifica</label>
+        <input type="text" id="addQualifica" placeholder="es. Istruttore di base" />
+      </div>
+      <div class="field">
+        <!-- Spazio vuoto o altro campo -->
+      </div>
+    </div>
+      <div class="field">
+        <label>Qualifica</label>
+        <input type="text" id="addQualifica" placeholder="es. Istruttore di base" />
+      </div>
+    </div>
+    
+    <p style="font-size: 0.9em; color: #64748b; margin-top: 10px;">
+        Verrà generata una password casuale e inviata all'indirizzo email specificato. L'istruttore dovrà cambiarla al primo accesso.
+    </p>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">Annulla</button>
+      <button class="btn-confirm" id="btnSalva" onclick="salvaIstruttore()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Lista Atleti Istruttore -->
+<div class="overlay" id="atletiModal">
+  <div class="modal table-sub-modal">
+    <div class="modal-pill">Atleti Associati</div>
+    <h2 id="atletiModalTitle">Atleti di ...</h2>
+    <div class="modal-divider"></div>
+
+    <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
+      <table id="atletiTable">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Codice Fiscale</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody id="atletiBody">
+        </tbody>
+      </table>
+      <div class="empty-state" id="emptyAtletiState" style="display: none;">
+        <p>Nessun atleta associato a questo istruttore.</p>
+      </div>
+    </div>
+
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="btn-cancel" onclick="closeAtletiModal()">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Modifica Istruttore -->
+<div class="overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-pill">Modifica Istruttore</div>
+    <h2>Modifica Dati</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="editMsgBox"></div>
+    <input type="hidden" id="editId" />
+
+    <div class="form-row">
+      <div class="field">
+        <label>Nome <span class="required">*</span></label>
+        <input type="text" id="editNome" />
+      </div>
+      <div class="field">
+        <label>Cognome <span class="required">*</span></label>
+        <input type="text" id="editCognome" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Email <span class="required">*</span></label>
+        <input type="email" id="editEmail" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="editUsername" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Qualifica</label>
+        <input type="text" id="editQualifica" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditModal()">Annulla</button>
+      <button class="btn-confirm" id="btnEditSalva" onclick="salvaModificheIstruttore()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Mio Profilo Admin -->
+<div class="overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-pill">Impostazioni Admin</div>
+    <h2>Mio Profilo</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="profileMsgBox"></div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Email <span class="required">*</span></label>
+        <input type="email" id="profileEmail" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="profileUsername" placeholder="Opzionale" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeProfileModal()">Annulla</button>
+      <button class="btn-confirm" id="btnProfileSalva" onclick="salvaProfilo()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<script src="AdminDashboard.js"></script>
+</body>
+</html>

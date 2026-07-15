@@ -10,8 +10,18 @@ function showMsg(testo, tipo) {
 
 function showModalMsg(testo, tipo) {
     const box = document.getElementById("modalMsgBox");
-    box.textContent = testo;
-    box.className = "msg-box " + tipo;
+    if(box) {
+        box.textContent = testo;
+        box.className = "msg-box " + tipo;
+    }
+}
+
+function showChangePwdMsg(testo, tipo) {
+    const box = document.getElementById("changePwdMsgBox");
+    if(box) {
+        box.textContent = testo;
+        box.className = "msg-box " + tipo;
+    }
 }
 
 function parseToken(token) {
@@ -21,15 +31,20 @@ function parseToken(token) {
 function redirectByRuolo(token) {
     try {
         const payload = parseToken(token);
-        if (payload.ruolo !== "istruttore") {
+        if (payload.ruolo !== "istruttore" && payload.ruolo !== "admin") {
             localStorage.removeItem("access_token");
             localStorage.removeItem("currentUser");
-            showMsg("Questo accesso è riservato agli istruttori.", "error");
+            showMsg("Questo accesso è riservato agli istruttori o agli admin.", "error");
             return;
         }
         const currentUser = { role: payload.ruolo, email: payload.sub };
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
-        window.location.href = DASHBOARD;
+        
+        if (payload.ruolo === "admin") {
+            window.location.href = "../AdminDashboard/AdminDashboard.html";
+        } else {
+            window.location.href = DASHBOARD;
+        }
     } catch (e) {
         console.error("Errore nel reindirizzamento:", e);
         showMsg("Errore nella lettura dei dati di accesso.", "error");
@@ -69,7 +84,14 @@ async function handleLogin(e) {
             localStorage.removeItem("remember_email");
         }
 
-        redirectByRuolo(data.access_token);
+        if (data.must_change_password) {
+            // Mostra modale cambio password
+            document.getElementById("changePwdMsgBox").className = "msg-box";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("changePasswordModal").classList.add("open");
+        } else {
+            redirectByRuolo(data.access_token);
+        }
 
     } catch {
         showMsg("Impossibile contattare il server. Verifica che il backend sia avviato.", "error");
@@ -79,57 +101,56 @@ async function handleLogin(e) {
     }
 }
 
-function openRegisterModal() {
-    document.getElementById("regNome").value     = "";
-    document.getElementById("regCognome").value  = "";
-    document.getElementById("regEmail").value    = "";
-    document.getElementById("regPassword").value = "";
-    document.getElementById("modalMsgBox").className = "msg-box";
-    document.getElementById("registerModal").classList.add("open");
-}
+async function handleChangePassword() {
+    const newPassword = document.getElementById("newPassword").value;
+    const oldPassword = document.getElementById("loginPassword").value;
+    const btn = document.getElementById("changePwdBtn");
+    
+    if (newPassword.length < 6) {
+        showChangePwdMsg("La password deve essere di almeno 6 caratteri.", "error");
+        return;
+    }
 
-function closeRegisterModal() {
-    document.getElementById("registerModal").classList.remove("open");
-}
-
-async function handleRegister() {
-    const nome     = document.getElementById("regNome").value.trim();
-    const cognome  = document.getElementById("regCognome").value.trim();
-    const email    = document.getElementById("regEmail").value.trim();
-    const password = document.getElementById("regPassword").value;
-    const btn      = document.getElementById("regBtn");
-
-    if (!nome || !cognome || !email || !password) { showModalMsg("Compila tutti i campi.", "error"); return; }
-    if (password.length < 6) { showModalMsg("Password di almeno 6 caratteri.", "error"); return; }
-
-    btn.disabled    = true;
-    btn.textContent = "Registrazione...";
+    btn.disabled = true;
+    btn.textContent = "Salvataggio...";
 
     try {
-        const res = await fetch(`${API_URL}/auth/register`, {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ email, password, ruolo: "istruttore", nome, cognome })
+        const token = localStorage.getItem("access_token");
+        const res = await fetch(`${API_URL}/auth/change-password`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                old_password: oldPassword, 
+                new_password: newPassword 
+            })
         });
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            showModalMsg(err.detail || "Errore durante la registrazione.", "error");
+            showChangePwdMsg(err.detail || "Errore nel cambio password.", "error");
             return;
         }
 
-        const data = await res.json();
-        localStorage.setItem("access_token", data.access_token);
-        closeRegisterModal();
-        redirectByRuolo(data.access_token);
+        document.getElementById("changePasswordModal").classList.remove("open");
+        
+        // Per rinfrescare il token (che ora non ha più must_change_password)
+        // Rifacciamo il login
+        const email = document.getElementById("loginEmail").value.trim();
+        document.getElementById("loginPassword").value = newPassword;
+        await handleLogin({preventDefault: () => {}});
 
-    } catch {
-        showModalMsg("Impossibile contattare il server.", "error");
+    } catch (e) {
+        showChangePwdMsg("Errore di connessione al server.", "error");
     } finally {
-        btn.disabled    = false;
-        btn.textContent = "Registrati";
+        btn.disabled = false;
+        btn.textContent = "Salva Nuova Password";
     }
 }
+
+// Rimossa registrazione istruttori
 
 window.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("remember_email");

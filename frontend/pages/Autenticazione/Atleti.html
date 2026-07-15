@@ -22,8 +22,8 @@
 
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="field">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="email@example.com" required />
+                <label>Username o Email</label>
+                <input type="email" id="loginEmail" placeholder="atleta@esempio.it o email" required />
             </div>
             <div class="field">
                 <label>Password</label>
@@ -50,29 +50,24 @@
         </form>
     </div>
 
-   <!-- MODALE REGISTRAZIONE DISABILITATA - gestita dall'istruttore
-    <div class="modal-overlay" id="registerModal">
+    <!-- Modale Cambio Password Primo Accesso -->
+    <div class="modal-overlay" id="changePasswordModal">
         <div class="modal-box">
-            <h3>Crea Account</h3>
-
-            <div class="msg-box" id="modalMsgBox"></div>
+            <h3>Cambio Password Obbligatorio</h3>
+            <p>Per motivi di sicurezza, devi cambiare la password al tuo primo accesso.</p>
+            
+            <div class="msg-box" id="changePwdMsgBox"></div>
 
             <div class="field">
-                <label>Email</label>
-                <input type="email" id="regEmail" placeholder="email@example.com" />
-            </div>
-            <div class="field">
-                <label>Password <span style="color:#555; font-weight:400;">(min. 6 caratteri)</span></label>
-                <input type="password" id="regPassword" placeholder="••••••••" />
+                <label>Nuova Password <span style="color:#555; font-weight:400;">(min. 6 caratteri)</span></label>
+                <input type="password" id="newPassword" placeholder="••••••••" required />
             </div>
 
             <div class="modal-actions">
-                <button class="btn-cancel"  onclick="closeRegisterModal()">Annulla</button>
-                <button class="btn-confirm" id="regBtn" onclick="handleRegister()">Registrati</button>
+                <button class="btn-confirm" id="changePwdBtn" onclick="handleChangePassword()">Salva Nuova Password</button>
             </div>
         </div>
     </div>
--->
     <footer>
         <span> Arcieri Vicenza</span>
         <span>© 2026</span>

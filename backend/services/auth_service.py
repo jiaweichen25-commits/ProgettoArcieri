@@ -12,24 +12,31 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def authenticate_user(email: str, password: str, portale: str):
-    user = user_repository.get_user_by_email(email)
+    user = user_repository.get_user_by_email_or_username(email)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenziali non valide")
 
+    must_change = user[3] if len(user) > 3 else False
+    
+    # Se il portale è istruttore, un admin può loggarsi qui se vogliamo? 
+    # Il frontend dovrebbe inviare portale=admin, non istruttore, se è admin.
     if user[1] != portale:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Accesso non autorizzato per questo portale"
-        )
+        # Se un admin cerca di accedere dal portale istruttore, lo autorizziamo ma cambiamo il ruolo nel token
+        # oppure frontend manderà 'admin' come portale
+        if not (portale == "istruttore" and user[1] == "admin"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Accesso non autorizzato per questo portale"
+            )
 
     if not bcrypt.checkpw(password.encode(), user[0].encode()):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenziali non valide")
 
-    token = create_access_token({"sub": email, "ruolo": user[1], "id_utente": user[2]})
-    return token
+    token = create_access_token({"sub": email, "ruolo": user[1], "id_utente": user[2], "must_change_password": must_change})
+    return token, must_change
 
 def register_user(email: str, password: str, ruolo: str, nome: str = None, cognome: str = None, qualifica: str = None):
-    existing_user = user_repository.get_user_by_email(email)
+    existing_user = user_repository.get_user_by_email_or_username(email)
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email già registrata")
         
@@ -39,7 +46,7 @@ def register_user(email: str, password: str, ruolo: str, nome: str = None, cogno
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email già registrata")
     
-    new_user = user_repository.get_user_by_email(email)
+    new_user = user_repository.get_user_by_email_or_username(email)
     id_utente = new_user[2]
 
     if ruolo == "istruttore":
@@ -51,5 +58,17 @@ def register_user(email: str, password: str, ruolo: str, nome: str = None, cogno
             qualifica.strip() if qualifica else None,
         )
 
-    token = create_access_token({"sub": email, "ruolo": ruolo, "id_utente": id_utente})
+    token = create_access_token({"sub": email, "ruolo": ruolo, "id_utente": id_utente, "must_change_password": False})
     return token
+
+def change_user_password(email: str, old_password: str, new_password: str):
+    user = user_repository.get_user_by_email_or_username(email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Utente non trovato")
+        
+    if not bcrypt.checkpw(old_password.encode(), user[0].encode()):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La password attuale è errata")
+        
+    new_hashed = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+    user_repository.update_user_password(user[2], new_hashed)
+    return True

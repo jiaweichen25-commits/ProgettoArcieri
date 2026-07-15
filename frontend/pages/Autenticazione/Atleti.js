@@ -4,8 +4,18 @@ const AREA_ATLETA = "../AreaAtleta/Dashboard.html";
 
 function showMsg(testo, tipo) {
     const box = document.getElementById("msgBox");
-    box.textContent = testo;
-    box.className = "msg-box " + tipo;
+    if(box) {
+        box.textContent = testo;
+        box.className = "msg-box " + tipo;
+    }
+}
+
+function showChangePwdMsg(testo, tipo) {
+    const box = document.getElementById("changePwdMsgBox");
+    if(box) {
+        box.textContent = testo;
+        box.className = "msg-box " + tipo;
+    }
 }
 
 function parseToken(token) {
@@ -63,13 +73,68 @@ async function handleLogin(e) {
             localStorage.removeItem("remember_email");
         }
 
-        redirectByRuolo(data.access_token);
+        if (data.must_change_password) {
+            // Mostra modale cambio password
+            document.getElementById("changePwdMsgBox").className = "msg-box";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("changePasswordModal").classList.add("open");
+        } else {
+            redirectByRuolo(data.access_token);
+        }
 
     } catch {
         showMsg("Impossibile contattare il server. Verifica che il backend sia avviato.", "error");
     } finally {
         btn.disabled    = false;
         btn.textContent = "Accedi";
+    }
+}
+
+async function handleChangePassword() {
+    const newPassword = document.getElementById("newPassword").value;
+    const oldPassword = document.getElementById("loginPassword").value;
+    const btn = document.getElementById("changePwdBtn");
+    
+    if (newPassword.length < 6) {
+        showChangePwdMsg("La password deve essere di almeno 6 caratteri.", "error");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Salvataggio...";
+
+    try {
+        const token = localStorage.getItem("access_token");
+        const res = await fetch(`${API_URL}/auth/change-password`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                old_password: oldPassword, 
+                new_password: newPassword 
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            showChangePwdMsg(err.detail || "Errore nel cambio password.", "error");
+            return;
+        }
+
+        document.getElementById("changePasswordModal").classList.remove("open");
+        
+        // Rifacciamo il login
+        const email = document.getElementById("loginEmail").value.trim();
+        document.getElementById("loginPassword").value = newPassword;
+        await handleLogin({preventDefault: () => {}});
+
+    } catch (e) {
+        showChangePwdMsg("Errore di connessione al server.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Salva Nuova Password";
     }
 }
 

@@ -2,11 +2,13 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS public."Tutenti"
 (
-    "IDutente"          serial NOT NULL,
-    "E-mail"            character varying NOT NULL UNIQUE,
-    passwd_hash         character varying NOT NULL,
-    "Ruolo"             character varying NOT NULL,
-    creato_il           timestamp without time zone DEFAULT NOW(),
+    "IDutente"              serial NOT NULL,
+    "E-mail"                character varying NOT NULL UNIQUE,
+    "Username"              character varying UNIQUE,
+    passwd_hash             character varying NOT NULL,
+    "Ruolo"                 character varying NOT NULL,
+    must_change_password    boolean DEFAULT false,
+    creato_il               timestamp without time zone DEFAULT NOW(),
     PRIMARY KEY ("IDutente")
 );
 
