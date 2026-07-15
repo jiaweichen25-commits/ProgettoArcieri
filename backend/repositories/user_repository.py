@@ -13,6 +13,18 @@ def get_user_by_email_or_username(identifier: str):
     finally:
         conn.close()
 
+def get_user_by_email(email: str):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password FROM "Tutenti" WHERE LOWER("E-mail") = LOWER(%s)',
+                (email,)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
 def create_user(email: str, hashed_password: str, ruolo: str, must_change_password: bool = False, username: str = None):
     conn = get_db_conn()
     try:
