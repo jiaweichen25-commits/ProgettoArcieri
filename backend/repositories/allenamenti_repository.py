@@ -97,3 +97,18 @@ def get_allenamenti_by_atleta_istruttore(id_istruttore: int):
             return cur.fetchall()
     finally:
         conn.close()
+
+def get_periodo_allenamento(id_allenamento: int, id_istruttore: int):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''SELECT a."DataInizio", a."DataFine"
+                   FROM "Tallenamenti" a
+                   JOIN "Tatleti" at ON a."IDatleta" = at."IDatleta"
+                   WHERE a."IDallenamento" = %s AND at."IDistruttore" = %s''',
+                (id_allenamento, id_istruttore)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
