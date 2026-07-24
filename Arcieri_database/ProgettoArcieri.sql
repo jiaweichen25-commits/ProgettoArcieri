@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public."Tutenti"
     "Ruolo"                 character varying NOT NULL,
     must_change_password    boolean DEFAULT false,
     creato_il               timestamp without time zone DEFAULT NOW(),
+    sospeso_fino_al         date,
     PRIMARY KEY ("IDutente")
 );
 

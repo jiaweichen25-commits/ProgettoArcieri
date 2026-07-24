@@ -12,7 +12,7 @@
         cursor: pointer;
     }
     .row-clickable:hover {
-        background-color: #f1f5f9;
+        background-color: #2a2a2a;
     }
     .table-sub-modal {
         max-width: 900px;
@@ -214,6 +214,41 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeEditModal()">Annulla</button>
       <button class="btn-confirm" id="btnEditSalva" onclick="salvaModificheIstruttore()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Sospensione Istruttore -->
+<div class="overlay" id="suspendModal">
+  <div class="modal">
+    <div class="modal-pill">Sospendi Istruttore</div>
+    <h2>Sospensione</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="suspendMsgBox"></div>
+    <input type="hidden" id="suspendId" />
+
+    <p style="margin-bottom: 15px; color: #475569;">
+      Seleziona per quanto tempo vuoi sospendere l'istruttore. Durante questo periodo non potrà effettuare il login.
+    </p>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Durata Sospensione</label>
+        <select id="suspendDuration" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+          <option value="">Rimuovi sospensione</option>
+          <option value="1">1 Anno</option>
+          <option value="2">2 Anni</option>
+          <option value="3">3 Anni</option>
+          <option value="5">5 Anni</option>
+          <option value="99">A tempo indeterminato</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeSuspendModal()">Annulla</button>
+      <button class="btn-confirm" id="btnSuspendSalva" style="background: #ef4444; border-color: #ef4444;" onclick="salvaSospensione()">Applica</button>
     </div>
   </div>
 </div>

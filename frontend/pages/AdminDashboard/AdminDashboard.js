@@ -81,16 +81,23 @@ function renderTable(data) {
         data.forEach(istr => {
             const tr = document.createElement("tr");
             tr.className = "row-clickable";
+            
+            const isSospeso = istr.sospeso_fino_al && new Date(istr.sospeso_fino_al) >= new Date();
+            const statusBadge = isSospeso 
+                ? `<span style="background: #ef4444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">Sospeso</span>`
+                : '';
+
             tr.innerHTML = `
                 <td>${istr.IDistruttore}</td>
-                <td><strong>${istr.Nome}</strong></td>
+                <td><strong>${istr.Nome}</strong>${statusBadge}</td>
                 <td><strong>${istr.Cognome}</strong></td>
                 <td>${istr.Qualifica || "-"}</td>
                 <td>${istr["E-mail"]}</td>
                 <td>
-                    <button class="btn btn-red" style="padding: 5px 10px; font-size: 0.8rem;" onclick="viewAtleti(${istr.IDistruttore}, '${istr.Nome}', '${istr.Cognome}', event)">
-                        Vedi Atleti
-                    </button>
+                    <button class="btn btn-red" style="padding: 5px 10px; font-size: 0.8rem; margin-right: 5px;" onclick="viewAtleti(${istr.IDistruttore}, '${istr.Nome.replace(/'/g, "\\'")}', '${istr.Cognome.replace(/'/g, "\\'")}', event)">Atleti</button>
+                    <button class="btn btn-red" style="padding: 5px 10px; font-size: 0.8rem; margin-right: 5px; background: #3b82f6; border-color: #3b82f6;" onclick="openEditModal(${istr.IDistruttore}, event)">Modifica</button>
+                    <button class="btn btn-red" style="padding: 5px 10px; font-size: 0.8rem; margin-right: 5px; background: #f59e0b; border-color: #f59e0b;" onclick="openSuspendModal(${istr.IDistruttore}, event)">Sospendi</button>
+                    <button class="btn btn-red" style="padding: 5px 10px; font-size: 0.8rem;" onclick="eliminaIstruttore(${istr.IDistruttore}, event)">Elimina</button>
                 </td>
             `;
             tr.onclick = (e) => {
@@ -215,4 +222,144 @@ async function viewAtleti(idIstruttore, nome, cognome, event) {
 
 function closeAtletiModal() {
     document.getElementById("atletiModal").classList.remove("open");
+}
+
+// MODIFICA ISTRUTTORE
+function openEditModal(id, event) {
+    if(event) event.stopPropagation();
+    const istr = istruttori.find(i => i.IDistruttore === id);
+    if (!istr) return;
+
+    document.getElementById("editId").value = istr.IDistruttore;
+    document.getElementById("editNome").value = istr.Nome || "";
+    document.getElementById("editCognome").value = istr.Cognome || "";
+    document.getElementById("editEmail").value = istr["E-mail"] || "";
+    document.getElementById("editUsername").value = istr.Username || "";
+    document.getElementById("editQualifica").value = istr.Qualifica || "";
+    document.getElementById("editMsgBox").className = "msg-box";
+    document.getElementById("editModal").classList.add("open");
+}
+
+function closeEditModal() {
+    document.getElementById("editModal").classList.remove("open");
+}
+
+async function salvaModificheIstruttore() {
+    const id = document.getElementById("editId").value;
+    const nome = document.getElementById("editNome").value.trim();
+    const cognome = document.getElementById("editCognome").value.trim();
+    const email = document.getElementById("editEmail").value.trim();
+    const username = document.getElementById("editUsername").value.trim();
+    const qualifica = document.getElementById("editQualifica").value.trim();
+
+    if (!nome || !cognome || !email) {
+        showMsg("editMsgBox", "Compila nome, cognome ed email", "error");
+        return;
+    }
+
+    const payload = { nome, cognome, email, username, qualifica };
+    const btn = document.getElementById("btnEditSalva");
+    btn.disabled = true;
+    btn.textContent = "Salvataggio...";
+
+    const token = localStorage.getItem("access_token");
+    try {
+        const res = await fetch(`${API_URL}/admin/istruttori/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(()=>({}));
+            throw new Error(err.detail || "Errore durante il salvataggio");
+        }
+
+        closeEditModal();
+        loadIstruttori();
+    } catch (err) {
+        showMsg("editMsgBox", err.message, "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Salva";
+    }
+}
+
+// ELIMINA ISTRUTTORE
+async function eliminaIstruttore(id, event) {
+    if(event) event.stopPropagation();
+    if (!confirm("Sei sicuro di voler eliminare questo istruttore? L'azione è irreversibile e comporterà anche l'eliminazione dell'account utente associato.")) return;
+
+    const token = localStorage.getItem("access_token");
+    try {
+        const res = await fetch(`${API_URL}/admin/istruttori/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        if (!res.ok) throw new Error("Errore durante l'eliminazione");
+        loadIstruttori();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+// SOSPENSIONE ISTRUTTORE
+function openSuspendModal(id, event) {
+    if(event) event.stopPropagation();
+    document.getElementById("suspendId").value = id;
+    document.getElementById("suspendDuration").value = "";
+    document.getElementById("suspendMsgBox").className = "msg-box";
+    document.getElementById("suspendModal").classList.add("open");
+}
+
+function closeSuspendModal() {
+    document.getElementById("suspendModal").classList.remove("open");
+}
+
+async function salvaSospensione() {
+    const id = document.getElementById("suspendId").value;
+    const durationStr = document.getElementById("suspendDuration").value;
+    
+    let data_fine_sospensione = null;
+    if (durationStr) {
+        const years = parseInt(durationStr, 10);
+        const endDate = new Date();
+        endDate.setFullYear(endDate.getFullYear() + years);
+        data_fine_sospensione = endDate.toISOString().split('T')[0]; // format YYYY-MM-DD
+    }
+
+    const payload = { data_fine_sospensione };
+    const btn = document.getElementById("btnSuspendSalva");
+    btn.disabled = true;
+    btn.textContent = "Applicazione...";
+
+    const token = localStorage.getItem("access_token");
+    try {
+        const res = await fetch(`${API_URL}/admin/istruttori/${id}/sospendi`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(()=>({}));
+            throw new Error(err.detail || "Errore durante la sospensione");
+        }
+
+        closeSuspendModal();
+        loadIstruttori();
+    } catch (err) {
+        showMsg("suspendMsgBox", err.message, "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Applica";
+    }
 }

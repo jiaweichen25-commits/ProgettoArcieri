@@ -17,7 +17,13 @@ def authenticate_user(email: str, password: str, portale: str):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenziali non valide")
 
     must_change = user[3] if len(user) > 3 else False
+    sospeso_fino_al = user[4] if len(user) > 4 else None
     
+    if sospeso_fino_al:
+        if isinstance(sospeso_fino_al, str):
+            sospeso_fino_al = datetime.strptime(sospeso_fino_al, "%Y-%m-%d").date()
+        if sospeso_fino_al >= datetime.now().date():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Account sospeso fino al {sospeso_fino_al}")
     # Se il portale è istruttore, un admin può loggarsi qui se vogliamo? 
     # Il frontend dovrebbe inviare portale=admin, non istruttore, se è admin.
     if user[1] != portale:
