@@ -29,13 +29,14 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 - Tabelle di supporto (esercizi, distanze, targhe, serie, ecc.) alimentabili direttamente dalla schermata di programmazione
 - Visite mediche e autorizzazioni antidoping
 - Piano gare
-- Segnapunti gara in stile World Archery (turni, volée, conteggio 10/X)
+- Consultazione storico punteggi e gare degli atleti (in sola lettura)
 - Assistant AI: analisi di allenamenti, materiali e storico punteggi su richiesta
 - Ogni istruttore gestisce solo i propri atleti e vede anche gli atleti degli altri
 
 **Lato atleta** (accesso in sola lettura, salvo dove indicato)
 - Consultazione profilo, materiali, allenamenti, visite mediche, antidoping, piano gare
 - Nota personale scrivibile su ciascuna settimana di allenamento
+- Compilazione attiva del Segnapunti gara in stile World Archery (turni, volée, conteggio 10/X)
 
 ## Prerequisiti
 
