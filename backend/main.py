@@ -19,6 +19,7 @@ from controllers import lookup_controller
 from controllers import ai_assistant_controller
 from controllers import segnapunti_controller
 from controllers import admin_controller
+from controllers import me_segnapunti_controller
 
 
 # Carica le variabili d'ambiente dal file .env
@@ -49,6 +50,7 @@ app.include_router(lookup_controller.router)
 app.include_router(ai_assistant_controller.router)
 app.include_router(segnapunti_controller.router)
 app.include_router(admin_controller.router)
+app.include_router(me_segnapunti_controller.router)
 
 
 @app.on_event("startup")

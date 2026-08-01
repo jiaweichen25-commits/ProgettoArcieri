@@ -165,3 +165,60 @@ def salva_nota_atleta(id_utente: int, id_allenamento: int, id_settimana: int, te
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Allenamento non trovato o non autorizzato")
 
     return me_repository.salva_nota_atleta(id_allenamento, id_settimana, testo)
+
+# ══ SEGNAPUNTI ══
+
+from repositories import segnapunti_repository
+from services.segnapunti_service import _row_to_dict as _segnapunto_row_to_dict
+from services.segnapunti_service import _volee_row_to_dict
+
+def get_miei_segnapunti(id_utente: int):
+    atleta = _get_atleta_or_404(id_utente)
+    rows = segnapunti_repository.get_segnapunti(atleta["IDatleta"])
+    return [_segnapunto_row_to_dict(r) for r in rows]
+
+def crea_mio_segnapunto(id_utente: int, dati: dict):
+    atleta = _get_atleta_or_404(id_utente)
+    new_id = segnapunti_repository.crea_segnapunto(atleta["IDatleta"], dati)
+    return {"IDsegnapunto": new_id, "message": "Segnapunto creato"}
+
+def get_mio_segnapunto(id_utente: int, id_segnapunto: int):
+    atleta = _get_atleta_or_404(id_utente)
+    r = segnapunti_repository.get_segnapunto(id_segnapunto)
+    if r is None or r[1] != atleta["IDatleta"]:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Segnapunto non trovato"
+        )
+    return _segnapunto_row_to_dict(r)
+
+def aggiorna_mio_segnapunto(id_utente: int, id_segnapunto: int, dati: dict):
+    atleta = _get_atleta_or_404(id_utente)
+    ok = segnapunti_repository.aggiorna_segnapunto(id_segnapunto, atleta["IDatleta"], dati)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Segnapunto non trovato"
+        )
+    return {"message": "Segnapunto aggiornato"}
+
+def elimina_mio_segnapunto(id_utente: int, id_segnapunto: int):
+    atleta = _get_atleta_or_404(id_utente)
+    ok = segnapunti_repository.elimina_segnapunto(id_segnapunto, atleta["IDatleta"])
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Segnapunto non trovato"
+        )
+
+def get_mie_volee(id_utente: int, id_segnapunto: int):
+    # Verifica proprietà
+    get_mio_segnapunto(id_utente, id_segnapunto)
+    rows = segnapunti_repository.get_volee(id_segnapunto)
+    return [_volee_row_to_dict(r) for r in rows]
+
+def salva_mie_volee(id_utente: int, id_segnapunto: int, volee: list):
+    # Verifica proprietà
+    get_mio_segnapunto(id_utente, id_segnapunto)
+    segnapunti_repository.salva_volee(id_segnapunto, volee)
+    return {"message": "Volée salvate"}

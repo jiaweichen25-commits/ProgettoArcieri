@@ -1,9 +1,14 @@
 const API_URL = "http://localhost:8000";
 
-const params = new URLSearchParams(window.location.search);
-const ID_ATLETA = Number(params.get("atleta"));
-const NOME_ATLETA = params.get("nome") || "";
-const COGNOME_ATLETA = params.get("cognome") || "";
+const currentUserStr = localStorage.getItem("currentUser");
+let currentUser = null;
+if (currentUserStr) {
+  try {
+    currentUser = JSON.parse(currentUserStr);
+  } catch (e) { }
+}
+const NOME_ATLETA = currentUser ? currentUser.nome : "";
+const COGNOME_ATLETA = currentUser ? currentUser.cognome : "";
 
 let segnapuntiCache = [];
 let segnapuntoCorrente = null;
@@ -24,16 +29,16 @@ function authHeaders() {
 
 function requireAuth() {
   const token = getToken();
-  if (!token) { window.location.href = "../../Autenticazione/Istruttore.html"; return false; }
+  if (!token) { window.location.href = "../../Autenticazione/Atleta.html"; return false; }
   try {
     const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
-    if (payload.ruolo !== "istruttore") {
+    if (payload.ruolo !== "atleta") {
       localStorage.clear();
-      window.location.href = "../../Autenticazione/Istruttore.html";
+      window.location.href = "../../Autenticazione/Atleta.html";
       return false;
     }
     return true;
-  } catch { window.location.href = "../../Autenticazione/Istruttore.html"; return false; }
+  } catch { window.location.href = "../../Autenticazione/Atleta.html"; return false; }
 }
 
 function tornaDashboard() { window.location.href = "../Dashboard.html"; }
@@ -41,7 +46,7 @@ function tornaDashboard() { window.location.href = "../Dashboard.html"; }
 function logout() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("currentUser");
-  window.location.href = "../../Autenticazione/Istruttore.html";
+  window.location.href = "../../Autenticazione/Atleta.html";
 }
 
 function showMsg(id, testo, tipo) {
@@ -86,7 +91,7 @@ function punti(v) {
 
 async function caricaSegnapunti() {
   try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/`, { headers: authHeaders() });
+    const res = await fetch(`${API_URL}/me/segnapunti/`, { headers: authHeaders() });
     if (res.status === 401) { logout(); return; }
     if (!res.ok) {
       showMsg("pageMsgBox", "Errore nel caricamento delle sessioni.", "error");
@@ -125,6 +130,7 @@ function renderLista() {
       </div>
       <div class="materiale-actions">
         <button class="btn btn-sm btn-outline" data-apri="${s.IDsegnapunto}">Apri segnapunti</button>
+        <button class="btn btn-sm btn-red" data-delete="${s.IDsegnapunto}">Elimina</button>
       </div>
     `;
     list.appendChild(card);
@@ -136,6 +142,76 @@ function renderLista() {
       if (s) apriScore(s);
     });
   });
+
+  list.querySelectorAll("[data-delete]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const s = segnapuntiCache.find((x) => x.IDsegnapunto === Number(btn.dataset.delete));
+      if (s) openDeleteModal(s);
+    });
+  });
+}
+
+// ─── Crea ed Elimina Sessione ─────────────────────────────
+
+function openAddModal() {
+  clearMsg("formMsgBox");
+  document.getElementById("fData").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("fDistanza").value = "18m";
+  document.getElementById("fFrecce").value = "3";
+  openModal("formModal");
+}
+
+async function creaSessione() {
+  clearMsg("formMsgBox");
+  const data = document.getElementById("fData").value;
+  const distanza = document.getElementById("fDistanza").value;
+  const frecce_per_volee = Number(document.getElementById("fFrecce").value);
+
+  if (!data) {
+    showMsg("formMsgBox", "La data è obbligatoria.", "error");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/me/segnapunti/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ data, distanza, frecce_per_volee }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showMsg("formMsgBox", err.detail || "Errore nella creazione.", "error");
+      return;
+    }
+    closeModal("formModal");
+    await caricaSegnapunti();
+  } catch {
+    showMsg("formMsgBox", "Impossibile contattare il server.", "error");
+  }
+}
+
+function openDeleteModal(s) {
+  document.getElementById("deleteId").value = s.IDsegnapunto;
+  document.getElementById("deleteMsg").textContent = `Eliminare la sessione del ${formatDate(s.data)} a ${s.distanza}?`;
+  openModal("deleteModal");
+}
+
+async function confermaElimina() {
+  const id = document.getElementById("deleteId").value;
+  try {
+    const res = await fetch(`${API_URL}/me/segnapunti/${id}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok && res.status !== 204) {
+      alert("Errore nell'eliminazione.");
+      return;
+    }
+    closeModal("deleteModal");
+    await caricaSegnapunti();
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
 }
 
 // ─── Score Gestione Tabella ───────────────────────────────
@@ -198,23 +274,23 @@ function switchMezza(m, isInit = false) {
     const tab = document.getElementById(id);
     if (tab) tab.className = "mezza-tab" + (m === (idx + 1) ? " active" : "");
   });
-  
+
   // Ridisegna semplicemente la tabella basandosi sulla memoria locale corrente
   disegnaTabella();
 }
 
 async function caricaEDisegnaVolee() {
   try {
-    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/${segnapuntoCorrente.IDsegnapunto}/volee/`, { headers: authHeaders() });
+    const res = await fetch(`${API_URL}/me/segnapunti/${segnapuntoCorrente.IDsegnapunto}/volee/`, { headers: authHeaders() });
     if (res.ok) {
       const rows = await res.json();
-      voleeData = {}; 
+      voleeData = {};
       rows.forEach((r) => {
         voleeData[`${r.mezza}-${r.numero}`] = r;
       });
     }
   } catch { /* In caso di offline, mantiene i dati temporanei correnti */ }
-  
+
   disegnaTabella();
 }
 
@@ -222,14 +298,14 @@ function disegnaTabella() {
   const tbody = document.getElementById("scoreBody");
   if (!tbody || !segnapuntoCorrente) return;
   tbody.innerHTML = "";
-  
+
   const fpv = segnapuntoCorrente.frecce_per_volee;
 
   for (let n = 1; n <= 10; n++) {
     const key = `${mezzaAttiva}-${n}`;
     const saved = voleeData[key] || {};
     const tr = document.createElement("tr");
-    
+
     let celleFrecce = "";
     for (let i = 1; i <= 6; i++) {
       const val = saved[`f${i}`] || "";
@@ -238,7 +314,7 @@ function disegnaTabella() {
         <td ${hidden}>
           <input class="freccia" id="f-${mezzaAttiva}-${n}-${i}"
                  value="${val}" maxlength="2" autocomplete="off"
-                 readonly />
+                 oninput="aggiornaRighe()" />
         </td>`;
     }
 
@@ -285,11 +361,11 @@ function aggiornaRighe() {
   for (let n = 1; n <= 10; n++) {
     const key = `${mezzaAttiva}-${n}`;
     const vals = [];
-    
+
     if (!voleeData[key]) {
       voleeData[key] = { mezza: mezzaAttiva, numero: n };
     }
-    
+
     // Legge i valori in tempo reale dal DOM e aggiorna lo stato locale 'voleeData'
     for (let i = 1; i <= 6; i++) {
       if (i <= fpv) {
@@ -305,14 +381,14 @@ function aggiornaRighe() {
     const somma = vals.reduce((acc, v) => acc + punti(v), 0);
     totProg += somma;
     sommaMezza += somma;
-    
+
     voleeData[key].somma = somma;
     voleeData[key].totale = totProg;
 
     const cnt10 = vals.filter((v) => v === "10").length;
-    const cntX  = vals.filter((v) => v === "X").length;
+    const cntX = vals.filter((v) => v === "X").length;
     tot10 += cnt10;
-    totX  += cntX;
+    totX += cntX;
 
     setTxt(`somma-${mezzaAttiva}-${n}`, somma);
     setTxt(`totale-${mezzaAttiva}-${n}`, totProg);
@@ -340,7 +416,7 @@ function aggiornaTotaleFinale() {
         tot += r.somma || 0;
         for (let i = 1; i <= fpv; i++) {
           if (r[`f${i}`] === "10") t10++;
-          if (r[`f${i}`] === "X")  tX++;
+          if (r[`f${i}`] === "X") tX++;
         }
       }
     }
@@ -352,19 +428,80 @@ function aggiornaTotaleFinale() {
   }
 }
 
+// ─── Salva Volée e Note ───────────────────────────────────
+
+async function salvaVolee(silenzioso = false) {
+  if (!silenzioso) clearMsg("scoreMsgBox");
+  if (!segnapuntoCorrente) return;
+
+  // Siccome voleeData contiene TUTTE le righe aggiornate (Mezza 1 + Mezza 2),
+  // estraiamo semplicemente i valori totali per mandarli al database.
+  const volee = Object.values(voleeData);
+
+  try {
+    const res = await fetch(`${API_URL}/me/segnapunti/${segnapuntoCorrente.IDsegnapunto}/volee/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(volee),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (!silenzioso) showMsg("scoreMsgBox", err.detail || "Errore nel salvataggio.", "error");
+      return;
+    }
+    if (!silenzioso) {
+      await caricaEDisegnaVolee();
+      showMsg("scoreMsgBox", "Tabella salvata con successo.", "success");
+    }
+  } catch {
+    if (!silenzioso) showMsg("scoreMsgBox", "Impossibile contattare il server.", "error");
+  }
+}
+
+async function salvaNoteCorrente() {
+  const note_istruttore = document.getElementById("noteIstruttore").value.trim() || null;
+  const note_atleta = document.getElementById("noteAtleta").value.trim() || null;
+  const s = segnapuntoCorrente;
+
+  try {
+    const res = await fetch(`${API_URL}/me/segnapunti/${s.IDsegnapunto}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ note_istruttore, note_atleta, ImpattiBersaglio: impattiBersaglio }),
+    });
+    if (!res.ok) {
+      alert("Errore nel salvataggio delle note.");
+      return;
+    }
+    segnapuntoCorrente.note_istruttore = note_istruttore;
+    segnapuntoCorrente.note_atleta = note_atleta;
+    segnapuntoCorrente.ImpattiBersaglio = impattiBersaglio;
+    showMsg("scoreMsgBox", "Note aggiornate.", "success");
+  } catch {
+    alert("Impossibile contattare il server.");
+  }
+}
+
 // ─── Init ────────────────────────────────────────────────
+
+async function caricaNomeAtleta() {
+  try {
+    const res = await fetch(`${API_URL}/me/profilo`, { headers: authHeaders() });
+    if (res.ok) {
+      const p = await res.json();
+      const nome = [p.nome, p.cognome].filter(Boolean).join(" ");
+      const tNav = document.getElementById("titoloAtletaNav");
+      if (tNav) tNav.textContent = nome || "—";
+    }
+  } catch { /* ignora */ }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   if (!requireAuth()) return;
-  if (!ID_ATLETA) { window.location.href = "../Dashboard.html"; return; }
-  
-  const nomeCompleto = [NOME_ATLETA, COGNOME_ATLETA].filter(Boolean).join(" ");
-  
+
   const t = document.getElementById("titoloAtleta");
-  if (t) t.textContent = nomeCompleto ? `Segnapunti: ${nomeCompleto}` : "Segnapunti atleta";
-  
-  const tNav = document.getElementById("titoloAtletaNav");
-  if (tNav) tNav.textContent = nomeCompleto || "—";
-  
+  if (t) t.textContent = "I Miei Segnapunti";
+
+  caricaNomeAtleta();
   caricaSegnapunti();
 });

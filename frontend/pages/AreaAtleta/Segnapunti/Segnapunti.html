@@ -5,7 +5,7 @@
   <link rel="icon" type="image/svg+xml" href="../../../assets/Favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arcieri Vicenza – Segnapunti</title>
-  <link rel="stylesheet" href="../Materiali/Materiali.css" />
+  <link rel="stylesheet" href="../Dashboard.css" />
   <style>
     /* Manteniamo i tuoi stili custom per la griglia dei punteggi */
     .score-grid {
@@ -107,9 +107,9 @@
 </nav>
 <div class="page">
   <div class="page-header">
-    <div class="pill">Area Istruttore</div>
-    <h1 id="titoloAtleta">Segnapunti</h1>
-    <p>Sessioni di tiro dell'atleta</p>
+    <div class="pill">Area Atleta</div>
+    <h1 id="titoloAtleta">I Miei Segnapunti</h1>
+    <p>Le mie sessioni di tiro</p>
   </div>
 
   <div class="msg-box" id="pageMsgBox"></div>
@@ -117,6 +117,7 @@
   <div class="section" id="listaSezione">
     <div class="section-head">
       <div class="section-title">Storico Sessioni</div>
+      <button class="btn btn-red" onclick="openAddModal()">+ Nuova sessione</button>
     </div>
     <div id="segnapuntiList"></div>
     <div id="emptyState" class="empty-state" style="display:none;">
@@ -157,16 +158,22 @@
     <div class="totale-finale" id="totaleFinalBox" style="display:none;"></div>
 
     <div class="msg-box" id="scoreMsgBox"></div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+      <button class="btn btn-red" onclick="salvaVolee()">Salva Tabella</button>
+    </div>
 
     <div style="display:flex; gap:16px; margin-top:24px; flex-wrap:wrap;">
       <div class="field" style="flex:1; min-width:200px;">
         <label>Note Istruttore</label>
-        <textarea id="noteIstruttore" rows="3" style="width:100%;background:#111;border:1px solid #333;color:white;padding:10px;border-radius:2px;font-family:inherit;resize:vertical;"></textarea>
+        <textarea id="noteIstruttore" rows="3" style="width:100%;background:#111;border:1px solid #333;color:white;padding:10px;border-radius:2px;font-family:inherit;resize:vertical;" readonly></textarea>
       </div>
       <div class="field" style="flex:1; min-width:200px;">
-        <label>Note Atleta</label>
-        <textarea id="noteAtleta" rows="3" style="width:100%;background:#111;border:1px solid #333;color:white;padding:10px;border-radius:2px;font-family:inherit;resize:vertical;" readonly></textarea>
+        <label>Le tue note (Atleta)</label>
+        <textarea id="noteAtleta" rows="3" style="width:100%;background:#111;border:1px solid #333;color:white;padding:10px;border-radius:2px;font-family:inherit;resize:vertical;"></textarea>
       </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+      <button class="btn btn-red" onclick="salvaNoteCorrente()">Salva Note</button>
     </div>
 
     <div class="section-title" style="margin-top: 32px; margin-bottom: 12px;">Bersaglio Interattivo</div>
@@ -174,6 +181,54 @@
   </div>
 </div>
 
+<div class="overlay" id="formModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-pill">Nuova sessione</span>
+      <h2 class="modal-title">Crea segnapunti</h2>
+    </div>
+    <div class="field">
+      <label>Data</label>
+      <input type="date" id="fData" />
+    </div>
+    <div class="field">
+      <label>Distanza</label>
+      <select id="fDistanza">
+        <option value="18m">18m</option>
+        <option value="25m">25m</option>
+        <option value="50m">50m</option>
+        <option value="70m">70m</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Frecce per volée</label>
+      <select id="fFrecce">
+        <option value="3">3 (indoor)</option>
+        <option value="6">6 (outdoor)</option>
+      </select>
+    </div>
+    <div class="msg-box" id="formMsgBox"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('formModal')">Annulla</button>
+      <button class="btn btn-red" onclick="creaSessione()">Crea</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="deleteModal">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <span class="modal-pill">Attenzione</span>
+      <h2 class="modal-title">Conferma eliminazione</h2>
+    </div>
+    <p id="deleteMsg" style="color:#aaa; margin-bottom:20px;"></p>
+    <input type="hidden" id="deleteId" />
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Annulla</button>
+      <button class="btn btn-red" onclick="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+</div>
 
 <script src="../../../components/AIwidget.js"></script>
 <script src="Segnapunti.js"></script>

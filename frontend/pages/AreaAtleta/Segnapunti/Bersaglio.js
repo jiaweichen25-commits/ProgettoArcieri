@@ -26,8 +26,6 @@ function svgPointFromEvent(svg, evt) {
 }
 
 function registraTiro(evt) {
-  // Solo lettura per l'istruttore
-  return;
   const svg = document.getElementById("target");
   const p = svgPointFromEvent(svg, evt);
   if (!p) return;
