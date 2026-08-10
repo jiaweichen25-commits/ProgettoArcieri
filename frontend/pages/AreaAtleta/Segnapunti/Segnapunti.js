@@ -264,7 +264,41 @@ window.addEventListener("message", (evt) => {
   if (evt.data && evt.data.type === "bersaglio-hits") {
     impattiBersaglio = evt.data.hits || [];
   }
+  if (evt.data && evt.data.type === "bersaglio-salva") {
+    salvaBersaglioDaWidget(evt.data.hits || []);
+  }
 });
+
+async function salvaBersaglioDaWidget(hits) {
+  const frame = document.getElementById("bersaglioFrame");
+  const s = segnapuntoCorrente;
+  if (!s) return;
+
+  const note_istruttore = document.getElementById("noteIstruttore").value.trim() || null;
+  const note_atleta = document.getElementById("noteAtleta").value.trim() || null;
+
+  try {
+    const res = await fetch(`${API_URL}/me/segnapunti/${s.IDsegnapunto}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ note_istruttore, note_atleta, ImpattiBersaglio: hits }),
+    });
+    if (!res.ok) {
+      if (frame) frame.contentWindow.postMessage({ type: "bersaglio-errore-salvataggio" }, "*");
+      showMsg("scoreMsgBox", "Errore nel salvataggio del bersaglio.", "error");
+      return;
+    }
+    impattiBersaglio = hits;
+    segnapuntoCorrente.note_istruttore = note_istruttore;
+    segnapuntoCorrente.note_atleta = note_atleta;
+    segnapuntoCorrente.ImpattiBersaglio = hits;
+    if (frame) frame.contentWindow.postMessage({ type: "bersaglio-salvato" }, "*");
+    showMsg("scoreMsgBox", "Bersaglio salvato.", "success");
+  } catch {
+    if (frame) frame.contentWindow.postMessage({ type: "bersaglio-errore-salvataggio" }, "*");
+    showMsg("scoreMsgBox", "Impossibile contattare il server.", "error");
+  }
+}
 
 function switchMezza(m, isInit = false) {
   if (mezzaAttiva === m && !isInit) return;

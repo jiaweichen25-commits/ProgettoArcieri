@@ -89,6 +89,20 @@ function resetBersaglio() {
   notificaGenitore();
 }
 
+function salvaBersaglio() {
+  // A differenza di notificaGenitore() (che sincronizza soltanto lo stato),
+  // questo chiede esplicitamente al genitore di persistere i tiri sul database.
+  if (window.parent === window) return; // aperto standalone, nessun genitore
+  const btn = document.getElementById("btnSalvaBersaglio");
+  const status = document.getElementById("bersaglioStatus");
+  if (btn) btn.disabled = true;
+  if (status) {
+    status.textContent = "Salvataggio…";
+    status.style.color = "#888";
+  }
+  window.parent.postMessage({ type: "bersaglio-salva", hits }, "*");
+}
+
 // ─── Comunicazione con la pagina Segnapunti che incorpora questo widget ───
 
 function notificaGenitore() {
@@ -106,6 +120,24 @@ function caricaHitsSalvati(hitsSalvati) {
 window.addEventListener("message", (evt) => {
   if (evt.data && evt.data.type === "bersaglio-load") {
     caricaHitsSalvati(evt.data.hits);
+  }
+  if (evt.data && evt.data.type === "bersaglio-salvato") {
+    const btn = document.getElementById("btnSalvaBersaglio");
+    const status = document.getElementById("bersaglioStatus");
+    if (btn) btn.disabled = false;
+    if (status) {
+      status.textContent = "Salvato ✓";
+      status.style.color = "#2ecc71";
+    }
+  }
+  if (evt.data && evt.data.type === "bersaglio-errore-salvataggio") {
+    const btn = document.getElementById("btnSalvaBersaglio");
+    const status = document.getElementById("bersaglioStatus");
+    if (btn) btn.disabled = false;
+    if (status) {
+      status.textContent = "Errore nel salvataggio";
+      status.style.color = "#c0392b";
+    }
   }
 });
 
