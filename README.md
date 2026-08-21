@@ -41,7 +41,7 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 ## Prerequisiti
 
 - [Docker](https://www.docker.com/) e Docker Compose
-- In alternativa, per lo sviluppo in locale senza container: Python 3.12, PostgreSQL, e un server statico qualsiasi per il frontend
+- In alternativa, per lo sviluppo in locale senza container: Python 3.12 e PostgreSQL
 
 ## Avvio con Docker
 
@@ -109,15 +109,15 @@ Al primo avvio (volume del database vuoto) lo schema viene creato automaticament
 ## Avvio in locale (sviluppo)
 
 ```bash
-# backend
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
-
-# frontend, da un altro terminale
-cd frontend
-python -m http.server 8080
 ```
+
+Un solo comando è sufficiente: FastAPI serve automaticamente anche i file statici del frontend all'indirizzo [`http://localhost:8000/app`](http://localhost:8000/app).
+
+> [!NOTE]
+> In produzione (Docker) il frontend è servito da nginx nel suo container separato; il mount statico in FastAPI viene semplicemente ignorato perché la cartella `../frontend` non esiste all'interno del container backend.
 
 Richiede un'istanza PostgreSQL raggiungibile con le credenziali indicate in `DATABASE_URL` nel `.env`.
 

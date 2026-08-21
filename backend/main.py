@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import os
 import bcrypt
 from repositories import user_repository
@@ -69,3 +70,10 @@ def startup_event():
 @app.get("/")
 def read_root():
     return {"message": "QUALCOSA???"}
+
+# ── Serving statico del frontend (comodo per lo sviluppo locale) ──
+# In produzione (Docker) il frontend è servito da nginx nel suo container,
+# quindi questo mount viene semplicemente ignorato.
+frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+if os.path.isdir(frontend_dir):
+    app.mount("/app", StaticFiles(directory=frontend_dir, html=True), name="frontend")
