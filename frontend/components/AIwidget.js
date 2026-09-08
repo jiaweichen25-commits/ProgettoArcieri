@@ -1,4 +1,16 @@
 (function() {
+  // L'assistente IA è riservato a istruttori e amministratori.
+  // Se l'utente è un atleta, non montare il widget nel DOM.
+  try {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+      if (payload.ruolo === "atleta") {
+        return;
+      }
+    }
+  } catch (e) { }
+
   const stiliWidget = `
     .backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); opacity: 0; pointer-events: none; transition: opacity 0.25s ease-out; z-index: 998; }
     .backdrop.open { opacity: 1; pointer-events: auto; }
