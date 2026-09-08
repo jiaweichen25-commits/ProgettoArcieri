@@ -263,25 +263,50 @@ function inviaHitsAllIframe() {
 window.addEventListener("message", (evt) => {
   if (evt.data && evt.data.type === "bersaglio-hits") {
     impattiBersaglio = evt.data.hits || [];
+    sincronizzaGrigliaConBersaglio(impattiBersaglio);
   }
   if (evt.data && evt.data.type === "bersaglio-salva") {
     salvaBersaglioDaWidget(evt.data.hits || []);
   }
 });
 
+// Riempie la tabella a griglia con i punteggi calcolati dai click sul bersaglio,
+// nello stesso ordine sinistra→destra, alto→basso usato per l'inserimento manuale.
+// Ogni volta che i colpi cambiano (nuovo tiro, annulla, reset) la griglia si
+// riallinea per intero, quindi eventuali celle inserite a mano vengono sovrascritte
+// non appena il bersaglio viene toccato di nuovo.
+function sincronizzaGrigliaConBersaglio(hits) {
+  if (!segnapuntoCorrente) return;
+  const fpv = segnapuntoCorrente.frecce_per_volee;
+  const perMezza = fpv * 10; // capacità di una mezza: 10 volée × frecce per volée
+
+  for (let m = 1; m <= 2; m++) {
+    for (let n = 1; n <= 10; n++) {
+      const key = `${m}-${n}`;
+      if (!voleeData[key]) voleeData[key] = { mezza: m, numero: n };
+      for (let i = 1; i <= fpv; i++) {
+        const idx = (m - 1) * perMezza + (n - 1) * fpv + (i - 1);
+        const hit = hits[idx];
+                voleeData[key][`f${i}`] = hit ? (hit.isX ? "X" : (hit.isMiss ? "M" : String(hit.value))) : null;
+      }
+    }
+  }
+
+  disegnaTabella();
+}
+
 async function salvaBersaglioDaWidget(hits) {
   const frame = document.getElementById("bersaglioFrame");
   const s = segnapuntoCorrente;
   if (!s) return;
 
-  const note_istruttore = document.getElementById("noteIstruttore").value.trim() || null;
   const note_atleta = document.getElementById("noteAtleta").value.trim() || null;
 
   try {
     const res = await fetch(`${API_URL}/me/segnapunti/${s.IDsegnapunto}`, {
       method: "PUT",
       headers: authHeaders(),
-      body: JSON.stringify({ note_istruttore, note_atleta, ImpattiBersaglio: hits }),
+      body: JSON.stringify({ note_atleta, ImpattiBersaglio: hits }),
     });
     if (!res.ok) {
       if (frame) frame.contentWindow.postMessage({ type: "bersaglio-errore-salvataggio" }, "*");
@@ -289,11 +314,11 @@ async function salvaBersaglioDaWidget(hits) {
       return;
     }
     impattiBersaglio = hits;
-    segnapuntoCorrente.note_istruttore = note_istruttore;
     segnapuntoCorrente.note_atleta = note_atleta;
     segnapuntoCorrente.ImpattiBersaglio = hits;
+    await salvaVolee(true); // salva anche la tabella, già sincronizzata sopra
     if (frame) frame.contentWindow.postMessage({ type: "bersaglio-salvato" }, "*");
-    showMsg("scoreMsgBox", "Bersaglio salvato.", "success");
+    showMsg("scoreMsgBox", "Bersaglio e tabella salvati.", "success");
   } catch {
     if (frame) frame.contentWindow.postMessage({ type: "bersaglio-errore-salvataggio" }, "*");
     showMsg("scoreMsgBox", "Impossibile contattare il server.", "error");
@@ -493,7 +518,6 @@ async function salvaVolee(silenzioso = false) {
 }
 
 async function salvaNoteCorrente() {
-  const note_istruttore = document.getElementById("noteIstruttore").value.trim() || null;
   const note_atleta = document.getElementById("noteAtleta").value.trim() || null;
   const s = segnapuntoCorrente;
 
@@ -501,13 +525,12 @@ async function salvaNoteCorrente() {
     const res = await fetch(`${API_URL}/me/segnapunti/${s.IDsegnapunto}`, {
       method: "PUT",
       headers: authHeaders(),
-      body: JSON.stringify({ note_istruttore, note_atleta, ImpattiBersaglio: impattiBersaglio }),
+      body: JSON.stringify({ note_atleta, ImpattiBersaglio: impattiBersaglio }),
     });
     if (!res.ok) {
       alert("Errore nel salvataggio delle note.");
       return;
     }
-    segnapuntoCorrente.note_istruttore = note_istruttore;
     segnapuntoCorrente.note_atleta = note_atleta;
     segnapuntoCorrente.ImpattiBersaglio = impattiBersaglio;
     showMsg("scoreMsgBox", "Note aggiornate.", "success");

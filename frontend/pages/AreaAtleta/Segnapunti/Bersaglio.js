@@ -33,22 +33,25 @@ function registraTiro(evt) {
   const dx = p.x - CENTER.x;
   const dy = p.y - CENTER.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
-  const result = scoreForDistance(dist);
-  if (!result) return; // click fuori dal bersaglio, ignorato
+  const result = scoreForDistance(dist); // null = fuori da tutti gli anelli = mancato (M)
 
-  hits.push({ x: p.x, y: p.y, value: result.value, isX: result.isX });
-  disegnaImpatto(p.x, p.y, result.isX);
+  const value = result ? result.value : 0;
+  const isX = result ? result.isX : false;
+  const isMiss = !result;
+
+  hits.push({ x: p.x, y: p.y, value, isX, isMiss });
+  disegnaImpatto(p.x, p.y, isX, isMiss);
   aggiornaStatistiche();
   notificaGenitore();
 }
 
-function disegnaImpatto(x, y, isX) {
+function disegnaImpatto(x, y, isX, isMiss) {
   const impacts = document.getElementById("impacts");
   const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   circle.setAttribute("cx", x);
   circle.setAttribute("cy", y);
   circle.setAttribute("r", 4.5);
-  circle.setAttribute("class", isX ? "impact impact-x" : "impact");
+  circle.setAttribute("class", isMiss ? "impact impact-miss" : (isX ? "impact impact-x" : "impact"));
   impacts.appendChild(circle);
 }
 
@@ -65,8 +68,8 @@ function aggiornaStatistiche() {
   log.innerHTML = "";
   hits.forEach((h) => {
     const chip = document.createElement("span");
-    chip.className = "hit-chip" + (h.isX ? " chip-x" : "");
-    chip.textContent = h.isX ? "X" : h.value;
+    chip.className = "hit-chip" + (h.isX ? " chip-x" : (h.isMiss ? " chip-miss" : ""));
+    chip.textContent = h.isX ? "X" : (h.isMiss ? "M" : h.value);
     log.appendChild(chip);
   });
 }
@@ -113,7 +116,7 @@ function notificaGenitore() {
 function caricaHitsSalvati(hitsSalvati) {
   hits = Array.isArray(hitsSalvati) ? hitsSalvati.slice() : [];
   document.getElementById("impacts").innerHTML = "";
-  hits.forEach((h) => disegnaImpatto(h.x, h.y, h.isX));
+  hits.forEach((h) => disegnaImpatto(h.x, h.y, h.isX, h.isMiss));
   aggiornaStatistiche();
 }
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from typing import List
-from schemas.segnapunti_schemas import SegnapuntoOut, VoleeOut
+from schemas.segnapunti_schemas import SegnapuntoOut, VoleeOut, SegnapuntoNoteIstruttoreUpdate
 from services import segnapunti_service
 from dependencies.auth_deps import solo_istruttore
 
@@ -19,6 +19,18 @@ def get_segnapunto(
     utente: dict = Depends(solo_istruttore),
 ):
     return segnapunti_service.get_segnapunto(utente["id_utente"], id_atleta, id_segnapunto)
+
+
+@router.put("/{id_atleta}/segnapunti/{id_segnapunto}/note")
+def aggiorna_note_istruttore(
+    id_atleta: int,
+    id_segnapunto: int,
+    dati: SegnapuntoNoteIstruttoreUpdate,
+    utente: dict = Depends(solo_istruttore),
+):
+    return segnapunti_service.aggiorna_note_istruttore(
+        utente["id_utente"], id_atleta, id_segnapunto, dati.note_istruttore
+    )
 
 
 @router.get("/{id_atleta}/segnapunti/{id_segnapunto}/volee/", response_model=List[VoleeOut])

@@ -62,6 +62,10 @@ class SegnapuntoUpdate(BaseModel):
     ImpattiBersaglio: Optional[list] = None
 
 
+class SegnapuntoNoteIstruttoreUpdate(BaseModel):
+    note_istruttore: Optional[str] = None
+
+
 class SegnapuntoOut(BaseModel):
     IDsegnapunto: int
     IDatleta: int

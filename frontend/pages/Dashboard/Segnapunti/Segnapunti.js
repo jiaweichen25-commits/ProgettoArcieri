@@ -166,6 +166,31 @@ async function apriScore(s) {
   await caricaEDisegnaVolee();
 }
 
+async function salvaNoteIstruttore() {
+  if (!segnapuntoCorrente) return;
+  const note_istruttore = document.getElementById("noteIstruttore").value.trim() || null;
+
+  try {
+    const res = await fetch(`${API_URL}/atleti/${ID_ATLETA}/segnapunti/${segnapuntoCorrente.IDsegnapunto}/note`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ note_istruttore }),
+    });
+
+    if (res.status === 401) { logout(); return; }
+    if (!res.ok) {
+      showMsg("scoreMsgBox", "Errore nel salvataggio delle note istruttore.", "error");
+      return;
+    }
+
+    segnapuntoCorrente.note_istruttore = note_istruttore;
+    showMsg("scoreMsgBox", "Note istruttore salvate con successo!", "success");
+    setTimeout(() => clearMsg("scoreMsgBox"), 3000);
+  } catch {
+    showMsg("scoreMsgBox", "Impossibile contattare il server.", "error");
+  }
+}
+
 function chiudiScore() {
   segnapuntoCorrente = null;
   voleeData = {}; // Svuota la memoria locale: le modifiche non salvate spariscono!

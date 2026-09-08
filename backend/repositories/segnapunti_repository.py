@@ -72,6 +72,21 @@ def crea_segnapunto(id_atleta: int, dati: dict):
         conn.close()
 
 
+def aggiorna_note_istruttore(id_segnapunto: int, id_atleta: int, note_istruttore: str | None):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                '''UPDATE "Tsegnapunti"
+                   SET "note_istruttore" = %s
+                   WHERE "IDsegnapunto" = %s AND "IDatleta" = %s''',
+                (note_istruttore, id_segnapunto, id_atleta)
+            )
+            return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
 def aggiorna_segnapunto(id_segnapunto: int, id_atleta: int, dati: dict):
     conn = get_db_conn()
     try:
@@ -79,11 +94,10 @@ def aggiorna_segnapunto(id_segnapunto: int, id_atleta: int, dati: dict):
             impatti = dati.get("ImpattiBersaglio")
             cur.execute(
                 '''UPDATE "Tsegnapunti"
-                   SET "note_istruttore" = %s, "note_atleta" = %s,
+                   SET "note_atleta" = %s,
                        "ImpattiBersaglio" = COALESCE(%s, "ImpattiBersaglio")
                    WHERE "IDsegnapunto" = %s AND "IDatleta" = %s''',
                 (
-                    dati.get("note_istruttore"),
                     dati.get("note_atleta"),
                     Json(impatti) if impatti is not None else None,
                     id_segnapunto,

@@ -33,6 +33,12 @@
       fill: #111111;
       stroke: #ffffff;
     }
+    .impact.impact-miss {
+      fill: transparent;
+      stroke: #888888;
+      stroke-width: 1.5;
+      stroke-dasharray: 2 1.5;
+    }
     .stat-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -87,6 +93,8 @@
       flex-wrap: wrap;
       gap: 6px;
       justify-content: center;
+      max-height: 70px;
+      overflow-y: auto;
     }
     .hit-chip {
       min-width: 24px;
@@ -100,6 +108,7 @@
       color: #ddd;
     }
     .hit-chip.chip-x { color: #c0392b; border-color: #c0392b; }
+    .hit-chip.chip-miss { color: #888888; border-color: #555555; }
   </style>
 </head>
 <body>

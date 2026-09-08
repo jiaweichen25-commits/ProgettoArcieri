@@ -67,6 +67,17 @@ def crea_segnapunto(id_utente: int, id_atleta: int, dati: dict):
     return {"IDsegnapunto": new_id, "message": "Segnapunto creato"}
 
 
+def aggiorna_note_istruttore(id_utente: int, id_atleta: int, id_segnapunto: int, note_istruttore: str | None):
+    _verifica_atleta(id_utente, id_atleta)
+    ok = segnapunti_repository.aggiorna_note_istruttore(id_segnapunto, id_atleta, note_istruttore)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Segnapunto non trovato"
+        )
+    return {"message": "Note istruttore salvate con successo"}
+
+
 def aggiorna_segnapunto(id_utente: int, id_atleta: int, id_segnapunto: int, dati: dict):
     _verifica_atleta(id_utente, id_atleta)
     ok = segnapunti_repository.aggiorna_segnapunto(id_segnapunto, id_atleta, dati)
