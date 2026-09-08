@@ -267,6 +267,20 @@ tbody a:hover {
   text-decoration: underline;
 }
 
+.col-email {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-email a {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 
 
 .actions-cell {

@@ -150,7 +150,7 @@ function renderTable(lista) {
       <td>${escHtml(atleta.codice_fiscale) || "—"}</td>
       <td>${escHtml(atleta.telefono) || "—"}</td>
       <td>${escHtml(atleta.cellulare) || "—"}</td>
-      <td>${atleta.email ? `<a href="mailto:${escHtml(atleta.email)}">${escHtml(atleta.email)}</a>` : "—"}</td>
+      <td class="col-email">${atleta.email ? `<a href="mailto:${escHtml(atleta.email)}" title="${escHtml(atleta.email)}">${escHtml(atleta.email)}</a>` : "—"}</td>
       <td>${formatDate(atleta.data_nascita)}</td>
     `;
     tbody.appendChild(trData);
