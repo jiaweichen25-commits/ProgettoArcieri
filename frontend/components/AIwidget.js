@@ -12,12 +12,89 @@
   } catch (e) { }
 
   const stiliWidget = `
-    .backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); opacity: 0; pointer-events: none; transition: opacity 0.25s ease-out; z-index: 998; }
+    :root {
+      --ai-panel-w: min(420px, 92vw);
+    }
+    .backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); opacity: 0; pointer-events: none; transition: opacity 0.28s ease-out; z-index: 998; backdrop-filter: blur(2px); }
     .backdrop.open { opacity: 1; pointer-events: auto; }
-    .panel-ai { position: fixed; right: 0; top: 0; height: 100vh; width: 400px; max-width: 90vw; background: #1a1a1a; border-left: 1px solid #333; transform: translateX(100%); transition: transform 0.25s ease-out; z-index: 999; overflow-y: auto; display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45); }
+    
+    /* OP.GG style lateral drawer trigger tab */
+    .ai-drawer-tab {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 60px;
+      background: #18191c;
+      border: 1px solid #333842;
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      color: #9aa2b0;
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.5);
+      transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+      padding: 0;
+      outline: none;
+    }
+    .ai-drawer-tab:hover {
+      background: #23262e;
+      color: #ffffff;
+      border-color: #c0392b;
+      box-shadow: -4px 0 20px rgba(192, 57, 43, 0.35);
+    }
+    .ai-drawer-tab.open {
+      right: var(--ai-panel-w);
+      background: #151619;
+      border-color: #2d3139;
+    }
+    .ai-chevron-icon {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ai-drawer-tab.open .ai-chevron-icon {
+      transform: rotate(180deg);
+    }
+
+    .panel-ai {
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100vh;
+      width: var(--ai-panel-w);
+      background: #151619;
+      border-left: 1px solid #2d3139;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 999;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      box-sizing: border-box;
+      box-shadow: -14px 0 36px rgba(0, 0, 0, 0.65);
+    }
     .panel-ai.open { transform: translateX(0); }
-    .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; border-left: 3px solid #c0392b; padding-left: 12px; flex-wrap: wrap; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; border-left: 3px solid #c0392b; padding-left: 12px; }
     .panel-header h3 { font-size: 1.05rem; font-weight: 600; margin: 0; color: #fff; }
+    .panel-header-close {
+      background: transparent;
+      border: none;
+      color: #888;
+      font-size: 1.15rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .panel-header-close:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
     .ai-selected-pill { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #888; background: #111; border: 1px solid #333; padding: 4px 10px; border-radius: 2px; }
     .ai-selected-pill.active { color: #fff; background: rgba(192, 57, 43, 0.2); border-color: #c0392b; }
     .ai-hint { color: #888; font-size: 0.85rem; line-height: 1.5; margin-bottom: 18px; }
@@ -38,16 +115,23 @@
   styleEl.innerHTML = stiliWidget;
   document.head.appendChild(styleEl);
 
-  // Inject HTML structure
+  // Inject HTML structure (OP.GG style lateral drawer tab)
   const widgetHtml = `
-    <button class="btn btn-red" type="button" id="btnAssistenteIA" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">+ Assistente IA</button>
+    <button class="ai-drawer-tab" type="button" id="btnAssistenteIA" aria-label="Apri/Chiudi Assistente IA" title="Assistente IA">
+      <svg class="ai-chevron-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
     
     <div class="backdrop" id="aiBackdrop"></div>
 
     <div class="panel-ai" id="sectionAi">
       <div class="panel-header">
-        <h3>Chiedi all'Agente AI</h3>
-        <span class="ai-selected-pill" id="aiSelectedPill">Nessun atleta selezionato</span>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <h3>Chiedi all'Agente AI</h3>
+          <span class="ai-selected-pill" id="aiSelectedPill">Nessun atleta selezionato</span>
+        </div>
+        <button class="panel-header-close" type="button" id="aiBtnCloseHeader" title="Chiudi">✕</button>
       </div>
       <p class="ai-hint">
         Fai una domanda contestuale sull'atleta selezionato oppure chiedi consigli generali.
@@ -83,26 +167,39 @@
   const aiSelectedPill = document.getElementById("aiSelectedPill");
   const aiDomanda = document.getElementById("aiDomanda");
   const aiBtnClose = document.getElementById("aiBtnClose");
+  const aiBtnCloseHeader = document.getElementById("aiBtnCloseHeader");
   const aiBtnInvia = document.getElementById("aiBtnInvia");
   const historyBox = document.getElementById("aiHistory");
   const loadingBox = document.getElementById("aiLoading");
 
-  // Event Listeners
-  btnAssistente.addEventListener("click", () => {
-    sectionAi.classList.toggle("open");
-    aiBackdrop.classList.toggle("open");
-    if (sectionAi.classList.contains("open")) {
-      aiDomanda.focus();
-    }
-  });
+  // Open / Close Handlers
+  const openPanel = () => {
+    sectionAi.classList.add("open");
+    btnAssistente.classList.add("open");
+    aiBackdrop.classList.add("open");
+    aiDomanda.focus();
+  };
 
   const closePanel = () => {
     sectionAi.classList.remove("open");
+    btnAssistente.classList.remove("open");
     aiBackdrop.classList.remove("open");
   };
 
+  const togglePanel = () => {
+    if (sectionAi.classList.contains("open")) {
+      closePanel();
+    } else {
+      openPanel();
+    }
+  };
+
+  btnAssistente.addEventListener("click", togglePanel);
   aiBackdrop.addEventListener("click", closePanel);
   aiBtnClose.addEventListener("click", closePanel);
+  if (aiBtnCloseHeader) {
+    aiBtnCloseHeader.addEventListener("click", closePanel);
+  }
 
   // Initialize context from URL
   const initContext = () => {
@@ -128,11 +225,7 @@
     aiSelectedPill.textContent = `${atleta.nome} ${atleta.cognome}`;
     aiSelectedPill.classList.add("active");
     
-    sectionAi.classList.add("open");
-    aiBackdrop.classList.add("open");
-    
-    // Non azzeriamo più la cronologia per mantenere il flusso
-    aiDomanda.focus();
+    openPanel();
   };
 
   // Send Logic
