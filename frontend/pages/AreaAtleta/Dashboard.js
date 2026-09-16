@@ -79,6 +79,19 @@ async function caricaProfilo() {
     document.getElementById("pTelefono").textContent = val(p.telefono);
     document.getElementById("pCellulare").textContent = val(p.cellulare);
     document.getElementById("pEmail").textContent = val(p.email);
+
+    // Carica username da /auth/me
+    try {
+      const resMe = await fetch(`${API_URL}/auth/me`, { headers: authHeaders() });
+      if (resMe.ok) {
+        const me = await resMe.json();
+        const pUser = document.getElementById("pUsername");
+        if (pUser) {
+          const userVal = me.username ? `@${me.username}` : "Nessuno";
+          pUser.innerHTML = `${userVal} <button class="btn btn-outline" style="padding:2px 8px; font-size:0.75rem; border:1px solid #444; border-radius:4px; cursor:pointer;" onclick="openProfileModal()">Modifica</button>`;
+        }
+      }
+    } catch {}
   } catch {
     console.error("Errore caricamento profilo");
   }
@@ -458,3 +471,67 @@ window.addEventListener("DOMContentLoaded", () => {
   caricaAntidoping();
   caricaPianoGare();
 });
+
+// ══════════════════════════════════════════════
+// GESTIONE PROFILO ATLETA
+// ══════════════════════════════════════════════
+
+async function openProfileModal() {
+  const msgBox = document.getElementById("profileMsgBox");
+  if (msgBox) msgBox.className = "msg-box";
+
+  try {
+    const res = await fetch(`${API_URL}/auth/me`, {
+      headers: authHeaders()
+    });
+    if (!res.ok) throw new Error("Impossibile caricare i dati del profilo");
+
+    const data = await res.json();
+    document.getElementById("profileEmail").value = data.email || "";
+    document.getElementById("profileUsername").value = data.username || "";
+    document.getElementById("profileModal").classList.add("open");
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+function closeProfileModal() {
+  document.getElementById("profileModal").classList.remove("open");
+}
+
+async function salvaProfilo() {
+  const username = document.getElementById("profileUsername").value.trim();
+  const btn = document.getElementById("btnProfileSalva");
+  btn.disabled = true;
+  btn.textContent = "Salvataggio...";
+
+  try {
+    const res = await fetch(`${API_URL}/auth/username`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ username: username || null })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showMsg("profileMsgBox", data.detail || "Errore durante il salvataggio", "error");
+      return;
+    }
+
+    showMsg("profileMsgBox", "Profilo aggiornato con successo!", "success");
+    const pUser = document.getElementById("pUsername");
+    if (pUser) {
+      const userVal = username ? `@${username}` : "Nessuno";
+      pUser.innerHTML = `${userVal} <button class="btn btn-outline" style="padding:2px 8px; font-size:0.75rem; border:1px solid #444; border-radius:4px; cursor:pointer;" onclick="openProfileModal()">Modifica</button>`;
+    }
+    setTimeout(() => {
+      closeProfileModal();
+    }, 1200);
+
+  } catch (err) {
+    showMsg("profileMsgBox", "Errore di connessione", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Salva";
+  }
+}

@@ -1,5 +1,8 @@
 from fastapi import APIRouter, status, Depends
-from schemas.auth_schemas import LoginInput, TokenOutput, RegisterInput, ChangePasswordInput
+from schemas.auth_schemas import (
+    LoginInput, TokenOutput, RegisterInput, ChangePasswordInput,
+    ForgotPasswordInput, ResetPasswordInput, UpdateUsernameInput, UserProfileOut
+)
 from services import auth_service
 from dependencies.auth_deps import get_utente_loggato
 
@@ -26,3 +29,21 @@ def register(data: RegisterInput):
 def change_password(data: ChangePasswordInput, utente: dict = Depends(get_utente_loggato)):
     auth_service.change_user_password(utente["email"], data.old_password, data.new_password)
     return {"message": "Password modificata con successo"}
+
+@router.post("/forgot-password")
+def forgot_password(data: ForgotPasswordInput):
+    result = auth_service.request_password_reset(data.email)
+    return result
+
+@router.post("/reset-password")
+def reset_password(data: ResetPasswordInput):
+    result = auth_service.reset_password(data.email, data.code, data.new_password)
+    return result
+
+@router.get("/me", response_model=UserProfileOut)
+def get_profile(utente: dict = Depends(get_utente_loggato)):
+    return auth_service.get_user_profile(utente["id_utente"])
+
+@router.put("/username")
+def update_username(data: UpdateUsernameInput, utente: dict = Depends(get_utente_loggato)):
+    return auth_service.update_user_username(utente["id_utente"], data.username)

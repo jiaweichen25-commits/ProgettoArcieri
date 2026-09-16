@@ -10,6 +10,7 @@ class IstruttoreCreateInput(BaseModel):
     cognome: str
     email: EmailStr
     qualifica: str = None
+    username: str = None
 
 @router.get("/istruttori")
 def get_istruttori(utente: dict = Depends(solo_admin)):

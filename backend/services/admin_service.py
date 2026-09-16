@@ -44,7 +44,8 @@ def create_istruttore(dati: dict):
     password_temp = ''.join(random.choice(chars) for _ in range(8))
     hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
     
-    user_repository.create_user(email, hashed, "istruttore", must_change_password=True)
+    username = (dati.get("username") or "").strip() or None
+    user_repository.create_user(email, hashed, "istruttore", must_change_password=True, username=username)
     new_user = user_repository.get_user_by_email(email)
     id_utente = new_user[2]
     

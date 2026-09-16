@@ -10,6 +10,10 @@ CREATE TABLE IF NOT EXISTS public."Tutenti"
     must_change_password    boolean DEFAULT false,
     creato_il               timestamp without time zone DEFAULT NOW(),
     sospeso_fino_al         date,
+    tentativi_falliti       integer DEFAULT 0 NOT NULL,
+    bloccato_fino_al        timestamp without time zone,
+    reset_token             character varying,
+    reset_token_scadenza    timestamp without time zone,
     PRIMARY KEY ("IDutente")
 );
 

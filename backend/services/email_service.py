@@ -49,3 +49,44 @@ def invia_email_credenziali(destinatario: str, password_temporanea: str, ruolo: 
     except Exception as e:
         print(f"Errore durante l'invio dell'email a {destinatario}: {str(e)}")
         # Non rilancio l'eccezione per non bloccare la creazione, ma si potrebbe gestire meglio
+
+def invia_email_recupero_password(destinatario: str, codice_recupero: str):
+    oggetto = "Recupero Password - Arcieri Vicenza"
+    
+    corpo = f"""
+    Hai richiesto il recupero della password per il tuo account Arcieri Vicenza.
+    
+    Il tuo codice di verifica è:
+    
+        {codice_recupero}
+    
+    Questo codice scadrà tra 30 minuti.
+    Se non hai richiesto il recupero della password, ignora questa email.
+    
+    Cordiali saluti,
+    Lo staff di Arcieri Vicenza
+    """
+    
+    if not SMTP_SERVER or not SMTP_USER or not SMTP_PASSWORD:
+        print(f"\n[EMAIL MOCK] Email a {destinatario}")
+        print(f"[EMAIL MOCK] Oggetto: {oggetto}")
+        print(f"[EMAIL MOCK] Codice Recupero: {codice_recupero}\n")
+        return
+
+    msg = MIMEMultipart()
+    msg['From'] = SMTP_USER
+    msg['To'] = destinatario
+    msg['Subject'] = oggetto
+    msg.attach(MIMEText(corpo, 'plain'))
+
+    try:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USER, SMTP_PASSWORD)
+        text = msg.as_string()
+        server.sendmail(SMTP_USER, destinatario, text)
+        server.quit()
+        print(f"Email di recupero inviata con successo a {destinatario}")
+    except Exception as e:
+        print(f"Errore durante l'invio dell'email di recupero a {destinatario}: {str(e)}")
+

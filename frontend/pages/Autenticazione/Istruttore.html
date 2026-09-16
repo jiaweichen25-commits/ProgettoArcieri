@@ -35,14 +35,55 @@
                     <input type="checkbox" id="rememberLogin" />
                     Ricordami
                 </label>
-                <a onclick="event.preventDefault(); showMsg('Contatta la segreteria per recuperare la password.', 'error');">
+                <a onclick="event.preventDefault(); openForgotPasswordModal();" style="cursor:pointer;">
                     Password dimenticata?
                 </a>
             </div>
 
             <button type="submit" class="btn-primary" id="submitBtn">Accedi</button>
-
         </form>
+    </div>
+
+    <!-- Modale Recupero Password -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal-box">
+            <h3>Recupero Password</h3>
+            <p id="forgotModalDesc">Inserisci la tua email per ricevere un codice di verifica a 6 cifre.</p>
+            
+            <div class="msg-box" id="forgotMsgBox"></div>
+
+            <!-- Step 1: Invia Email -->
+            <div id="forgotStep1">
+                <div class="field">
+                    <label>Email registrata</label>
+                    <input type="email" id="forgotEmail" placeholder="admin@arcierivicenza.it" />
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeForgotPasswordModal()">Annulla</button>
+                    <button type="button" class="btn-confirm" id="btnSendResetCode" onclick="handleSendResetCode()">Invia Codice</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Inserisci Codice e Nuova Password -->
+            <div id="forgotStep2" style="display: none;">
+                <div class="field">
+                    <label>Codice di Verifica (6 cifre)</label>
+                    <input type="text" id="resetCode" maxlength="6" placeholder="123456" />
+                </div>
+                <div class="field">
+                    <label>Nuova Password <span style="color:#555; font-weight:400;">(min. 6 caratteri)</span></label>
+                    <input type="password" id="resetNewPassword" placeholder="••••••••" />
+                </div>
+                <div class="field">
+                    <label>Conferma Password</label>
+                    <input type="password" id="resetConfirmPassword" placeholder="••••••••" />
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeForgotPasswordModal()">Annulla</button>
+                    <button type="button" class="btn-confirm" id="btnResetPassword" onclick="handleResetPassword()">Reimposta</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modale Cambio Password Primo Accesso -->

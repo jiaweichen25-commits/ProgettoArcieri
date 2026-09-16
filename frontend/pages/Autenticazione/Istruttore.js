@@ -150,7 +150,128 @@ async function handleChangePassword() {
     }
 }
 
-// Rimossa registrazione istruttori
+// ══════════════════════════════════════════════
+// Recupero Password
+// ══════════════════════════════════════════════
+
+function showForgotMsg(testo, tipo) {
+    const box = document.getElementById("forgotMsgBox");
+    if (box) {
+        box.textContent = testo;
+        box.className = "msg-box " + tipo;
+    }
+}
+
+function openForgotPasswordModal() {
+    const modal = document.getElementById("forgotPasswordModal");
+    const loginInput = document.getElementById("loginEmail").value.trim();
+    if (loginInput.includes("@")) {
+        document.getElementById("forgotEmail").value = loginInput;
+    }
+    document.getElementById("forgotStep1").style.display = "block";
+    document.getElementById("forgotStep2").style.display = "none";
+    document.getElementById("forgotModalDesc").textContent = "Inserisci la tua email per ricevere un codice di verifica a 6 cifre.";
+    const box = document.getElementById("forgotMsgBox");
+    if (box) box.className = "msg-box";
+    modal.classList.add("open");
+}
+
+function closeForgotPasswordModal() {
+    document.getElementById("forgotPasswordModal").classList.remove("open");
+}
+
+async function handleSendResetCode() {
+    const email = document.getElementById("forgotEmail").value.trim();
+    if (!email) {
+        showForgotMsg("Inserisci l'indirizzo email", "error");
+        return;
+    }
+
+    const btn = document.getElementById("btnSendResetCode");
+    btn.disabled = true;
+    btn.textContent = "Invio in corso...";
+
+    try {
+        const res = await fetch(`${API_URL}/auth/forgot-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            showForgotMsg(data.detail || "Errore durante la richiesta di recupero.", "error");
+            return;
+        }
+
+        showForgotMsg("Se l'email è registrata, abbiamo inviato il codice a 6 cifre.", "success");
+        document.getElementById("forgotStep1").style.display = "none";
+        document.getElementById("forgotStep2").style.display = "block";
+        document.getElementById("forgotModalDesc").textContent = "Inserisci il codice ricevuto e la tua nuova password.";
+        document.getElementById("resetCode").focus();
+
+    } catch (err) {
+        showForgotMsg("Errore di connessione al server.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Invia Codice";
+    }
+}
+
+async function handleResetPassword() {
+    const email = document.getElementById("forgotEmail").value.trim();
+    const code = document.getElementById("resetCode").value.trim();
+    const new_password = document.getElementById("resetNewPassword").value;
+    const confirm_password = document.getElementById("resetConfirmPassword").value;
+
+    if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
+        showForgotMsg("Inserisci il codice numerico a 6 cifre", "error");
+        return;
+    }
+
+    if (!new_password || new_password.length < 6) {
+        showForgotMsg("La password deve essere di almeno 6 caratteri", "error");
+        return;
+    }
+
+    if (new_password !== confirm_password) {
+        showForgotMsg("Le password non coincidono", "error");
+        return;
+    }
+
+    const btn = document.getElementById("btnResetPassword");
+    btn.disabled = true;
+    btn.textContent = "Reimpostazione...";
+
+    try {
+        const res = await fetch(`${API_URL}/auth/reset-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, code, new_password })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            showForgotMsg(data.detail || "Codice non valido o scaduto.", "error");
+            return;
+        }
+
+        showForgotMsg("Password reimpostata con successo! Ora puoi accedere.", "success");
+        setTimeout(() => {
+            closeForgotPasswordModal();
+            document.getElementById("loginEmail").value = email;
+            document.getElementById("loginPassword").value = "";
+            document.getElementById("loginPassword").focus();
+            showMsg("Password reimpostata! Inserisci la nuova password per accedere.", "success");
+        }, 1500);
+
+    } catch (err) {
+        showForgotMsg("Errore di connessione al server.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Reimposta";
+    }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("remember_email");
@@ -162,7 +283,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (token) {
         try {
             const payload = parseToken(token);
-            if (payload.ruolo === "istruttore") redirectByRuolo(token);
+            if (payload.ruolo === "istruttore" || payload.ruolo === "admin") redirectByRuolo(token);
         } catch { /* token invalido */ }
     }
 });

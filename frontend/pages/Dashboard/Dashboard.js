@@ -35,7 +35,17 @@ function requireAuth() {
     if (navUser) {
       const saved = localStorage.getItem("currentUser");
       const user = saved ? JSON.parse(saved) : { email: payload.sub };
-      navUser.textContent = user.email || payload.sub;
+      navUser.textContent = user.username || user.email || payload.sub;
+
+      // Carica profilo per verificare username aggiornato
+      fetch(`${API_URL}/auth/me`, { headers: { "Authorization": `Bearer ${token}` } })
+        .then(res => res.ok ? res.json() : null)
+        .then(me => {
+          if (me) {
+            navUser.textContent = me.username || me.email || payload.sub;
+          }
+        })
+        .catch(() => {});
     }
     return true;
   } catch {
@@ -434,3 +444,71 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Il tasto invio e' gestito da ai_widget.js ora
 });
+
+// ══════════════════════════════════════════════
+// GESTIONE PROFILO ISTRUTTORE
+// ══════════════════════════════════════════════
+
+async function openProfileModal() {
+  const token = localStorage.getItem("access_token");
+  const msgBox = document.getElementById("profileMsgBox");
+  if (msgBox) msgBox.className = "msg-box";
+
+  try {
+    const res = await fetch(`${API_URL}/auth/me`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error("Impossibile caricare i dati del profilo");
+
+    const data = await res.json();
+    document.getElementById("profileEmail").value = data.email || "";
+    document.getElementById("profileUsername").value = data.username || "";
+    document.getElementById("profileModal").classList.add("open");
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+function closeProfileModal() {
+  document.getElementById("profileModal").classList.remove("open");
+}
+
+async function salvaProfilo() {
+  const username = document.getElementById("profileUsername").value.trim();
+  const btn = document.getElementById("btnProfileSalva");
+  btn.disabled = true;
+  btn.textContent = "Salvataggio...";
+
+  const token = localStorage.getItem("access_token");
+  try {
+    const res = await fetch(`${API_URL}/auth/username`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ username: username || null })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showMsg("profileMsgBox", data.detail || "Errore durante il salvataggio", "error");
+      return;
+    }
+
+    showMsg("profileMsgBox", "Profilo aggiornato con successo!", "success");
+    const navUser = document.getElementById("navUser");
+    if (navUser) {
+      navUser.textContent = username || document.getElementById("profileEmail").value;
+    }
+    setTimeout(() => {
+      closeProfileModal();
+    }, 1200);
+
+  } catch (err) {
+    showMsg("profileMsgBox", "Errore di connessione", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Salva";
+  }
+}

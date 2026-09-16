@@ -1,12 +1,32 @@
 from config.database import get_db_conn
 from psycopg2.errors import UniqueViolation
 
+def ensure_security_columns():
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute('''
+                ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS tentativi_falliti integer DEFAULT 0 NOT NULL;
+                ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS bloccato_fino_al timestamp without time zone;
+                ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS reset_token character varying;
+                ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS reset_token_scadenza timestamp without time zone;
+            ''')
+    except Exception as e:
+        print(f"Warning: could not ensure security columns: {e}")
+    finally:
+        conn.close()
+
+# Esegui migrazione automatica all'import
+ensure_security_columns()
+
 def get_user_by_email_or_username(identifier: str):
     conn = get_db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password, sospeso_fino_al FROM "Tutenti" WHERE LOWER("E-mail") = LOWER(%s) OR LOWER("Username") = LOWER(%s)',
+                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password, sospeso_fino_al, '
+                '"E-mail", "Username", tentativi_falliti, bloccato_fino_al, reset_token, reset_token_scadenza '
+                'FROM "Tutenti" WHERE LOWER("E-mail") = LOWER(%s) OR LOWER("Username") = LOWER(%s)',
                 (identifier, identifier)
             )
             return cur.fetchone()
@@ -18,10 +38,121 @@ def get_user_by_email(email: str):
     try:
         with conn.cursor() as cur:
             cur.execute(
-                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password, sospeso_fino_al FROM "Tutenti" WHERE LOWER("E-mail") = LOWER(%s)',
+                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password, sospeso_fino_al, '
+                '"E-mail", "Username", tentativi_falliti, bloccato_fino_al, reset_token, reset_token_scadenza '
+                'FROM "Tutenti" WHERE LOWER("E-mail") = LOWER(%s)',
                 (email,)
             )
             return cur.fetchone()
+    finally:
+        conn.close()
+
+def get_user_by_id(id_utente: int):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password, sospeso_fino_al, '
+                '"E-mail", "Username", tentativi_falliti, bloccato_fino_al '
+                'FROM "Tutenti" WHERE "IDutente" = %s',
+                (id_utente,)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
+def get_user_by_username(username: str):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'SELECT "IDutente", "E-mail", "Username" FROM "Tutenti" WHERE LOWER("Username") = LOWER(%s)',
+                (username,)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
+def increment_failed_attempts(id_utente: int, lock_until=None):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            if lock_until:
+                cur.execute(
+                    'UPDATE "Tutenti" SET tentativi_falliti = 5, bloccato_fino_al = %s WHERE "IDutente" = %s',
+                    (lock_until, id_utente)
+                )
+            else:
+                cur.execute(
+                    'UPDATE "Tutenti" SET tentativi_falliti = tentativi_falliti + 1 WHERE "IDutente" = %s',
+                    (id_utente,)
+                )
+    finally:
+        conn.close()
+
+def reset_failed_attempts(id_utente: int):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'UPDATE "Tutenti" SET tentativi_falliti = 0, bloccato_fino_al = NULL WHERE "IDutente" = %s',
+                (id_utente,)
+            )
+    finally:
+        conn.close()
+
+def set_reset_token(email: str, token: str, expiry):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'UPDATE "Tutenti" SET reset_token = %s, reset_token_scadenza = %s WHERE LOWER("E-mail") = LOWER(%s)',
+                (token, expiry, email)
+            )
+            return cur.rowcount > 0
+    finally:
+        conn.close()
+
+def get_user_by_reset_token(email: str, token: str):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password, sospeso_fino_al, '
+                '"E-mail", "Username", tentativi_falliti, bloccato_fino_al, reset_token, reset_token_scadenza '
+                'FROM "Tutenti" WHERE LOWER("E-mail") = LOWER(%s) AND reset_token = %s',
+                (email, token)
+            )
+            return cur.fetchone()
+    finally:
+        conn.close()
+
+def reset_password_with_token(id_utente: int, new_hashed_password: str):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'UPDATE "Tutenti" '
+                'SET passwd_hash = %s, reset_token = NULL, reset_token_scadenza = NULL, '
+                'tentativi_falliti = 0, bloccato_fino_al = NULL, must_change_password = false '
+                'WHERE "IDutente" = %s',
+                (new_hashed_password, id_utente)
+            )
+            return cur.rowcount > 0
+    finally:
+        conn.close()
+
+def update_username(id_utente: int, username: str):
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'UPDATE "Tutenti" SET "Username" = %s WHERE "IDutente" = %s',
+                (username if username else None, id_utente)
+            )
+            return cur.rowcount > 0
+    except UniqueViolation:
+        raise ValueError("Questo nome utente è già utilizzato da un altro account")
     finally:
         conn.close()
 

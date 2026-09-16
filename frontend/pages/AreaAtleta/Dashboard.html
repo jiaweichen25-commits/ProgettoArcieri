@@ -18,7 +18,7 @@
     </div>
   </div>
   <div class="nav-right">
-    <div class="nav-user">Benvenuto, <strong id="navUser">Atleta</strong></div>
+    <div class="nav-user" style="cursor: pointer;" onclick="openProfileModal()">Benvenuto, <strong id="navUser">Atleta</strong> ⚙️</div>
     <button class="btn-logout" onclick="logout()">Esci</button>
   </div>
 </nav>
@@ -36,6 +36,7 @@
     <div class="info-grid" id="profiloGrid">
       <div class="info-item"><span class="info-label">Nome</span><span class="info-value" id="pNome">—</span></div>
       <div class="info-item"><span class="info-label">Cognome</span><span class="info-value" id="pCognome">—</span></div>
+      <div class="info-item"><span class="info-label">Username</span><span class="info-value" id="pUsername" style="display:flex; align-items:center; gap:8px;">— <button class="btn btn-outline" style="padding:2px 8px; font-size:0.75rem; border:1px solid #444; border-radius:4px; cursor:pointer;" onclick="openProfileModal()">Modifica</button></span></div>
       <div class="info-item"><span class="info-label">Codice Fiscale</span><span class="info-value" id="pCf">—</span></div>
       <div class="info-item"><span class="info-label">Data di Nascita</span><span class="info-value" id="pDataNascita">—</span></div>
       <div class="info-item"><span class="info-label">Indirizzo</span><span class="info-value" id="pIndirizzo">—</span></div>
@@ -107,6 +108,33 @@
     </div>
   </div>
 
+</div>
+
+<!-- Modal Mio Profilo Atleta -->
+<div class="overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-pill">Profilo</div>
+    <h2>Mio Profilo</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="profileMsgBox"></div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="profileEmail" disabled readonly style="background:#222; color:#888; cursor:not-allowed;" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="profileUsername" placeholder="es. arciere_doc (3-30 caratteri)" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeProfileModal()">Annulla</button>
+      <button class="btn btn-red" id="btnProfileSalva" onclick="salvaProfilo()">Salva</button>
+    </div>
+  </div>
 </div>
 
 <script src="Dashboard.js"></script>

@@ -59,3 +59,49 @@ class ChangePasswordInput(BaseModel):
         if len(v) < 6:
             raise ValueError("La password deve essere di almeno 6 caratteri")
         return v
+
+class ForgotPasswordInput(BaseModel):
+    email: EmailStr
+
+class ResetPasswordInput(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def password_lunghezza(cls, v):
+        if len(v) < 6:
+            raise ValueError("La password deve essere di almeno 6 caratteri")
+        return v
+
+    @field_validator("code")
+    @classmethod
+    def codice_valido(cls, v):
+        if not v or len(v.strip()) != 6 or not v.strip().isdigit():
+            raise ValueError("Il codice deve essere di 6 cifre")
+        return v.strip()
+
+class UpdateUsernameInput(BaseModel):
+    username: Optional[str] = None
+
+    @field_validator("username")
+    @classmethod
+    def username_valido(cls, v):
+        import re
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            return None
+        if len(v) < 3 or len(v) > 30:
+            raise ValueError("Il nome utente deve essere tra 3 e 30 caratteri")
+        if not re.match(r'^[a-zA-Z0-9_]+$', v):
+            raise ValueError("Il nome utente può contenere solo lettere, numeri e underscore")
+        return v
+
+class UserProfileOut(BaseModel):
+    id_utente: int
+    email: str
+    username: Optional[str] = None
+    ruolo: str

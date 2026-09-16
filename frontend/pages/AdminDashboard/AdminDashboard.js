@@ -33,6 +33,18 @@ function checkAuth() {
         return;
     }
     document.getElementById("navUser").textContent = payload.sub || "Admin";
+
+    // Carica profilo per mostrare l'username se presente
+    fetch(`${API_URL}/auth/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(res => res.ok ? res.json() : null)
+    .then(me => {
+        if (me && me.username) {
+            document.getElementById("navUser").textContent = me.username;
+        }
+    })
+    .catch(() => {});
 }
 
 function logout() {
@@ -125,6 +137,7 @@ function openAddModal() {
     document.getElementById("addNome").value = "";
     document.getElementById("addCognome").value = "";
     document.getElementById("addEmail").value = "";
+    document.getElementById("addUsername").value = "";
     document.getElementById("addQualifica").value = "";
     document.getElementById("addMsgBox").className = "msg-box";
     document.getElementById("addModal").classList.add("open");
@@ -138,6 +151,7 @@ async function salvaIstruttore() {
     const nome = document.getElementById("addNome").value.trim();
     const cognome = document.getElementById("addCognome").value.trim();
     const email = document.getElementById("addEmail").value.trim();
+    const username = document.getElementById("addUsername").value.trim();
     const qualifica = document.getElementById("addQualifica").value.trim();
 
     if (!nome || !cognome || !email) {
@@ -145,7 +159,7 @@ async function salvaIstruttore() {
         return;
     }
 
-    const payload = { nome, cognome, email, qualifica };
+    const payload = { nome, cognome, email, qualifica, username: username || null };
     const btn = document.getElementById("btnSalva");
     btn.disabled = true;
     btn.textContent = "Salvataggio...";
@@ -361,5 +375,70 @@ async function salvaSospensione() {
     } finally {
         btn.disabled = false;
         btn.textContent = "Applica";
+    }
+}
+
+// ══════════════════════════════════════════════
+// GESTIONE PROFILO ADMIN
+// ══════════════════════════════════════════════
+
+async function openProfileModal() {
+    const token = localStorage.getItem("access_token");
+    const msgBox = document.getElementById("profileMsgBox");
+    if (msgBox) msgBox.className = "msg-box";
+
+    try {
+        const res = await fetch(`${API_URL}/auth/me`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Impossibile caricare i dati del profilo");
+
+        const data = await res.json();
+        document.getElementById("profileEmail").value = data.email || "";
+        document.getElementById("profileUsername").value = data.username || "";
+        document.getElementById("profileModal").classList.add("open");
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+function closeProfileModal() {
+    document.getElementById("profileModal").classList.remove("open");
+}
+
+async function salvaProfilo() {
+    const username = document.getElementById("profileUsername").value.trim();
+    const btn = document.getElementById("btnProfileSalva");
+    btn.disabled = true;
+    btn.textContent = "Salvataggio...";
+
+    const token = localStorage.getItem("access_token");
+    try {
+        const res = await fetch(`${API_URL}/auth/username`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ username: username || null })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            showMsg("profileMsgBox", data.detail || "Errore durante il salvataggio", "error");
+            return;
+        }
+
+        showMsg("profileMsgBox", "Profilo aggiornato con successo!", "success");
+        document.getElementById("navUser").textContent = username || document.getElementById("profileEmail").value;
+        setTimeout(() => {
+            closeProfileModal();
+        }, 1200);
+
+    } catch (err) {
+        showMsg("profileMsgBox", "Errore di connessione", "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Salva";
     }
 }
