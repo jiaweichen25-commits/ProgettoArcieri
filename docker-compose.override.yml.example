@@ -1,0 +1,23 @@
+# Template per il file docker-compose.override.yml (sviluppo locale).
+# Copia questo file come docker-compose.override.yml e personalizzalo.
+# Il file docker-compose.override.yml è in .gitignore e NON viene committato.
+
+services:
+  db:
+    ports:
+      - "5432:5432"   # Espone postgres in locale per DBeaver/psql diretto
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: arcieri_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - arcieri_network
