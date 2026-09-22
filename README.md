@@ -100,11 +100,37 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
    |---|---|
    | Frontend | http://localhost:8080 |
    | Backend / documentazione API (Swagger) | http://localhost:8000/docs |
-   | pgAdmin | http://localhost:5050 |
+   | pgAdmin *(solo sviluppo locale)* | http://localhost:5050 |
 
 Al primo avvio (volume del database vuoto) lo schema viene creato automaticamente. Se il volume esiste già da un avvio precedente, lo script di inizializzazione non viene rieseguito.
 
 *Nota sulla Gestione Database in Docker:* In caso di necessità (es. per ripristinare il database allo stato iniziale), è possibile eliminare il volume dati di PostgreSQL usando il comando `docker volume rm progettoarcieri2_postgres_data` a container spenti.
+
+### Sviluppo locale vs produzione
+
+Il file `docker-compose.yml` è la configurazione base di produzione: il database **non espone** la porta 5432 sull'host e pgAdmin **non è incluso**.
+
+Per lo sviluppo locale è disponibile un file di override che aggiunge pgAdmin e la porta 5432:
+
+```bash
+# Copia il template e personalizzalo se vuoi
+cp docker-compose.override.yml.example docker-compose.override.yml
+
+# Docker Compose carica l'override automaticamente
+docker compose up --build
+```
+
+Il file `docker-compose.override.yml` è in `.gitignore` e non viene committato.
+
+> [!TIP]
+> **Accesso al DB in produzione:** Con il DB non esposto, il modo più sicuro per accedervi è tramite SSH tunnel:
+> ```bash
+> ssh -L 5432:localhost:5432 user@tuo-server.com
+> ```
+> Poi connettiti con pgAdmin o DBeaver a `localhost:5432` dal tuo PC locale. In alternativa, accedi direttamente via shell:
+> ```bash
+> docker exec -it arcieri_db psql -U postgres -d ProgettoArcieri
+> ```
 
 ## Avvio in locale (sviluppo)
 
@@ -143,10 +169,12 @@ L'Admin si occuperà poi di creare gli istruttori. Una volta creati, gli istrutt
 
 ```
 ProgettoArcieri2/
-├── backend/            FastAPI: controllers, services, repositories, schemas
-├── frontend/           pagine statiche (Dashboard istruttore, Area Atleta, Autenticazione)
-├── Arcieri_database/    schema PostgreSQL e Dockerfile del database
-└── docker-compose.yml
+├── backend/                              FastAPI: controllers, services, repositories, schemas
+├── frontend/                             pagine statiche (Dashboard istruttore, Area Atleta, Autenticazione)
+├── Arcieri_database/                     schema PostgreSQL e Dockerfile del database
+├── docker-compose.yml                    configurazione base (produzione)
+├── docker-compose.override.yml           override locale — gitignored, non committare
+└── docker-compose.override.yml.example   template dell'override da usare come riferimento
 ```
 
 Architettura backend a livelli: controller → service → repository, con le tabelle di lookup separate dalle tabelle di dettaglio.
