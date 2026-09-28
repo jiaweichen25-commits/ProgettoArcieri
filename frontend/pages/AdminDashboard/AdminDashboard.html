@@ -18,6 +18,152 @@
         max-width: 900px;
         width: 90%;
     }
+    .admin-nav-tabs {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #2a2a2a;
+        padding-bottom: 8px;
+        flex-wrap: wrap;
+    }
+    .tab-btn {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #888;
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 10px 18px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .tab-btn:hover {
+        color: white;
+        background: #1f1f1f;
+    }
+    .tab-btn.active {
+        color: white;
+        background: #c0392b;
+    }
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .badge-admin { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-istruttore { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .badge-atleta { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-attivo { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-sospeso { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-bloccato { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    
+    .filter-controls {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .filter-select {
+        padding: 10px 14px;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 2px;
+        color: white;
+        font-size: 0.85rem;
+        font-family: inherit;
+        cursor: pointer;
+        min-width: 170px;
+    }
+    .filter-select:focus {
+        outline: none;
+        border-color: #c0392b;
+    }
+    .view-toggle-wrap {
+        display: flex;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 2px;
+        margin-left: auto;
+    }
+    .view-toggle-btn {
+        padding: 7px 14px;
+        background: transparent;
+        border: none;
+        border-radius: 3px;
+        color: #888;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.2s;
+    }
+    .view-toggle-btn.active {
+        background: #c0392b;
+        color: white;
+    }
+    .group-card {
+        background: #161616;
+        border: 1px solid #2a2a2a;
+        border-left: 4px solid #3b82f6;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    .group-header {
+        background: #202020;
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #2a2a2a;
+    }
+    .group-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .group-count {
+        background: #2a2a2a;
+        color: #cbd5e1;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        border: 1px solid #444;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .read-only-pill {
+        display: inline-block;
+        background: #334155;
+        color: #94a3b8;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 3px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -31,7 +177,7 @@
     </div>
   </div>
   <div class="nav-right">
-    <div class="nav-user" style="cursor: pointer;" onclick="openProfileModal()">Benvenuto, <strong id="navUser">Admin</strong> ⚙️</div>
+    <div class="nav-user" style="cursor: pointer;" onclick="openProfileModal()">Benvenuto, <strong id="navUser">Admin</strong></div>
     <button class="btn-logout" onclick="logout()">Esci</button>
   </div>
 </nav>
@@ -40,18 +186,42 @@
   <div class="page-header">
     <div class="pill">Area Amministratore</div>
     <h1>Dashboard</h1>
-    <p>Gestione degli istruttori</p>
+    <p>Pannello di controllo per istruttori, atleti e utenti di sistema</p>
   </div>
 
   <div class="stats">
-    <div class="stat-card">
-      <div class="stat-label">Istruttori registrati</div>
+    <div class="stat-card cursor-pointer" onclick="switchTab('istruttori')" title="Clicca per gestire gli istruttori">
+      <div class="stat-label">Istruttori</div>
       <div class="stat-num" id="cntIstruttori">0</div>
-      <div class="stat-sub">nel sistema</div>
+      <div class="stat-sub">gestione attiva</div>
+    </div>
+    <div class="stat-card cursor-pointer" onclick="switchTab('atleti')" title="Clicca per vedere gli atleti">
+      <div class="stat-label">Atleti</div>
+      <div class="stat-num" id="cntAtleti">0</div>
+      <div class="stat-sub">seguiti da istruttori</div>
+    </div>
+    <div class="stat-card cursor-pointer" onclick="switchTab('utenti')" title="Clicca per vedere tutti gli utenti in Read">
+      <div class="stat-label">Tutti gli Utenti</div>
+      <div class="stat-num" id="cntUtenti">0</div>
+      <div class="stat-sub">account nel sistema (Read)</div>
     </div>
   </div>
 
-  <div class="section">
+  <!-- Barra di Navigazione Tab Admin -->
+  <div class="admin-nav-tabs">
+    <button class="tab-btn active" id="tabBtnIstruttori" onclick="switchTab('istruttori')">
+      <span>Gestione Istruttori</span>
+    </button>
+    <button class="tab-btn" id="tabBtnUtenti" onclick="switchTab('utenti')">
+      <span>Tutti gli Utenti <small class="read-only-pill">Read</small></span>
+    </button>
+    <button class="tab-btn" id="tabBtnAtleti" onclick="switchTab('atleti')">
+      <span>Atleti & Istruttori</span>
+    </button>
+  </div>
+
+  <!-- TAB 1: GESTIONE ISTRUTTORI -->
+  <div class="section" id="sectionIstruttori">
     <div class="section-head">
       <div class="section-title">Lista Istruttori</div>
       <button class="btn btn-red" onclick="openAddModal()">+ Nuovo Istruttore</button>
@@ -79,11 +249,125 @@
           </tr>
         </thead>
         <tbody id="istruttoriBody">
-          </tbody>
+        </tbody>
       </table>
 
       <div class="empty-state" id="emptyState">
         <p>Nessun istruttore trovato.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: TUTTI GLI UTENTI IN READ-ONLY -->
+  <div class="section" id="sectionUtenti" style="display: none;">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Tutti gli Utenti <span class="read-only-pill">Sola Lettura</span></div>
+        <p style="color: #666; font-size: 0.85rem; margin-top: 4px;">Visione globale di tutti gli account utente registrati nel sistema (Admin, Istruttori, Atleti).</p>
+      </div>
+    </div>
+
+    <div class="filter-controls">
+      <input
+        type="text"
+        id="searchUtentiInput"
+        placeholder="Cerca per email, username, nome..."
+        oninput="filterUtentiTable()"
+        class="filter-select"
+        style="min-width: 280px;"
+      />
+      <select id="filterRuoloUtenti" class="filter-select" onchange="filterUtentiTable()">
+        <option value="">Tutti i Ruoli</option>
+        <option value="admin">Amministratori</option>
+        <option value="istruttore">Istruttori</option>
+        <option value="atleta">Atleti</option>
+      </select>
+      <select id="filterStatoUtenti" class="filter-select" onchange="filterUtentiTable()">
+        <option value="">Tutti gli Stati</option>
+        <option value="attivo">Attivi</option>
+        <option value="sospeso">Sospesi</option>
+        <option value="bloccato">Bloccati temporaneamente</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table id="utentiTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ruolo</th>
+            <th>Anagrafica / Dettagli</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Stato Account</th>
+            <th>Registrato il</th>
+          </tr>
+        </thead>
+        <tbody id="utentiBody">
+        </tbody>
+      </table>
+
+      <div class="empty-state" id="emptyUtentiState" style="display: none;">
+        <p>Nessun utente trovato con i filtri selezionati.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: ATLETI E RAGGRUPPAMENTO PER ISTRUTTORE -->
+  <div class="section" id="sectionAtleti" style="display: none;">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Atleti & Istruttore da cui sono seguiti</div>
+        <p style="color: #666; font-size: 0.85rem; margin-top: 4px;">Consulta tutti gli atleti con possibilità di filtrarli o raggrupparli per istruttore.</p>
+      </div>
+      <div class="view-toggle-wrap">
+        <button class="view-toggle-btn active" id="btnViewList" onclick="setAtletiViewMode('list')">Vista Tabella</button>
+        <button class="view-toggle-btn" id="btnViewGrouped" onclick="setAtletiViewMode('grouped')">Raggruppa per Istruttore</button>
+      </div>
+    </div>
+
+    <div class="filter-controls">
+      <input
+        type="text"
+        id="searchAtletiInput"
+        placeholder="Cerca per nome, cognome, CF, email..."
+        oninput="renderAtleti()"
+        class="filter-select"
+        style="min-width: 280px;"
+      />
+      <select id="filterIstruttoreAtleti" class="filter-select" onchange="renderAtleti()">
+        <option value="">Tutti gli Istruttori</option>
+      </select>
+    </div>
+
+    <!-- Contenitore Vista Tabellare Atleti -->
+    <div class="table-wrap" id="atletiListView">
+      <table id="allAtletiTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Atleta</th>
+            <th>Codice Fiscale</th>
+            <th>Email</th>
+            <th>Telefono</th>
+            <th>Città</th>
+            <th>Istruttore Assegnato</th>
+          </tr>
+        </thead>
+        <tbody id="allAtletiBody">
+        </tbody>
+      </table>
+
+      <div class="empty-state" id="emptyAllAtletiState" style="display: none;">
+        <p>Nessun atleta trovato con i filtri selezionati.</p>
+      </div>
+    </div>
+
+    <!-- Contenitore Vista Raggruppata per Istruttore -->
+    <div id="atletiGroupedView" style="display: none;">
+      <div id="atletiGroupsContainer"></div>
+      <div class="empty-state" id="emptyGroupedAtletiState" style="display: none;">
+        <p>Nessun gruppo di atleti trovato.</p>
       </div>
     </div>
   </div>

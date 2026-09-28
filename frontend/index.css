@@ -51,7 +51,7 @@ body {
 
 /* Spazio riservato per il logo aziendale, da inserire qui in futuro.
 .card::before {
-    content: "🏹"; #background-image: url("logo.png")
+    /* background-image: url("logo.png") */
     position: absolute;
     right: -10px;
     bottom: -30px;

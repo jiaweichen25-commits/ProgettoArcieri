@@ -114,3 +114,81 @@ def get_atleti_by_istruttore_admin(id_istruttore: int):
             "citta":          row[10],
         }
     return [row_to_dict(row) for row in rows]
+
+def get_all_utenti():
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('''
+                SELECT u."IDutente", u."E-mail", u."Username", u."Ruolo",
+                       u.sospeso_fino_al, u.tentativi_falliti, u.bloccato_fino_al,
+                       COALESCE(i."Nome", a."Nome") AS "Nome",
+                       COALESCE(i."Cognome", a."Cognome") AS "Cognome",
+                       i."Qualifica", a."Codice_Fiscale",
+                       u.creato_il
+                FROM "Tutenti" u
+                LEFT JOIN "Tistruttori" i ON u."IDutente" = i."IDutente"
+                LEFT JOIN "Tatleti" a ON u."IDutente" = a."IDutente"
+                ORDER BY u."IDutente" ASC
+            ''')
+            rows = cur.fetchall()
+            return [{
+                "IDutente": r[0],
+                "email": r[1],
+                "username": r[2],
+                "ruolo": r[3],
+                "sospeso_fino_al": r[4].isoformat() if r[4] else None,
+                "tentativi_falliti": r[5],
+                "bloccato_fino_al": r[6].isoformat() if r[6] else None,
+                "nome": r[7],
+                "cognome": r[8],
+                "qualifica": r[9],
+                "codice_fiscale": r[10],
+                "creato_il": r[11].isoformat() if r[11] else None,
+            } for r in rows]
+    finally:
+        conn.close()
+
+def get_all_atleti(id_istruttore: int = None):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            query = '''
+                SELECT a."IDatleta", a."Nome", a."Cognome", a."Codice_Fiscale",
+                       a."DataNascita", a."Telefono", a."Cellulare", a."E-mail",
+                       a."Indirizzo", a."CAP", a."CITTA", a."IDistruttore",
+                       i."Nome" AS "IstruttoreNome", i."Cognome" AS "IstruttoreCognome",
+                       i."E-mail" AS "IstruttoreEmail",
+                       u.sospeso_fino_al, u."Username"
+                FROM "Tatleti" a
+                LEFT JOIN "Tistruttori" i ON a."IDistruttore" = i."IDistruttore"
+                LEFT JOIN "Tutenti" u ON a."IDutente" = u."IDutente"
+            '''
+            params = []
+            if id_istruttore is not None:
+                query += ' WHERE a."IDistruttore" = %s'
+                params.append(id_istruttore)
+            query += ' ORDER BY a."Cognome" ASC, a."Nome" ASC'
+            cur.execute(query, tuple(params))
+            rows = cur.fetchall()
+            return [{
+                "IDatleta": r[0],
+                "nome": r[1],
+                "cognome": r[2],
+                "codice_fiscale": r[3],
+                "data_nascita": r[4].isoformat() if r[4] else None,
+                "telefono": r[5],
+                "cellulare": r[6],
+                "email": r[7],
+                "indirizzo": r[8],
+                "cap": str(r[9]) if r[9] is not None else None,
+                "citta": r[10],
+                "IDistruttore": r[11],
+                "istruttore_nome": f"{r[12]} {r[13]}".strip() if (r[12] or r[13]) else "Non assegnato",
+                "istruttore_email": r[14],
+                "sospeso_fino_al": r[15].isoformat() if r[15] else None,
+                "username": r[16]
+            } for r in rows]
+    finally:
+        conn.close()
+

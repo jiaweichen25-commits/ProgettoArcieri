@@ -10,6 +10,7 @@ def ensure_security_columns():
                 ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS bloccato_fino_al timestamp without time zone;
                 ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS reset_token character varying;
                 ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS reset_token_scadenza timestamp without time zone;
+                ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS creato_il timestamp without time zone DEFAULT NOW();
             ''')
     except Exception as e:
         print(f"Warning: could not ensure security columns: {e}")

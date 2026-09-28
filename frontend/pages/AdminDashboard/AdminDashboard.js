@@ -1,11 +1,40 @@
 const API_URL = "http://localhost:8000";
 
 let istruttori = [];
+let utenti = [];
+let atleti = [];
+let atletiViewMode = 'list'; // 'list' | 'grouped'
 
 document.addEventListener("DOMContentLoaded", () => {
     checkAuth();
-    loadIstruttori();
+    loadAllDashboardData();
 });
+
+async function loadAllDashboardData() {
+    await Promise.all([
+        loadIstruttori(),
+        loadUtenti(),
+        loadAtleti()
+    ]);
+}
+
+function switchTab(tabName) {
+    const secIstr = document.getElementById("sectionIstruttori");
+    const secUt = document.getElementById("sectionUtenti");
+    const secAtl = document.getElementById("sectionAtleti");
+
+    const btnIstr = document.getElementById("tabBtnIstruttori");
+    const btnUt = document.getElementById("tabBtnUtenti");
+    const btnAtl = document.getElementById("tabBtnAtleti");
+
+    if (secIstr) secIstr.style.display = tabName === 'istruttori' ? 'block' : 'none';
+    if (secUt) secUt.style.display = tabName === 'utenti' ? 'block' : 'none';
+    if (secAtl) secAtl.style.display = tabName === 'atleti' ? 'block' : 'none';
+
+    if (btnIstr) btnIstr.classList.toggle("active", tabName === 'istruttori');
+    if (btnUt) btnUt.classList.toggle("active", tabName === 'utenti');
+    if (btnAtl) btnAtl.classList.toggle("active", tabName === 'atleti');
+}
 
 function parseToken(token) {
     try {
@@ -60,7 +89,9 @@ function showMsg(boxId, testo, tipo) {
     box.className = "msg-box " + tipo;
 }
 
-// CARICAMENTO ISTRUTTORI
+// ══════════════════════════════════════════════
+// CARICAMENTO & GESTIONE ISTRUTTORI
+// ══════════════════════════════════════════════
 async function loadIstruttori() {
     const token = localStorage.getItem("access_token");
     try {
@@ -75,15 +106,31 @@ async function loadIstruttori() {
         }
         istruttori = await res.json();
         renderTable(istruttori);
+        updateIstruttoreFilterDropdown();
     } catch (err) {
         console.error(err);
     }
 }
 
+function updateIstruttoreFilterDropdown() {
+    const select = document.getElementById("filterIstruttoreAtleti");
+    if (!select) return;
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">Tutti gli Istruttori</option>';
+    istruttori.forEach(i => {
+        const opt = document.createElement("option");
+        opt.value = i.IDistruttore;
+        opt.textContent = `${i.Nome} ${i.Cognome}`;
+        select.appendChild(opt);
+    });
+    select.value = currentVal;
+}
+
 function renderTable(data) {
     const tbody = document.getElementById("istruttoriBody");
     const emptyState = document.getElementById("emptyState");
-    document.getElementById("cntIstruttori").textContent = data.length;
+    const cntElem = document.getElementById("cntIstruttori");
+    if (cntElem) cntElem.textContent = istruttori.length;
 
     tbody.innerHTML = "";
     if (data.length === 0) {
@@ -96,7 +143,7 @@ function renderTable(data) {
             
             const isSospeso = istr.sospeso_fino_al && new Date(istr.sospeso_fino_al) >= new Date();
             const statusBadge = isSospeso 
-                ? `<span style="background: #ef4444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">Sospeso</span>`
+                ? `<span class="badge badge-sospeso" style="margin-left: 6px;">Sospeso</span>`
                 : '';
 
             tr.innerHTML = `
@@ -131,6 +178,7 @@ function filterTable() {
     );
     renderTable(filtered);
 }
+
 
 // AGGIUNTA ISTRUTTORE
 function openAddModal() {
@@ -181,7 +229,7 @@ async function salvaIstruttore() {
         }
 
         closeAddModal();
-        loadIstruttori();
+        loadAllDashboardData();
     } catch (err) {
         showMsg("addMsgBox", err.message, "error");
     } finally {
@@ -293,7 +341,7 @@ async function salvaModificheIstruttore() {
         }
 
         closeEditModal();
-        loadIstruttori();
+        loadAllDashboardData();
     } catch (err) {
         showMsg("editMsgBox", err.message, "error");
     } finally {
@@ -316,7 +364,7 @@ async function eliminaIstruttore(id, event) {
             }
         });
         if (!res.ok) throw new Error("Errore durante l'eliminazione");
-        loadIstruttori();
+        loadAllDashboardData();
     } catch (err) {
         alert(err.message);
     }
@@ -369,7 +417,7 @@ async function salvaSospensione() {
         }
 
         closeSuspendModal();
-        loadIstruttori();
+        loadAllDashboardData();
     } catch (err) {
         showMsg("suspendMsgBox", err.message, "error");
     } finally {
@@ -442,3 +490,331 @@ async function salvaProfilo() {
         btn.textContent = "Salva";
     }
 }
+
+// ══════════════════════════════════════════════
+// TUTTI GLI UTENTI IN READ-ONLY
+// ══════════════════════════════════════════════
+async function loadUtenti() {
+    const token = localStorage.getItem("access_token");
+    try {
+        const res = await fetch(`${API_URL}/admin/utenti`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Errore caricamento utenti");
+        utenti = await res.json();
+        const cntElem = document.getElementById("cntUtenti");
+        if (cntElem) cntElem.textContent = utenti.length;
+        filterUtentiTable();
+    } catch (err) {
+        console.error("Errore caricamento utenti:", err);
+    }
+}
+
+function filterUtentiTable() {
+    const q = (document.getElementById("searchUtentiInput")?.value || "").toLowerCase().trim();
+    const ruoloFilter = (document.getElementById("filterRuoloUtenti")?.value || "").toLowerCase().trim();
+    const statoFilter = (document.getElementById("filterStatoUtenti")?.value || "").toLowerCase().trim();
+
+    const now = new Date();
+
+    const filtered = utenti.filter(u => {
+        // Ricerca testuale
+        const matchText = !q ||
+            (u.email || "").toLowerCase().includes(q) ||
+            (u.username || "").toLowerCase().includes(q) ||
+            (u.nome || "").toLowerCase().includes(q) ||
+            (u.cognome || "").toLowerCase().includes(q) ||
+            (u.codice_fiscale || "").toLowerCase().includes(q);
+
+        // Filtro Ruolo
+        const matchRuolo = !ruoloFilter || (u.ruolo || "").toLowerCase() === ruoloFilter;
+
+        // Filtro Stato
+        const isSospeso = u.sospeso_fino_al && new Date(u.sospeso_fino_al) >= now;
+        const isBloccato = u.bloccato_fino_al && new Date(u.bloccato_fino_al) >= now;
+        let matchStato = true;
+        if (statoFilter === "attivo") {
+            matchStato = !isSospeso && !isBloccato;
+        } else if (statoFilter === "sospeso") {
+            matchStato = isSospeso;
+        } else if (statoFilter === "bloccato") {
+            matchStato = isBloccato;
+        }
+
+        return matchText && matchRuolo && matchStato;
+    });
+
+    renderUtentiTable(filtered);
+}
+
+function renderUtentiTable(data) {
+    const tbody = document.getElementById("utentiBody");
+    const emptyState = document.getElementById("emptyUtentiState");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+    if (data.length === 0) {
+        if (emptyState) emptyState.style.display = "block";
+        return;
+    }
+    if (emptyState) emptyState.style.display = "none";
+
+    const now = new Date();
+
+    data.forEach(u => {
+        const tr = document.createElement("tr");
+
+        // Ruolo Badge
+        let roleBadgeClass = "badge-atleta";
+        let roleLabel = u.ruolo || "Utente";
+        if (u.ruolo === "admin") {
+            roleBadgeClass = "badge-admin";
+            roleLabel = "Admin";
+        } else if (u.ruolo === "istruttore") {
+            roleBadgeClass = "badge-istruttore";
+            roleLabel = "Istruttore";
+        } else if (u.ruolo === "atleta") {
+            roleBadgeClass = "badge-atleta";
+            roleLabel = "Atleta";
+        }
+        const roleBadge = `<span class="badge ${roleBadgeClass}">${roleLabel}</span>`;
+
+        // Stato Account Badge
+        const isSospeso = u.sospeso_fino_al && new Date(u.sospeso_fino_al) >= now;
+        const isBloccato = u.bloccato_fino_al && new Date(u.bloccato_fino_al) >= now;
+        let statoBadge = `<span class="badge badge-attivo">Attivo</span>`;
+        if (isSospeso) {
+            const d = new Date(u.sospeso_fino_al).toLocaleDateString('it-IT');
+            statoBadge = `<span class="badge badge-sospeso" title="Sospeso fino al ${d}">Sospeso fino al ${d}</span>`;
+        } else if (isBloccato) {
+            statoBadge = `<span class="badge badge-bloccato" title="Account bloccato per tentativi multipli falliti">Bloccato Sicurezza</span>`;
+        }
+
+        // Dettaglio Anagrafico
+        let anagrafica = "-";
+        if (u.nome || u.cognome) {
+            anagrafica = `<strong>${u.nome || ""} ${u.cognome || ""}</strong>`;
+            if (u.qualifica) {
+                anagrafica += `<br><small style="color: #94a3b8;">${u.qualifica}</small>`;
+            } else if (u.codice_fiscale) {
+                anagrafica += `<br><small style="color: #94a3b8; font-family: monospace;">CF: ${u.codice_fiscale}</small>`;
+            }
+        } else if (u.ruolo === "admin") {
+            anagrafica = `<strong style="color: #f87171;">Amministratore di Sistema</strong>`;
+        }
+
+        // Data registrazione
+        let dataCreazione = "-";
+        if (u.creato_il) {
+            dataCreazione = new Date(u.creato_il).toLocaleDateString('it-IT', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            });
+        }
+
+        tr.innerHTML = `
+            <td>${u.IDutente}</td>
+            <td>${roleBadge}</td>
+            <td>${anagrafica}</td>
+            <td><code style="color: #cbd5e1;">${u.username || "-"}</code></td>
+            <td>${u.email}</td>
+            <td>${statoBadge}</td>
+            <td style="color: #888;">${dataCreazione}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ══════════════════════════════════════════════
+// ATLETI E RAGGRUPPAMENTO PER ISTRUTTORE
+// ══════════════════════════════════════════════
+async function loadAtleti() {
+    const token = localStorage.getItem("access_token");
+    try {
+        const res = await fetch(`${API_URL}/admin/atleti`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Errore caricamento atleti");
+        atleti = await res.json();
+        const cntElem = document.getElementById("cntAtleti");
+        if (cntElem) cntElem.textContent = atleti.length;
+        renderAtleti();
+    } catch (err) {
+        console.error("Errore caricamento atleti:", err);
+    }
+}
+
+function setAtletiViewMode(mode) {
+    atletiViewMode = mode;
+    const btnList = document.getElementById("btnViewList");
+    const btnGroup = document.getElementById("btnViewGrouped");
+    if (btnList) btnList.classList.toggle("active", mode === 'list');
+    if (btnGroup) btnGroup.classList.toggle("active", mode === 'grouped');
+    renderAtleti();
+}
+
+function renderAtleti() {
+    const q = (document.getElementById("searchAtletiInput")?.value || "").toLowerCase().trim();
+    const idIstruttoreFilter = document.getElementById("filterIstruttoreAtleti")?.value || "";
+
+    const filtered = atleti.filter(a => {
+        const matchText = !q ||
+            (a.nome || "").toLowerCase().includes(q) ||
+            (a.cognome || "").toLowerCase().includes(q) ||
+            (a.codice_fiscale || "").toLowerCase().includes(q) ||
+            (a.email || "").toLowerCase().includes(q) ||
+            (a.citta || "").toLowerCase().includes(q) ||
+            (a.istruttore_nome || "").toLowerCase().includes(q);
+
+        const matchIstruttore = !idIstruttoreFilter || String(a.IDistruttore) === String(idIstruttoreFilter);
+
+        return matchText && matchIstruttore;
+    });
+
+    const listView = document.getElementById("atletiListView");
+    const groupedView = document.getElementById("atletiGroupedView");
+
+    if (atletiViewMode === 'list') {
+        if (listView) listView.style.display = "block";
+        if (groupedView) groupedView.style.display = "none";
+        renderAtletiList(filtered);
+    } else {
+        if (listView) listView.style.display = "none";
+        if (groupedView) groupedView.style.display = "block";
+        renderAtletiGrouped(filtered);
+    }
+}
+
+function renderAtletiList(data) {
+    const tbody = document.getElementById("allAtletiBody");
+    const emptyState = document.getElementById("emptyAllAtletiState");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+    if (data.length === 0) {
+        if (emptyState) emptyState.style.display = "block";
+        return;
+    }
+    if (emptyState) emptyState.style.display = "none";
+
+    data.forEach(a => {
+        const tr = document.createElement("tr");
+
+        const istruttoreBadge = a.istruttore_nome && a.istruttore_nome !== "Non assegnato"
+            ? `<span class="badge badge-istruttore">${a.istruttore_nome}</span>`
+            : `<span class="badge" style="background:#333; color:#aaa;">Nessun istruttore</span>`;
+
+        const contattoTel = [a.cellulare, a.telefono].filter(Boolean).join(" / ") || "-";
+
+        tr.innerHTML = `
+            <td>${a.IDatleta}</td>
+            <td><strong>${a.nome} ${a.cognome}</strong></td>
+            <td><span style="font-family: monospace; font-size: 0.8rem; color: #cbd5e1;">${a.codice_fiscale || "-"}</span></td>
+            <td>${a.email || "-"}</td>
+            <td>${contattoTel}</td>
+            <td>${a.citta || "-"}</td>
+            <td>${istruttoreBadge}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function renderAtletiGrouped(data) {
+    const container = document.getElementById("atletiGroupsContainer");
+    const emptyState = document.getElementById("emptyGroupedAtletiState");
+    if (!container) return;
+
+    container.innerHTML = "";
+    if (data.length === 0) {
+        if (emptyState) emptyState.style.display = "block";
+        return;
+    }
+    if (emptyState) emptyState.style.display = "none";
+
+    const groups = {};
+    data.forEach(a => {
+        const key = a.IDistruttore ? String(a.IDistruttore) : "unassigned";
+        if (!groups[key]) {
+            groups[key] = {
+                id: a.IDistruttore,
+                nome: a.istruttore_nome || "Atleti non assegnati",
+                email: a.istruttore_email || "",
+                atleti: []
+            };
+        }
+        groups[key].atleti.push(a);
+    });
+
+    // Se non ci sono filtri restrittivi, mostra anche gli altri istruttori con 0 atleti
+    const idIstruttoreFilter = document.getElementById("filterIstruttoreAtleti")?.value || "";
+    const q = (document.getElementById("searchAtletiInput")?.value || "").trim();
+    if (!q && !idIstruttoreFilter) {
+        istruttori.forEach(istr => {
+            const key = String(istr.IDistruttore);
+            if (!groups[key]) {
+                groups[key] = {
+                    id: istr.IDistruttore,
+                    nome: `${istr.Nome} ${istr.Cognome}`,
+                    email: istr["E-mail"] || "",
+                    atleti: []
+                };
+            }
+        });
+    }
+
+    Object.values(groups).forEach(g => {
+        const groupCard = document.createElement("div");
+        groupCard.className = "group-card";
+        if (!g.id) {
+            groupCard.style.borderLeftColor = "#64748b";
+        }
+
+        let tableContent = "";
+        if (g.atleti.length === 0) {
+            tableContent = `<div style="padding: 16px; color: #777; font-size: 0.85rem; font-style: italic;">Nessun atleta attualmente assegnato a questo istruttore.</div>`;
+        } else {
+            tableContent = `
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Cognome</th>
+                        <th>Codice Fiscale</th>
+                        <th>Email</th>
+                        <th>Telefono / Cellulare</th>
+                        <th>Città</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${g.atleti.map(a => `
+                        <tr>
+                          <td>${a.IDatleta}</td>
+                          <td><strong>${a.nome}</strong></td>
+                          <td><strong>${a.cognome}</strong></td>
+                          <td><span style="font-family: monospace; font-size: 0.8rem; color: #cbd5e1;">${a.codice_fiscale || "-"}</span></td>
+                          <td>${a.email || "-"}</td>
+                          <td>${[a.cellulare, a.telefono].filter(Boolean).join(" / ") || "-"}</td>
+                          <td>${a.citta || "-"}</td>
+                        </tr>
+                      `).join("")}
+                    </tbody>
+                  </table>
+                </div>
+            `;
+        }
+
+        groupCard.innerHTML = `
+            <div class="group-header">
+              <div class="group-title">
+                <span>${g.nome}</span>
+                ${g.email ? `<small style="font-weight: normal; color: #888; font-size: 0.8rem;">(${g.email})</small>` : ""}
+              </div>
+              <div class="group-count">${g.atleti.length} ${g.atleti.length === 1 ? "atleta seguito" : "atleti seguiti"}</div>
+            </div>
+            ${tableContent}
+        `;
+        container.appendChild(groupCard);
+    });
+}
+

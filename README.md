@@ -15,11 +15,20 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 
 ## Funzionalità
 
+**Autenticazione e Sicurezza**
+- Login con Email o Username alternativo.
+- Protezione da attacchi brute-force: conteggio dei tentativi di accesso falliti con blocco temporaneo dell'utenza per 30 minuti al superamento di 5 tentativi consecutivi.
+- Recupero password via email: generazione di un codice OTP temporaneo monouso a 6 cifre con scadenza a 15 minuti (`/auth/forgot-password` e `/auth/reset-password`).
+- Generazione credenziali sicure e invio automatico tramite email SMTP.
+- Obbligo di cambio password al primo accesso per gli account generati dal sistema.
+- Gestione autonoma del proprio profilo (impostazione e modifica Username).
+
 **Lato Amministratore**
-- Accesso riservato alla dashboard direzionale
-- Gestione completa istruttori (creazione, modifica, eliminazione)
-- Sospensione temporanea o a tempo indeterminato degli account istruttori
-- Visione d'insieme degli atleti associati a ciascun istruttore
+- Accesso riservato alla dashboard direzionale con navigazione a schede
+- Gestione completa istruttori (creazione, modifica anagrafica, eliminazione con revoca account)
+- Sospensione programmata dell'account istruttore (per 1, 2, 3, 5 anni, a tempo indeterminato o revoca sospensione)
+- Visualizzazione globale di tutti gli utenti in sola lettura (Read-Only) con filtri per testo, per ruolo (Admin, Istruttori, Atleti) e per stato account (Attivi, Sospesi, Bloccati)
+- Consultazione completa degli atleti con filtro a tendina per istruttore e modalita di raggruppamento atleti per istruttore assegnato
 
 **Lato istruttore**
 - Anagrafica atleti (creazione, modifica, eliminazione, ricerca e filtro)
@@ -79,7 +88,7 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
    - **`GEMINI_API_KEY`**: Generabile su [Google AI Studio](https://aistudio.google.com/api-keys).
    - **`OPENROUTER_API_KEY`**: Generabile su [OpenRouter](https://openrouter.ai/workspaces/default/keys).
    - **`GROQ_API_KEY`**: Generabile su [Groq Cloud](https://console.groq.com/keys).
-   - **`SMTP_*`**: Configurazioni necessarie affinché l'applicazione possa inviare email (es. le credenziali di accesso ai nuovi utenti creati).
+   - **`SMTP_*`**: Configurazioni necessarie affinché l'applicazione possa inviare email (es. credenziali di accesso per i nuovi utenti e codici OTP per il recupero password).
      > Se usi una normale email **Gmail** (`smtp.gmail.com`), Google non ti permette di usare la tua password personale per motivi di sicurezza. Devi invece generare una **"Password per le app"**:
      > 1. Vai su [Gestione account Google](https://myaccount.google.com/).
      > 2. Clicca su **Sicurezza** nel menu a sinistra.

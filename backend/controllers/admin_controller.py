@@ -45,3 +45,12 @@ def delete_istruttore(id_istruttore: int, utente: dict = Depends(solo_admin)):
 @router.put("/istruttori/{id_istruttore}/sospendi")
 def suspend_istruttore(id_istruttore: int, data: SuspendInput, utente: dict = Depends(solo_admin)):
     return admin_service.suspend_istruttore(id_istruttore, data.data_fine_sospensione)
+
+@router.get("/utenti")
+def get_utenti(utente: dict = Depends(solo_admin)):
+    return admin_service.get_all_utenti()
+
+@router.get("/atleti")
+def get_atleti(id_istruttore: int = None, utente: dict = Depends(solo_admin)):
+    return admin_service.get_all_atleti(id_istruttore=id_istruttore)
+

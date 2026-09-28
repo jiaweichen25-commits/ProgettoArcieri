@@ -271,7 +271,7 @@
       if (data.provider && data.model) {
         const debugInfo = document.createElement("div");
         debugInfo.className = "ai-debug-info";
-        debugInfo.textContent = `⚡ Generato da: ${data.model} (tramite ${data.provider}) - Task: ${data.task || "generale"}`;
+        debugInfo.textContent = `Generato da: ${data.model} (tramite ${data.provider}) - Task: ${data.task || "generale"}`;
         aiBubble.appendChild(debugInfo);
       }
       
