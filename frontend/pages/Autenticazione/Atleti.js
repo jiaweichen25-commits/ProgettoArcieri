@@ -40,8 +40,48 @@ function redirectByRuolo(token) {
     }
 }
 
+let countdownInterval = null;
+
+function startLockoutCountdown(seconds) {
+    if (countdownInterval) clearInterval(countdownInterval);
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+
+    let remaining = seconds;
+
+    const formatTime = (secs) => {
+        if (secs >= 60) {
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+        }
+        return `${secs}s`;
+    };
+
+    const tick = () => {
+        if (remaining <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            btn.disabled = false;
+            btn.textContent = "Accedi";
+            showMsg("Tempo di attesa terminato. Puoi riprovare ora.", "info");
+            return;
+        }
+
+        const timeStr = formatTime(remaining);
+        showMsg(`Troppi tentativi falliti. Riprova tra ${timeStr}.`, "error");
+        btn.textContent = `Attendi (${timeStr})`;
+        remaining--;
+    };
+
+    tick();
+    countdownInterval = setInterval(tick, 1000);
+}
+
 async function handleLogin(e) {
     e.preventDefault();
+    if (countdownInterval) return; // Blocco attivo, non inviare richieste
+
     document.getElementById("msgBox").className = "msg-box";
 
     const email    = document.getElementById("loginEmail").value.trim();
@@ -60,6 +100,24 @@ async function handleLogin(e) {
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
+
+            if (res.status === 429) {
+                // Recupera secondi da header Retry-After o parsing del testo di errore
+                const retryHeader = res.headers.get("Retry-After");
+                let waitSeconds = retryHeader ? parseInt(retryHeader, 10) : NaN;
+
+                if (isNaN(waitSeconds) || waitSeconds <= 0) {
+                    const matchMin = err.detail && err.detail.match(/(\d+)\s*minut/i);
+                    const matchSec = err.detail && err.detail.match(/(\d+)\s*second/i);
+                    if (matchMin) waitSeconds = parseInt(matchMin[1], 10) * 60;
+                    else if (matchSec) waitSeconds = parseInt(matchSec[1], 10);
+                    else waitSeconds = 15;
+                }
+
+                startLockoutCountdown(waitSeconds);
+                return;
+            }
+
             showMsg(err.detail || "Credenziali non valide.", "error");
             return;
         }
@@ -85,8 +143,10 @@ async function handleLogin(e) {
     } catch {
         showMsg("Impossibile contattare il server. Verifica che il backend sia avviato.", "error");
     } finally {
-        btn.disabled    = false;
-        btn.textContent = "Accedi";
+        if (!countdownInterval) {
+            btn.disabled    = false;
+            btn.textContent = "Accedi";
+        }
     }
 }
 

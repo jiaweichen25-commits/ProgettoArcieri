@@ -8,9 +8,21 @@ from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from repositories import user_repository
 from services.email_service import invia_email_recupero_password
 
-# Costanti per il rate limiting
-MAX_TENTATIVI = 5
-LOCKOUT_MINUTI = 30
+# Backoff esponenziale per protezione brute-force
+BACKOFF_DELAYS = {
+    4: timedelta(seconds=15),
+    5: timedelta(seconds=30),
+    6: timedelta(minutes=1),
+    7: timedelta(minutes=5),
+}
+MAX_BACKOFF = timedelta(minutes=15)  # Per tentativo 8+
+
+def _format_tempo_attesa(secondi: int) -> str:
+    """Formatta i secondi rimanenti in un messaggio leggibile."""
+    if secondi >= 60:
+        minuti = secondi // 60
+        return f"{minuti} {'minuto' if minuti == 1 else 'minuti'}"
+    return f"{secondi} secondi"
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -33,20 +45,20 @@ def authenticate_user(email: str, password: str, portale: str):
     tentativi_falliti = user[7] if len(user) > 7 else 0
     bloccato_fino_al = user[8] if len(user) > 8 else None
 
-    # ── Controllo blocco per troppi tentativi ──
+    # ── Controllo blocco per troppi tentativi (backoff esponenziale) ──
     if bloccato_fino_al:
         if isinstance(bloccato_fino_al, str):
             bloccato_fino_al = datetime.strptime(bloccato_fino_al, "%Y-%m-%d %H:%M:%S")
         if bloccato_fino_al > datetime.now():
-            minuti_rimanenti = int((bloccato_fino_al - datetime.now()).total_seconds() / 60) + 1
+            secondi_rimanenti = int((bloccato_fino_al - datetime.now()).total_seconds()) + 1
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Account bloccato per troppi tentativi falliti. Riprova tra {minuti_rimanenti} minuti."
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Troppi tentativi falliti. Riprova tra {_format_tempo_attesa(secondi_rimanenti)}.",
+                headers={"Retry-After": str(secondi_rimanenti)}
             )
         else:
-            # Il blocco è scaduto, reset dei tentativi
-            user_repository.reset_failed_attempts(id_utente)
-            tentativi_falliti = 0
+            # Il blocco è scaduto: sblocca ma MANTIENI il contatore per escalation progressiva
+            user_repository.clear_lockout(id_utente)
 
     # ── Controllo sospensione account ──
     if sospeso_fino_al:
@@ -66,22 +78,24 @@ def authenticate_user(email: str, password: str, portale: str):
                 detail="Accesso non autorizzato per questo portale"
             )
 
-    # ── Verifica password con gestione tentativi ──
+    # ── Verifica password con escalation progressiva ──
     if not bcrypt.checkpw(password.encode(), user[0].encode()):
         tentativi_falliti += 1
-        if tentativi_falliti >= MAX_TENTATIVI:
-            lock_until = datetime.now() + timedelta(minutes=LOCKOUT_MINUTI)
+        if tentativi_falliti >= 4:
+            delay = BACKOFF_DELAYS.get(tentativi_falliti, MAX_BACKOFF)
+            lock_until = datetime.now() + delay
+            secondi_blocco = int(delay.total_seconds())
             user_repository.increment_failed_attempts(id_utente, lock_until=lock_until)
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Account bloccato per {LOCKOUT_MINUTI} minuti dopo {MAX_TENTATIVI} tentativi falliti."
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Troppi tentativi falliti. Riprova tra {_format_tempo_attesa(secondi_blocco)}.",
+                headers={"Retry-After": str(secondi_blocco)}
             )
         else:
             user_repository.increment_failed_attempts(id_utente)
-            rimanenti = MAX_TENTATIVI - tentativi_falliti
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Credenziali non valide. Tentativi rimanenti: {rimanenti}/{MAX_TENTATIVI}"
+                detail="Email o password non corretti"
             )
 
     # ── Login riuscito: reset contatore ──

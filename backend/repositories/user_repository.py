@@ -80,7 +80,7 @@ def increment_failed_attempts(id_utente: int, lock_until=None):
         with conn, conn.cursor() as cur:
             if lock_until:
                 cur.execute(
-                    'UPDATE "Tutenti" SET tentativi_falliti = 5, bloccato_fino_al = %s WHERE "IDutente" = %s',
+                    'UPDATE "Tutenti" SET tentativi_falliti = tentativi_falliti + 1, bloccato_fino_al = %s WHERE "IDutente" = %s',
                     (lock_until, id_utente)
                 )
             else:
@@ -97,6 +97,18 @@ def reset_failed_attempts(id_utente: int):
         with conn, conn.cursor() as cur:
             cur.execute(
                 'UPDATE "Tutenti" SET tentativi_falliti = 0, bloccato_fino_al = NULL WHERE "IDutente" = %s',
+                (id_utente,)
+            )
+    finally:
+        conn.close()
+
+def clear_lockout(id_utente: int):
+    """Rimuove il blocco temporaneo ma mantiene il contatore tentativi per l'escalation progressiva."""
+    conn = get_db_conn()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                'UPDATE "Tutenti" SET bloccato_fino_al = NULL WHERE "IDutente" = %s',
                 (id_utente,)
             )
     finally:

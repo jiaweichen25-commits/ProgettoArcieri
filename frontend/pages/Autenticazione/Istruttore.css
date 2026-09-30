@@ -209,6 +209,20 @@ h1 {
     color: #1abc9c;
 }
 
+.msg-box.info {
+    display: block;
+    background: rgba(52, 152, 219, 0.15);
+    border: 1px solid rgba(52, 152, 219, 0.4);
+    color: #3498db;
+}
+
+.msg-box.warning {
+    display: block;
+    background: rgba(243, 156, 18, 0.15);
+    border: 1px solid rgba(243, 156, 18, 0.4);
+    color: #f39c12;
+}
+
 .signup-link {
     margin-top: 20px;
     color: #555;
