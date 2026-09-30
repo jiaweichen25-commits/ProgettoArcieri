@@ -6,9 +6,11 @@ from pathlib import Path
 # In produzione (Docker) le variabili arrivano da docker-compose.yml — questa riga non fa nulla.
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / ".env")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "segnaposto")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY non configurata! Impostala nel file .env")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 600
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
