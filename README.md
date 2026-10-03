@@ -17,8 +17,10 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 
 **Autenticazione e Sicurezza**
 - Login con Email o Username alternativo.
-- Protezione da attacchi brute-force: conteggio dei tentativi di accesso falliti con blocco temporaneo dell'utenza per 30 minuti al superamento di 5 tentativi consecutivi.
-- Recupero password via email: generazione di un codice OTP temporaneo monouso a 6 cifre con scadenza a 15 minuti (`/auth/forgot-password` e `/auth/reset-password`).
+- Token JWT firmati con `SECRET_KEY` (obbligatoria, senza fallback hardcoded) e scadenza di **2 ore**.
+- Protezione brute-force con **backoff esponenziale** sui tentativi di login errati (dal 4° tentativo): 15 s → 30 s → 1 min → 5 min → 15 min. Il contatore non viene azzerato allo scadere del blocco, così l’attesa può scalare; un login riuscito resetta i tentativi.
+- Header HTTP `Retry-After` esposto via CORS; sui portali Istruttore e Atleti, countdown dinamico dei secondi rimasti e pulsante di login disabilitato per tutta la durata del blocco.
+- Recupero password via email: codice OTP temporaneo monouso a 6 cifre con scadenza a **30 minuti** (`/auth/forgot-password` e `/auth/reset-password`). L’esistenza dell’email non viene rivelata nella risposta.
 - Generazione credenziali sicure e invio automatico tramite email SMTP.
 - Obbligo di cambio password al primo accesso per gli account generati dal sistema.
 - Gestione autonoma del proprio profilo (impostazione e modifica Username).
@@ -27,8 +29,8 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 - Accesso riservato alla dashboard direzionale con navigazione a schede
 - Gestione completa istruttori (creazione, modifica anagrafica, eliminazione con revoca account)
 - Sospensione programmata dell'account istruttore (per 1, 2, 3, 5 anni, a tempo indeterminato o revoca sospensione)
-- Visualizzazione globale di tutti gli utenti in sola lettura (Read-Only) con filtri per testo, per ruolo (Admin, Istruttori, Atleti) e per stato account (Attivi, Sospesi, Bloccati)
-- Consultazione completa degli atleti con filtro a tendina per istruttore e modalita di raggruppamento atleti per istruttore assegnato
+- Visualizzazione globale di tutti gli utenti in sola lettura, con filtri per testo, ruolo (Admin, Istruttori, Atleti) e stato account (Attivi, Sospesi, Bloccati per troppi tentativi)
+- Consultazione completa degli atleti con filtro a tendina per istruttore e raggruppamento per istruttore assegnato
 
 **Lato istruttore**
 - Anagrafica atleti (creazione, modifica, eliminazione, ricerca e filtro)
@@ -39,13 +41,15 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 - Visite mediche e autorizzazioni antidoping
 - Piano gare
 - Consultazione storico punteggi e gare degli atleti (in sola lettura)
-- Assistant AI: analisi di allenamenti, materiali e storico punteggi su richiesta
-- Ogni istruttore gestisce solo i propri atleti e vede anche gli atleti degli altri
+- Assistant AI (solo istruttore e admin; il widget non viene montato per gli atleti): analisi di allenamenti, materiali e storico punteggi su richiesta
+- Ogni istruttore gestisce i propri atleti e può vedere anche gli atleti degli altri
 
 **Lato atleta** (accesso in sola lettura, salvo dove indicato)
 - Consultazione profilo, materiali, allenamenti, visite mediche, antidoping, piano gare
 - Nota personale scrivibile su ciascuna settimana di allenamento
-- Compilazione attiva del Segnapunti gara in stile World Archery (turni, volée, conteggio 10/X)
+- Compilazione attiva del Segnapunti gara in stile World Archery (turni, volée, 10/X, frecce fuori bersaglio con **M**)
+- Note separate: l’atleta scrive le proprie, l’istruttore le proprie (consultabili in sola lettura dall’altro ruolo)
+- Sincronizzazione automatica tra bersaglio interattivo e volée del segnapunti
 
 ## Prerequisiti
 
@@ -69,9 +73,9 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
    GEMINI_MODEL=gemini-2.5-flash
    
    OPENROUTER_API_KEY=tua_api_key_openrouter
-   OPENROUTER_MODEL_ANALISI=google/gemini-2.5-flash-lite
-   OPENROUTER_MODEL_RAGIONAMENTO=cognitivecomputations/dolphin3.0-r1-mistral-24b
-   OPENROUTER_MODEL_DEFAULT=mistralai/mistral-nemo
+   OPENROUTER_MODEL_ANALISI=qwen/qwen3-32b
+   OPENROUTER_MODEL_RAGIONAMENTO=deepseek/deepseek-chat-v3-0324
+   OPENROUTER_MODEL_DEFAULT=meta-llama/llama-3.3-70b-instruct
    
    GROQ_API_KEY=tua_api_key_groq
    GROQ_MODEL=llama-3.3-70b-versatile
@@ -84,7 +88,7 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
    ```
 
    **Dettagli configurazione ambiente:**
-   - **`SECRET_KEY`**: Utilizzata per la firma dei token JWT. Deve essere una stringa lunga, casuale e segreta. L'utilizzo di valori prevedibili compromette la sicurezza.
+   - **`SECRET_KEY`**: Obbligatoria. Usata per firmare i JWT (scadenza 2 ore). Senza questa variabile il backend non parte. Deve essere una stringa lunga, casuale e segreta.
    - **`GEMINI_API_KEY`**: Generabile su [Google AI Studio](https://aistudio.google.com/api-keys).
    - **`OPENROUTER_API_KEY`**: Generabile su [OpenRouter](https://openrouter.ai/workspaces/default/keys).
    - **`GROQ_API_KEY`**: Generabile su [Groq Cloud](https://console.groq.com/keys).

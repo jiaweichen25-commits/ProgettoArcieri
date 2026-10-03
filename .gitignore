@@ -4,6 +4,7 @@ docker-compose.override.yml
 venv/
 .venv/
 
+
 __pycache__/
 **/__pycache__/
 *.py[cod]
@@ -11,4 +12,6 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 
+tests/
 .tests/
+
