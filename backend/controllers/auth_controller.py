@@ -1,20 +1,23 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Request
 from schemas.auth_schemas import (
     LoginInput, TokenOutput, RegisterInput, ChangePasswordInput,
     ForgotPasswordInput, ResetPasswordInput, UpdateUsernameInput, UserProfileOut
 )
 from services import auth_service
 from dependencies.auth_deps import get_utente_loggato
+from main import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login", response_model=TokenOutput)
-def login(data: LoginInput):
+@limiter.limit("10/minute")
+def login(request: Request, data: LoginInput):
     token, must_change = auth_service.authenticate_user(data.email, data.password, data.portale)
     return TokenOutput(access_token=token, token_type="bearer", must_change_password=must_change)
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(data: RegisterInput):
+@limiter.limit("5/minute")
+def register(request: Request, data: RegisterInput):
     token = auth_service.register_user(
         data.email,
         data.password,
@@ -31,12 +34,14 @@ def change_password(data: ChangePasswordInput, utente: dict = Depends(get_utente
     return {"message": "Password modificata con successo"}
 
 @router.post("/forgot-password")
-def forgot_password(data: ForgotPasswordInput):
+@limiter.limit("5/minute")
+def forgot_password(request: Request, data: ForgotPasswordInput):
     result = auth_service.request_password_reset(data.email)
     return result
 
 @router.post("/reset-password")
-def reset_password(data: ResetPasswordInput):
+@limiter.limit("10/minute")
+def reset_password(request: Request, data: ResetPasswordInput):
     result = auth_service.reset_password(data.email, data.code, data.new_password)
     return result
 

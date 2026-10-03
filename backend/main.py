@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import os
 import bcrypt
 from repositories import user_repository
@@ -26,7 +30,12 @@ from controllers import me_segnapunti_controller
 # Carica le variabili d'ambiente dal file .env
 load_dotenv()
 
+# ── Rate limiting per IP (slowapi) ──
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(title="API Arcieri Vicenza")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configurazione del Middleware CORS (perfetto per lo sviluppo)
 app.add_middleware(
