@@ -1,6 +1,6 @@
-from fastapi import APIRouter, status, Depends, Request
+from fastapi import APIRouter, Depends, Request
 from schemas.auth_schemas import (
-    LoginInput, TokenOutput, RegisterInput, ChangePasswordInput,
+    LoginInput, TokenOutput, ChangePasswordInput,
     ForgotPasswordInput, ResetPasswordInput, UpdateUsernameInput, UserProfileOut
 )
 from services import auth_service
@@ -15,18 +15,7 @@ def login(request: Request, data: LoginInput):
     token, must_change = auth_service.authenticate_user(data.email, data.password, data.portale)
     return TokenOutput(access_token=token, token_type="bearer", must_change_password=must_change)
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
-@limiter.limit("5/minute")
-def register(request: Request, data: RegisterInput):
-    token = auth_service.register_user(
-        data.email,
-        data.password,
-        data.ruolo,
-        nome=data.nome,
-        cognome=data.cognome,
-        qualifica=data.qualifica,
-    )
-    return {"access_token": token, "token_type": "bearer", "must_change_password": False}
+
 
 @router.post("/change-password")
 def change_password(data: ChangePasswordInput, utente: dict = Depends(get_utente_loggato)):
