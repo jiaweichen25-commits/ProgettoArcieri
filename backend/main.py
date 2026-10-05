@@ -2,15 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from config.limiter import limiter
+from config.settings import DEFAULT_ADMIN_EMAIL
 import os
 import bcrypt
 from repositories import user_repository
 
 
-from dotenv import load_dotenv
+
 from controllers import visitemed_controller
 from controllers import auth_controller
 from controllers import atleti_controller
@@ -27,11 +28,7 @@ from controllers import admin_controller
 from controllers import me_segnapunti_controller
 
 
-# Carica le variabili d'ambiente dal file .env
-load_dotenv()
 
-# ── Rate limiting per IP (slowapi) ──
-limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(title="API Arcieri Vicenza")
 app.state.limiter = limiter
@@ -66,14 +63,12 @@ app.include_router(me_segnapunti_controller.router)
 
 @app.on_event("startup")
 def startup_event():
-    admin_email = "admin@amministratore.it"
     try:
-        user = user_repository.get_user_by_email(admin_email)
+        user = user_repository.get_user_by_email(DEFAULT_ADMIN_EMAIL)
         if not user:
-            # Crea l'admin di default
             hashed = bcrypt.hashpw("admin".encode(), bcrypt.gensalt()).decode()
-            user_repository.create_user(admin_email, hashed, "admin", must_change_password=True)
-            print(f"Utente admin '{admin_email}' creato con successo.")
+            user_repository.create_user(DEFAULT_ADMIN_EMAIL, hashed, "admin", must_change_password=True)
+            print(f"Utente admin '{DEFAULT_ADMIN_EMAIL}' creato con successo.")
     except Exception as e:
         print(f"Errore durante l'inizializzazione dell'admin: {e}")
 

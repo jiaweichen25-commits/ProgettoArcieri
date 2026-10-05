@@ -157,7 +157,7 @@ def request_password_reset(email: str):
         return {"message": "Se l'email è registrata, riceverai un codice di recupero."}
 
     codice = str(random.randint(100000, 999999))
-    scadenza = datetime.now() + timedelta(minutes=30)
+    scadenza = datetime.now() + timedelta(minutes=15)
     user_repository.set_reset_token(email_clean, codice, scadenza)
     invia_email_recupero_password(email_clean, codice)
 

@@ -6,12 +6,17 @@ from pathlib import Path
 # In produzione (Docker) le variabili arrivano da docker-compose.yml — questa riga non fa nulla.
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / ".env")
 
+# ── JWT ──
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY non configurata! Impostala nel file .env")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
+# ── Database ──
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# ── AI / LLM ──
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
@@ -33,3 +38,11 @@ LLM_PROVIDER_ORDER = [
     if p.strip()
 ]
 
+# ── Email SMTP ──
+SMTP_SERVER = os.getenv("SMTP_SERVER")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+
+# ── Bootstrap admin (creato allo startup se assente) ──
+DEFAULT_ADMIN_EMAIL = os.getenv("DEFAULT_ADMIN_EMAIL", "admin@amministratore.it")

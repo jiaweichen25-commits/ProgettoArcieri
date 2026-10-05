@@ -1,12 +1,7 @@
-import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
-SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+from config.settings import SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
 
 def invia_email_credenziali(destinatario: str, password_temporanea: str, ruolo: str = "atleta"):
     oggetto = "Credenziali di accesso - Arcieri Vicenza"
@@ -60,7 +55,7 @@ def invia_email_recupero_password(destinatario: str, codice_recupero: str):
     
         {codice_recupero}
     
-    Questo codice scadrà tra 30 minuti.
+    Questo codice scadrà tra 15 minuti.
     Se non hai richiesto il recupero della password, ignora questa email.
     
     Cordiali saluti,

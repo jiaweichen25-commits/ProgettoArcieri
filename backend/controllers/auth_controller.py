@@ -5,7 +5,7 @@ from schemas.auth_schemas import (
 )
 from services import auth_service
 from dependencies.auth_deps import get_utente_loggato
-from main import limiter
+from config.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

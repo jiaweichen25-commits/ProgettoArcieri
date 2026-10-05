@@ -17,10 +17,10 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 
 **Autenticazione e Sicurezza**
 - Login con Email o Username alternativo.
-- Token JWT firmati con `SECRET_KEY` (obbligatoria, senza fallback hardcoded) e scadenza di **2 ore**.
+- Token JWT firmati con `SECRET_KEY` e scadenza di **2 ore**.
 - Protezione brute-force con **backoff esponenziale** sui tentativi di login errati (dal 4° tentativo): 15 s → 30 s → 1 min → 5 min → 15 min. Il contatore non viene azzerato allo scadere del blocco, così l’attesa può scalare; un login riuscito resetta i tentativi.
 - Header HTTP `Retry-After` esposto via CORS; sui portali Istruttore e Atleti, countdown dinamico dei secondi rimasti e pulsante di login disabilitato per tutta la durata del blocco.
-- Recupero password via email: codice OTP temporaneo monouso a 6 cifre con scadenza a **30 minuti** (`/auth/forgot-password` e `/auth/reset-password`). L’esistenza dell’email non viene rivelata nella risposta.
+- Recupero password via email: codice OTP temporaneo monouso a 6 cifre con scadenza a **15 minuti** (`/auth/forgot-password` e `/auth/reset-password`). L’esistenza dell’email non viene rivelata nella risposta.
 - Generazione credenziali sicure e invio automatico tramite email SMTP.
 - Obbligo di cambio password al primo accesso per gli account generati dal sistema.
 - Gestione autonoma del proprio profilo (impostazione e modifica Username).
