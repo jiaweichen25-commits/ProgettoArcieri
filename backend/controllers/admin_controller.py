@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 from dependencies.auth_deps import solo_admin
 from services import admin_service
 from pydantic import BaseModel, EmailStr
+from schemas.auth_schemas import UpdateUsernameInput
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -19,6 +20,13 @@ def get_istruttori(utente: dict = Depends(solo_admin)):
 @router.post("/istruttori", status_code=status.HTTP_201_CREATED)
 def create_istruttore(data: IstruttoreCreateInput, utente: dict = Depends(solo_admin)):
     return admin_service.create_istruttore(data.dict())
+
+class AdminCreateInput(UpdateUsernameInput):
+    email: EmailStr
+
+@router.post("/amministratori", status_code=status.HTTP_201_CREATED)
+def create_admin(data: AdminCreateInput, utente: dict = Depends(solo_admin)):
+    return admin_service.create_admin(data.dict())
 
 class IstruttoreUpdateInput(BaseModel):
     nome: str

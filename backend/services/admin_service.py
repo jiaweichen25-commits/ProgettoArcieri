@@ -60,6 +60,28 @@ def create_istruttore(dati: dict):
     invia_email_credenziali(email, password_temp, "istruttore")
     return {"message": "Istruttore creato con successo"}
 
+def create_admin(dati: dict):
+    email = (dati.get("email") or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="L'email è obbligatoria")
+        
+    existing = user_repository.get_user_by_email(email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Esiste già un utente con questa email")
+        
+    chars = string.ascii_letters + string.digits
+    password_temp = ''.join(random.choice(chars) for _ in range(8))
+    hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
+    
+    username = (dati.get("username") or "").strip() or None
+    try:
+        user_repository.create_user(email, hashed, "admin", must_change_password=True, username=username)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+        
+    invia_email_credenziali(email, password_temp, "amministratore")
+    return {"message": "Amministratore creato con successo"}
+
 def update_istruttore(id_istruttore: int, dati: dict):
     try:
         user_repository.update_istruttore_details(

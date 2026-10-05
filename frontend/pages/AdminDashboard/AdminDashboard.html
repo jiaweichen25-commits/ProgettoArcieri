@@ -18,6 +18,36 @@
         max-width: 900px;
         width: 90%;
     }
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .btn-dark-red {
+        background: #801b14;
+        color: #ffffff;
+        border: 1px solid #5a120d;
+        padding: 10px 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-dark-red:hover {
+        background: #96221a;
+        border-color: #6e1610;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(128, 27, 20, 0.45);
+    }
     .admin-nav-tabs {
         display: flex;
         gap: 12px;
@@ -183,10 +213,13 @@
 </nav>
 
 <div class="page">
-  <div class="page-header">
-    <div class="pill">Area Amministratore</div>
-    <h1>Dashboard</h1>
-    <p>Pannello di controllo per istruttori, atleti e utenti di sistema</p>
+  <div class="page-header header-flex">
+    <div>
+      <div class="pill">Area Amministratore</div>
+      <h1>Dashboard</h1>
+      <p>Pannello di controllo per istruttori, atleti e utenti di sistema</p>
+    </div>
+    <button class="btn-dark-red" onclick="openAddAdminModal()">+ NUOVO ADMIN</button>
   </div>
 
   <div class="stats">
@@ -262,7 +295,7 @@
   <div class="section" id="sectionUtenti" style="display: none;">
     <div class="section-head">
       <div>
-        <div class="section-title">Tutti gli Utenti <span class="read-only-pill">Sola Lettura</span></div>
+        <div class="section-title">Tutti gli Utenti <span class="read-only-pill">Panoramica</span></div>
         <p style="color: #666; font-size: 0.85rem; margin-top: 4px;">Visione globale di tutti gli account utente registrati nel sistema (Admin, Istruttori, Atleti).</p>
       </div>
     </div>
@@ -560,6 +593,37 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeProfileModal()">Annulla</button>
       <button class="btn-confirm" id="btnProfileSalva" onclick="salvaProfilo()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Aggiungi Admin -->
+<div class="overlay" id="addAdminModal">
+  <div class="modal">
+    <div class="modal-pill">Nuovo Amministratore</div>
+    <h2>Crea Admin</h2>
+    <div class="modal-divider"></div>
+
+    <div class="msg-box" id="addAdminMsgBox"></div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Email <span class="required">*</span></label>
+        <input type="email" id="addAdminEmail" placeholder="admin@example.com" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="addAdminUsername" placeholder="Opzionale (3-30 caratteri)" />
+      </div>
+    </div>
+    
+    <p style="font-size: 0.9em; color: #64748b; margin-top: 10px;">
+        Verrà generata una password provvisoria casuale e inviata all'indirizzo email specificato. L'amministratore dovrà cambiarla al primo accesso.
+    </p>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddAdminModal()">Annulla</button>
+      <button class="btn-confirm" id="btnAddAdminSalva" onclick="salvaAdmin()">Crea Admin</button>
     </div>
   </div>
 </div>

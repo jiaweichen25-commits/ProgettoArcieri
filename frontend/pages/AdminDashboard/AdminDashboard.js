@@ -818,3 +818,58 @@ function renderAtletiGrouped(data) {
     });
 }
 
+// ══════════════════════════════════════════════
+// GESTIONE AGGIUNTA NUOVO ADMIN
+// ══════════════════════════════════════════════
+function openAddAdminModal() {
+    document.getElementById("addAdminEmail").value = "";
+    document.getElementById("addAdminUsername").value = "";
+    document.getElementById("addAdminMsgBox").className = "msg-box";
+    document.getElementById("addAdminModal").classList.add("open");
+}
+
+function closeAddAdminModal() {
+    document.getElementById("addAdminModal").classList.remove("open");
+}
+
+async function salvaAdmin() {
+    const email = document.getElementById("addAdminEmail").value.trim();
+    const username = document.getElementById("addAdminUsername").value.trim();
+
+    if (!email) {
+        showMsg("addAdminMsgBox", "Inserisci un indirizzo email valido", "error");
+        return;
+    }
+
+    const payload = { email, username: username || null };
+    const btn = document.getElementById("btnAddAdminSalva");
+    btn.disabled = true;
+    btn.textContent = "Creazione...";
+
+    const token = localStorage.getItem("access_token");
+    try {
+        const res = await fetch(`${API_URL}/admin/amministratori`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            const dettaglio = Array.isArray(err.detail) ? err.detail.map(d => d.msg.replace("Value error, ", "")).join(". ") : err.detail;
+            throw new Error(dettaglio || "Errore durante la creazione dell'amministratore");
+        }
+
+        closeAddAdminModal();
+        await loadAllDashboardData();
+    } catch (err) {
+        showMsg("addAdminMsgBox", err.message, "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Crea Admin";
+    }
+}
+
