@@ -25,6 +25,11 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-troia}@db:5432/${DB_NAME:-ProgettoArcieri}
+      - SECRET_KEY=${SECRET_KEY:?imposta SECRET_KEY nel file .env}
+      - SMTP_SERVER=${SMTP_SERVER:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
