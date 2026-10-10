@@ -1,4 +1,3 @@
-const API_URL = "http://localhost:8000";
 
 const params = new URLSearchParams(window.location.search);
 const ID_ALLENAMENTO = Number(params.get("allenamento"));
