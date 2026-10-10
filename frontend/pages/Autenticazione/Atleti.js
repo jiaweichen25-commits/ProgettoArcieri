@@ -1,4 +1,3 @@
-const API_URL = "http://localhost:8000";
 const PORTALE = "atleta";
 const AREA_ATLETA = "../AreaAtleta/Dashboard.html";
 
