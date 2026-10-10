@@ -158,7 +158,6 @@
 
   // Variables
   let aiSelectedAtletaId = null;
-  const API_URL = "http://localhost:8000";
 
   // Elements
   const btnAssistente = document.getElementById("btnAssistenteIA");
