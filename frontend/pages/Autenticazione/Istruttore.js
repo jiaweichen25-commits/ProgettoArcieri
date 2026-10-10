@@ -1,4 +1,3 @@
-const API_URL = "http://localhost:8000";
 const PORTALE = "istruttore";
 const DASHBOARD = "../Dashboard/Dashboard.html";
 

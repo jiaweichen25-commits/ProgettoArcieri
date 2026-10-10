@@ -1,4 +1,3 @@
-const API_URL = "http://localhost:8000";
 
 const currentUserStr = localStorage.getItem("currentUser");
 let currentUser = null;
