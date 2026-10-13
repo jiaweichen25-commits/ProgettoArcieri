@@ -21,8 +21,9 @@ services:
     build: ./backend
     container_name: arcieri_backend
     restart: always
-    ports:
-      - "8000:8000"
+    # Nessun "ports": il backend e' raggiungibile solo dagli altri container
+    # (nginx lo chiama su backend:8000). Dal browser si passa da nginx, su /api.
+    # Per Swagger in sviluppo vedi docker-compose.override.yml.example.
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-troia}@db:5432/${DB_NAME:-ProgettoArcieri}
       - SECRET_KEY=${SECRET_KEY:?imposta SECRET_KEY nel file .env}

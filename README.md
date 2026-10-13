@@ -112,7 +112,7 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
    | Servizio | URL |
    |---|---|
    | Frontend | http://localhost:8080 |
-   | Backend / documentazione API (Swagger) | http://localhost:8000/docs |
+   | Backend / documentazione API (Swagger) *(solo sviluppo locale)* | http://localhost:8000/docs |
    | pgAdmin *(solo sviluppo locale)* | http://localhost:5050 |
 
 Al primo avvio (volume del database vuoto) lo schema viene creato automaticamente. Se il volume esiste già da un avvio precedente, lo script di inizializzazione non viene rieseguito.
@@ -121,9 +121,9 @@ Al primo avvio (volume del database vuoto) lo schema viene creato automaticament
 
 ### Sviluppo locale vs produzione
 
-Il file `docker-compose.yml` è la configurazione base di produzione: il database **non espone** la porta 5432 sull'host e pgAdmin **non è incluso**.
+Il file `docker-compose.yml` è la configurazione base di produzione: il database **non espone** la porta 5432 sull'host, il backend **non espone** la porta 8000 (si raggiunge solo da nginx, su `/api`) e pgAdmin **non è incluso**.
 
-Per lo sviluppo locale è disponibile un file di override che aggiunge pgAdmin e la porta 5432:
+Per lo sviluppo locale è disponibile un file di override che aggiunge pgAdmin, la porta 5432 e la porta 8000 del backend (solo su localhost, per Swagger):
 
 ```bash
 # Copia il template e personalizzalo se vuoi

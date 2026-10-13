@@ -10,4 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Dietro nginx: uvicorn legge l'IP vero del client da X-Forwarded-For (serve al limiter).
+# "*" va bene solo perche' la porta 8000 non e' pubblicata e nginx SOVRASCRIVE l'header
+# (vedi frontend/nginx.conf). Se un giorno pubblichi la 8000, sostituisci "*" con la subnet della rete Docker.
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

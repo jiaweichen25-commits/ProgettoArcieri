@@ -7,6 +7,12 @@ services:
     ports:
       - "5432:5432"   # Espone postgres in locale per DBeaver/psql diretto
 
+  backend:
+    ports:
+      # Swagger (/docs) solo da questo PC. Non scrivere "8000:8000" (= aperta a tutta la rete):
+      # il backend si fida di X-Forwarded-For, quindi deve parlare solo con nginx.
+      - "127.0.0.1:8000:8000"
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: arcieri_pgadmin
