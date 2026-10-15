@@ -98,6 +98,7 @@
     .ai-selected-pill { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #888; background: #111; border: 1px solid #333; padding: 4px 10px; border-radius: 2px; }
     .ai-selected-pill.active { color: #fff; background: rgba(192, 57, 43, 0.2); border-color: #c0392b; }
     .ai-hint { color: #888; font-size: 0.85rem; line-height: 1.5; margin-bottom: 18px; }
+    .ai-privacy { color: #e0a39c; font-size: 0.8rem; line-height: 1.5; margin: -8px 0 18px; padding: 8px 12px; border-left: 3px solid #c0392b; background: rgba(192, 57, 43, 0.08); }
     #sectionAi .field textarea { width: 100%; min-height: 110px; padding: 12px 14px; background: #111; border: 1px solid #333; border-radius: 2px; color: white; font-size: 0.95rem; font-family: inherit; resize: vertical; transition: border-color 0.2s; }
     #sectionAi .field textarea:focus { outline: none; border-color: #c0392b; }
     #sectionAi .field textarea::placeholder { color: #444; }
@@ -135,6 +136,9 @@
       </div>
       <p class="ai-hint">
         Fai una domanda contestuale sull'atleta selezionato oppure chiedi consigli generali.
+      </p>
+      <p class="ai-privacy">
+        La domanda viene inviata a un servizio AI esterno: non scrivere nomi, dati sanitari o altre informazioni personali.
       </p>
 
       <div class="field">
