@@ -1,6 +1,7 @@
 // Indirizzo del backend: l'unico punto da modificare.
 // - Pagina servita dal backend stesso (porta 8000, /app/): stessa origine, niente CORS.
-// - Sviluppo locale (Live Server, file aperti dal disco): backend uvicorn su localhost:8000.
+// - Pagina aperta da un altro indirizzo locale (es. Live Server): backend su localhost:8000,
+//   funziona solo se quell'origine e' in CORS_ORIGINS. I file aperti dal disco (file://) sono bloccati.
 // - Docker / server: il frontend e' servito da nginx (porta 8080 in locale), che inoltra /api al backend.
 window.API_URL = (function () {
     if (location.port === "8000") return location.origin;

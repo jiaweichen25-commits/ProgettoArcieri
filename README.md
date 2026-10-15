@@ -92,6 +92,7 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
    - **`GEMINI_API_KEY`**: Generabile su [Google AI Studio](https://aistudio.google.com/api-keys).
    - **`OPENROUTER_API_KEY`**: Generabile su [OpenRouter](https://openrouter.ai/workspaces/default/keys).
    - **`GROQ_API_KEY`**: Generabile su [Groq Cloud](https://console.groq.com/keys).
+   - **`CORS_ORIGINS`**: Facoltativa. Origini autorizzate a chiamare l'API da un altro indirizzo, separate da virgola (predefinito: nessuna). Non serve per il frontend dietro nginx né per le pagine aperte da `http://localhost:8000/app/`. Va impostata solo se apri le pagine da un altro indirizzo, ad esempio Live Server di VSCode: `CORS_ORIGINS=http://localhost:5500,http://127.0.0.1:5500`. I file HTML aperti direttamente dal disco (`file://`) non sono autorizzati: usa `/app/`.
    - **`SMTP_*`**: Configurazioni necessarie affinché l'applicazione possa inviare email (es. credenziali di accesso per i nuovi utenti e codici OTP per il recupero password).
      > Se usi una normale email **Gmail** (`smtp.gmail.com`), Google non ti permette di usare la tua password personale per motivi di sicurezza. Devi invece generare una **"Password per le app"**:
      > 1. Vai su [Gestione account Google](https://myaccount.google.com/).

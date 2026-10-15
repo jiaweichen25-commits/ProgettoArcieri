@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from config.limiter import limiter
-from config.settings import DEFAULT_ADMIN_EMAIL
+from config.settings import DEFAULT_ADMIN_EMAIL, CORS_ORIGINS
 import os
 import bcrypt
 from repositories import user_repository
@@ -34,11 +34,11 @@ app = FastAPI(title="API Arcieri Vicenza")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Configurazione del Middleware CORS (perfetto per lo sviluppo)
+# CORS solo per le origini elencate in CORS_ORIGINS (vedi config/settings.py).
+# Niente allow_credentials: il token viaggia nell'header Authorization, non nei cookie.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], #da sostituire con url
-    allow_credentials=True,
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["Retry-After"],

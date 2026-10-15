@@ -40,6 +40,7 @@ services:
       - OPENROUTER_MODEL_DEFAULT=${OPENROUTER_MODEL_DEFAULT:-meta-llama/llama-3.3-70b-instruct}
       - GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}
       - LLM_PROVIDER_ORDER=${LLM_PROVIDER_ORDER:-openrouter,groq,gemini}
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
     depends_on:
       db:
         condition: service_healthy

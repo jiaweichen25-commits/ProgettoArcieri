@@ -44,5 +44,15 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
+# ── CORS ──
+# Servono solo le origini che chiamano l'API da un indirizzo diverso (es. Live Server su :5500).
+# nginx (/api) e le pagine servite dal backend (/app/) sono la stessa origine: non vanno elencate.
+# Vuota di default: nessuna origine esterna autorizzata.
+CORS_ORIGINS = [
+    o.strip()
+    for o in os.getenv("CORS_ORIGINS", "").split(",")
+    if o.strip()
+]
+
 # ── Bootstrap admin (creato allo startup se assente) ──
 DEFAULT_ADMIN_EMAIL = os.getenv("DEFAULT_ADMIN_EMAIL", "admin@amministratore.it")
