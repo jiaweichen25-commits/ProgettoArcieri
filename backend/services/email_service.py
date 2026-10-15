@@ -1,4 +1,5 @@
 import smtplib
+import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from config.settings import SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
@@ -35,7 +36,8 @@ def invia_email_credenziali(destinatario: str, password_temporanea: str, ruolo: 
 
     try:
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
+        # Verifica il certificato del server: senza contesto starttls() accetta chiunque si finga Gmail
+        server.starttls(context=ssl.create_default_context())
         server.login(SMTP_USER, SMTP_PASSWORD)
         text = msg.as_string()
         server.sendmail(SMTP_USER, destinatario, text)
@@ -76,7 +78,8 @@ def invia_email_recupero_password(destinatario: str, codice_recupero: str):
 
     try:
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
+        # Verifica il certificato del server: senza contesto starttls() accetta chiunque si finga Gmail
+        server.starttls(context=ssl.create_default_context())
         server.login(SMTP_USER, SMTP_PASSWORD)
         text = msg.as_string()
         server.sendmail(SMTP_USER, destinatario, text)
