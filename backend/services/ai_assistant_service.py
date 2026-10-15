@@ -7,8 +7,6 @@ from services import (
     atleti_service,
     allenamenti_service,
     materiali_service,
-    visitemed_service,
-    antidoping_service,
     pianogare_service,
     segnapunti_service,
     llm_router,
@@ -59,12 +57,20 @@ def _piano_attivo(piani: list) -> dict | None:
             continue
     return piani[0] if piani else None
 
+def _eta(data_nascita: date | None) -> int | None:
+    if data_nascita is None:
+        return None
+    oggi = date.today()
+    compleanno_passato = (oggi.month, oggi.day) >= (data_nascita.month, data_nascita.day)
+    return oggi.year - data_nascita.year - (0 if compleanno_passato else 1)
+
+# Il contesto va a provider AI esterni: niente dati che identificano l'atleta
+# (nome, cognome, data di nascita) e niente dati sanitari (visite mediche,
+# antidoping, note libere che potrebbero contenerne). Vedi GDPR art. 5 e 9.
 def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
     profilo = _trova_atleta(id_utente, id_atleta)
     piani = allenamenti_service.get_allenamenti(id_utente, id_atleta)
     materiali = materiali_service.get_materiali(id_utente, id_atleta)
-    visite = visitemed_service.get_visite(id_utente, id_atleta)
-    antidoping = antidoping_service.get_antidoping(id_utente, id_atleta)
 
     piano_attivo = _piano_attivo(piani)
     gare = []
@@ -80,8 +86,6 @@ def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
             "data": sp["data"],
             "distanza": sp["distanza"],
             "frecce_per_volee": sp["frecce_per_volee"],
-            "note_istruttore": sp["note_istruttore"],
-            "note_atleta": sp["note_atleta"],
             "volee": [
                 {
                     "mezza": v["mezza"], "numero": v["numero"],
@@ -94,9 +98,7 @@ def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
 
     return {
         "profilo": {
-            "nome": profilo.get("nome"),
-            "cognome": profilo.get("cognome"),
-            "data_nascita": profilo.get("data_nascita"),
+            "eta": _eta(profilo.get("data_nascita")),
         },
         "piani_allenamento": [
             {
@@ -111,8 +113,6 @@ def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
         "materiale_corrente": next(
             (m for m in materiali if m.get("materiale_corrente")), None
         ),
-        "visite_mediche": visite,
-        "antidoping": antidoping,
         "gare_pianificate_nel_piano_attivo": gare,
         "segnapunti": segnapunti_con_volee,
     }
