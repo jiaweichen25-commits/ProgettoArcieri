@@ -1,9 +1,8 @@
 from fastapi import HTTPException, status
 from repositories import user_repository, atleti_repository
 from config.database import get_db_conn
-import string
-import random
 import bcrypt
+from services.segreti import genera_password_temporanea
 from services.email_service import invia_email_credenziali
 from datetime import datetime
 
@@ -40,8 +39,7 @@ def create_istruttore(dati: dict):
     if existing:
         raise HTTPException(status_code=400, detail="Esiste già un utente con questa email")
         
-    chars = string.ascii_letters + string.digits
-    password_temp = ''.join(random.choice(chars) for _ in range(8))
+    password_temp = genera_password_temporanea()
     hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
     
     username = (dati.get("username") or "").strip() or None
@@ -69,8 +67,7 @@ def create_admin(dati: dict):
     if existing:
         raise HTTPException(status_code=400, detail="Esiste già un utente con questa email")
         
-    chars = string.ascii_letters + string.digits
-    password_temp = ''.join(random.choice(chars) for _ in range(8))
+    password_temp = genera_password_temporanea()
     hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
     
     username = (dati.get("username") or "").strip() or None

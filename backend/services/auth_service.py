@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from jose import jwt
 import bcrypt
-import random
 import re
 from fastapi import HTTPException, status
 from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from repositories import user_repository
+from services.segreti import genera_otp
 from services.email_service import invia_email_recupero_password
 
 # Backoff esponenziale per protezione brute-force
@@ -130,7 +130,7 @@ def request_password_reset(email: str):
         # Non rivelare se l'email esiste o meno per sicurezza
         return {"message": "Se l'email è registrata, riceverai un codice di recupero."}
 
-    codice = str(random.randint(100000, 999999))
+    codice = genera_otp()
     scadenza = datetime.now() + timedelta(minutes=15)
     user_repository.set_reset_token(email_clean, codice, scadenza)
     invia_email_recupero_password(email_clean, codice)
