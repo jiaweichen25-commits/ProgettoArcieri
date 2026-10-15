@@ -124,7 +124,7 @@ Al primo avvio (volume del database vuoto) lo schema viene creato automaticament
 
 Il file `docker-compose.yml` è la configurazione base di produzione: il database **non espone** la porta 5432 sull'host, il backend **non espone** la porta 8000 (si raggiunge solo da nginx, su `/api`) e pgAdmin **non è incluso**.
 
-Per lo sviluppo locale è disponibile un file di override che aggiunge pgAdmin, la porta 5432 e la porta 8000 del backend (solo su localhost, per Swagger):
+Per lo sviluppo locale è disponibile un file di override che aggiunge pgAdmin, la porta 5433 per il Postgres di Docker (la 5432 resta libera per un eventuale PostgreSQL installato sul PC) e la porta 8000 del backend (per Swagger), tutte legate a `127.0.0.1`, cioè raggiungibili solo da questo PC e non dal resto della rete:
 
 ```bash
 # Copia il template e personalizzalo se vuoi

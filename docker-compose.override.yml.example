@@ -5,7 +5,9 @@
 services:
   db:
     ports:
-      - "5432:5432"   # Espone postgres in locale per DBeaver/psql diretto
+      # Postgres per DBeaver/psql, solo da questo PC (senza 127.0.0.1 sarebbe visibile a tutta la rete).
+      # Sul PC si usa la 5433: la 5432 e' spesso occupata da un PostgreSQL installato su Windows.
+      - "127.0.0.1:5433:5432"
 
   backend:
     ports:
@@ -21,7 +23,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80"
+      - "127.0.0.1:5050:80"   # solo da questo PC: la password admin e' debole
     depends_on:
       db:
         condition: service_healthy
