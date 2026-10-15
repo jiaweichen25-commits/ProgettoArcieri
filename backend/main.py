@@ -2,9 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from config.limiter import limiter
+from config.limiter import limiter, rate_limit_handler
 from config.settings import DEFAULT_ADMIN_EMAIL, CORS_ORIGINS
 import os
 import bcrypt
@@ -32,7 +31,7 @@ from controllers import me_segnapunti_controller
 
 app = FastAPI(title="API Arcieri Vicenza")
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 # CORS solo per le origini elencate in CORS_ORIGINS (vedi config/settings.py).
 # Niente allow_credentials: il token viaggia nell'header Authorization, non nei cookie.
