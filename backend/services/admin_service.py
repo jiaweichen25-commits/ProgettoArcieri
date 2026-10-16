@@ -1,10 +1,9 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from repositories import user_repository, atleti_repository
 from config.database import get_db_conn
 import bcrypt
 from services.segreti import genera_password_temporanea
 from services.email_service import invia_email_credenziali
-from datetime import datetime
 
 def get_all_istruttori():
     conn = get_db_conn()
@@ -98,6 +97,7 @@ def delete_istruttore(id_istruttore: int):
         user_repository.delete_istruttore(id_istruttore)
         return {"message": "Istruttore eliminato con successo"}
     except Exception as e:
+        print(f"[ADMIN] eliminazione istruttore {id_istruttore} fallita: {e!r}")
         raise HTTPException(status_code=500, detail="Errore durante l'eliminazione")
 
 def suspend_istruttore(id_istruttore: int, data_fine_sospensione: str):

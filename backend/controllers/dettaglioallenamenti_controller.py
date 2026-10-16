@@ -7,7 +7,7 @@ from schemas.dettaglioallenamenti_schemas import (
     TecForCorCreate, TecForCorUpdate, TecForCorOut,
     AllFisForResCreate, AllFisForResUpdate, AllFisForResOut,
     AllFisCorCreate, AllFisCorUpdate, AllFisCorOut,
-    NotaAtletaCreate, NotaAtletaOut, TotaleFrecceOut
+    NotaAtletaCreate, TotaleFrecceOut
 )
 from services import dettaglioallenamenti_service as svc
 from dependencies.auth_deps import solo_istruttore

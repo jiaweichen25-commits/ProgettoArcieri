@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from config.limiter import limiter, rate_limit_handler
 from config.settings import DEFAULT_ADMIN_EMAIL, CORS_ORIGINS
