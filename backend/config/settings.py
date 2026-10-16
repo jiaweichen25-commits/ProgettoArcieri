@@ -56,3 +56,5 @@ CORS_ORIGINS = [
 
 # ── Bootstrap admin (creato allo startup se assente) ──
 DEFAULT_ADMIN_EMAIL = os.getenv("DEFAULT_ADMIN_EMAIL", "admin@amministratore.it")
+# Facoltativa: se vuota, al primo avvio ne viene generata una casuale e scritta nei log.
+DEFAULT_ADMIN_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD") or None

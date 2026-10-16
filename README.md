@@ -68,6 +68,8 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
    DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
    
    SECRET_KEY=la_tua_chiave_segreta_lunga_e_casuale
+   # Facoltativa: password provvisoria dell'admin creato al primo avvio
+   DEFAULT_ADMIN_PASSWORD=
    
    GEMINI_API_KEY=tua_api_key_gemini
    GEMINI_MODEL=gemini-2.5-flash
@@ -89,6 +91,7 @@ Nasce come riscrittura di un precedente gestionale interno basato su Microsoft A
 
    **Dettagli configurazione ambiente:**
    - **`SECRET_KEY`**: Obbligatoria. Usata per firmare i JWT (scadenza 2 ore). Senza questa variabile il backend non parte. Deve essere una stringa lunga, casuale e segreta.
+   - **`DEFAULT_ADMIN_PASSWORD`**: Facoltativa. Password provvisoria dell'admin creato al primo avvio (vedi [Primo accesso](#primo-accesso)). Se resta vuota, ne viene generata una casuale e scritta nei log del backend.
    - **`GEMINI_API_KEY`**: Generabile su [Google AI Studio](https://aistudio.google.com/api-keys).
    - **`OPENROUTER_API_KEY`**: Generabile su [OpenRouter](https://openrouter.ai/workspaces/default/keys).
    - **`GROQ_API_KEY`**: Generabile su [Groq Cloud](https://console.groq.com/keys).
@@ -165,7 +168,10 @@ Richiede un'istanza PostgreSQL raggiungibile con le credenziali indicate in `DAT
 
 Al primo avvio dell'applicazione, viene creato automaticamente un utente amministratore di default:
 - **Email:** `admin@amministratore.it`
-- **Password:** `admin` *(verrà richiesto di modificarla al primo accesso per motivi di sicurezza)*
+- **Password:** quella di `DEFAULT_ADMIN_PASSWORD` nel `.env`; se non è impostata, una password casuale scritta nei log del backend al primo avvio, nella riga `[ADMIN] password provvisoria: ...` (con Docker: `docker compose logs backend`; in locale con uvicorn compare direttamente nel terminale). Verrà richiesto di modificarla al primo accesso.
+
+> [!NOTE]
+> La password generata viene scritta solo quando l'admin viene creato. Se la perdi prima del primo accesso, il recupero via email non funziona (`admin@amministratore.it` non è una casella reale): elimina l'utente admin dalla tabella `"Tutenti"` e riavvia il backend, che lo ricrea con una nuova password.
 
 L'Admin si occuperà poi di creare gli istruttori. Una volta creati, gli istruttori riceveranno via email una password automatica e potranno registrare i propri atleti (che a loro volta riceveranno le credenziali via email).
 

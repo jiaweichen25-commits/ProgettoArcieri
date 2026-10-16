@@ -3,10 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from config.limiter import limiter, rate_limit_handler
-from config.settings import DEFAULT_ADMIN_EMAIL, CORS_ORIGINS
+from config.settings import DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD, CORS_ORIGINS
 import os
 import bcrypt
 from repositories import user_repository
+from services.segreti import genera_password_temporanea
 
 
 
@@ -64,9 +65,15 @@ def startup_event():
     try:
         user = user_repository.get_user_by_email(DEFAULT_ADMIN_EMAIL)
         if not user:
-            hashed = bcrypt.hashpw("admin".encode(), bcrypt.gensalt()).decode()
+            password = DEFAULT_ADMIN_PASSWORD or genera_password_temporanea()
+            hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
             user_repository.create_user(DEFAULT_ADMIN_EMAIL, hashed, "admin", must_change_password=True)
             print(f"Utente admin '{DEFAULT_ADMIN_EMAIL}' creato con successo.")
+            if DEFAULT_ADMIN_PASSWORD:
+                print("[ADMIN] password provvisoria: quella di DEFAULT_ADMIN_PASSWORD")
+            else:
+                # flush: in Docker l'output non e' un terminale e senza flush la riga resterebbe nel buffer.
+                print(f"[ADMIN] password provvisoria: {password} (da cambiare al primo accesso)", flush=True)
     except Exception as e:
         print(f"Errore durante l'inizializzazione dell'admin: {e}")
 

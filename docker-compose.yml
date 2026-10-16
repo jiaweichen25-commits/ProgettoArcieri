@@ -41,6 +41,7 @@ services:
       - GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}
       - LLM_PROVIDER_ORDER=${LLM_PROVIDER_ORDER:-openrouter,groq,gemini}
       - CORS_ORIGINS=${CORS_ORIGINS:-}
+      - DEFAULT_ADMIN_PASSWORD=${DEFAULT_ADMIN_PASSWORD:-}
     depends_on:
       db:
         condition: service_healthy
