@@ -19,14 +19,14 @@ def get_istruttori(utente: dict = Depends(solo_admin)):
 
 @router.post("/istruttori", status_code=status.HTTP_201_CREATED)
 def create_istruttore(data: IstruttoreCreateInput, utente: dict = Depends(solo_admin)):
-    return admin_service.create_istruttore(data.dict())
+    return admin_service.create_istruttore(data.model_dump())
 
 class AdminCreateInput(UpdateUsernameInput):
     email: EmailStr
 
 @router.post("/amministratori", status_code=status.HTTP_201_CREATED)
 def create_admin(data: AdminCreateInput, utente: dict = Depends(solo_admin)):
-    return admin_service.create_admin(data.dict())
+    return admin_service.create_admin(data.model_dump())
 
 class IstruttoreUpdateInput(BaseModel):
     nome: str
@@ -44,7 +44,7 @@ def get_atleti_di_istruttore(id_istruttore: int, utente: dict = Depends(solo_adm
 
 @router.put("/istruttori/{id_istruttore}")
 def update_istruttore(id_istruttore: int, data: IstruttoreUpdateInput, utente: dict = Depends(solo_admin)):
-    return admin_service.update_istruttore(id_istruttore, data.dict())
+    return admin_service.update_istruttore(id_istruttore, data.model_dump())
 
 @router.delete("/istruttori/{id_istruttore}")
 def delete_istruttore(id_istruttore: int, utente: dict = Depends(solo_admin)):
