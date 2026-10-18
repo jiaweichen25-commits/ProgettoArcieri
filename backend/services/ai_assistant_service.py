@@ -66,7 +66,8 @@ def _eta(data_nascita: date | None) -> int | None:
 
 # Il contesto va a provider AI esterni: niente dati che identificano l'atleta
 # (nome, cognome, data di nascita) e niente dati sanitari (visite mediche,
-# antidoping, note libere che potrebbero contenerne). Vedi GDPR art. 5 e 9.
+# antidoping, note libere che potrebbero contenerne, come quelle dei segnapunti
+# e delle gare). Vedi GDPR art. 5 e 9.
 def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
     profilo = _trova_atleta(id_utente, id_atleta)
     piani = allenamenti_service.get_allenamenti(id_utente, id_atleta)
@@ -113,7 +114,14 @@ def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
         "materiale_corrente": next(
             (m for m in materiali if m.get("materiale_corrente")), None
         ),
-        "gare_pianificate_nel_piano_attivo": gare,
+        "gare_pianificate_nel_piano_attivo": [
+            {
+                "tipo_gara": g["tipo_gara"],
+                "data": g["data"],
+                "distanza": g["distanza"],
+            }
+            for g in gare
+        ],
         "segnapunti": segnapunti_con_volee,
     }
 
