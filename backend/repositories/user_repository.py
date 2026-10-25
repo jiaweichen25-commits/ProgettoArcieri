@@ -263,10 +263,12 @@ def delete_istruttore(id_istruttore: int):
         with conn, conn.cursor() as cur:
             cur.execute('SELECT "IDutente" FROM "Tistruttori" WHERE "IDistruttore" = %s', (id_istruttore,))
             row = cur.fetchone()
-            if row:
-                id_utente = row[0]
-                cur.execute('DELETE FROM "Tistruttori" WHERE "IDistruttore" = %s', (id_istruttore,))
-                cur.execute('DELETE FROM "Tutenti" WHERE "IDutente" = %s', (id_utente,))
+            if not row:
+                return False
+            id_utente = row[0]
+            cur.execute('DELETE FROM "Tistruttori" WHERE "IDistruttore" = %s', (id_istruttore,))
+            cur.execute('DELETE FROM "Tutenti" WHERE "IDutente" = %s', (id_utente,))
+            return True
     finally:
         conn.close()
 

@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from psycopg2.errors import ForeignKeyViolation
 from repositories import user_repository, atleti_repository
 from config.database import get_db_conn
 import bcrypt
@@ -94,11 +95,15 @@ def update_istruttore(id_istruttore: int, dati: dict):
 
 def delete_istruttore(id_istruttore: int):
     try:
-        user_repository.delete_istruttore(id_istruttore)
-        return {"message": "Istruttore eliminato con successo"}
-    except Exception as e:
-        print(f"[ADMIN] eliminazione istruttore {id_istruttore} fallita: {e!r}")
-        raise HTTPException(status_code=500, detail="Errore durante l'eliminazione")
+        trovato = user_repository.delete_istruttore(id_istruttore)
+    except ForeignKeyViolation:
+        raise HTTPException(
+            status_code=409,
+            detail="L'istruttore ha ancora degli atleti: eliminali o spostali prima di eliminarlo."
+        )
+    if not trovato:
+        raise HTTPException(status_code=404, detail="Istruttore non trovato")
+    return {"message": "Istruttore eliminato con successo"}
 
 def suspend_istruttore(id_istruttore: int, data_fine_sospensione: str):
     conn = get_db_conn()

@@ -362,7 +362,10 @@ async function eliminaIstruttore(id, event) {
                 "Authorization": `Bearer ${token}`
             }
         });
-        if (!res.ok) throw new Error("Errore durante l'eliminazione");
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || "Errore durante l'eliminazione");
+        }
         loadAllDashboardData();
     } catch (err) {
         alert(err.message);
