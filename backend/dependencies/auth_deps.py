@@ -1,7 +1,9 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
+from datetime import date
 from config.settings import SECRET_KEY, ALGORITHM
+from repositories import user_repository
 
 security = HTTPBearer()
 
@@ -12,6 +14,17 @@ def get_utente_loggato(credentials: HTTPAuthorizationCredentials = Depends(secur
         ruolo: str = payload.get("ruolo")
         if id_utente is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token non valido")
+
+        # Il token resta valido fino alla scadenza: ricontrolla nel DB che l'utente
+        # esista ancora e non sia stato sospeso dopo il login.
+        # 401 così il frontend fa logout e il login mostra il motivo.
+        user = user_repository.get_user_by_id(id_utente)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Utente non più esistente")
+        sospeso_fino_al = user[4]
+        if sospeso_fino_al and sospeso_fino_al >= date.today():
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Account sospeso fino al {sospeso_fino_al}")
+
         return {
             "id_utente": id_utente, 
             "ruolo": ruolo, 
