@@ -17,6 +17,11 @@ BACKOFF_DELAYS = {
 }
 MAX_BACKOFF = timedelta(minutes=15)  # Per tentativo 8+
 
+# Hash usato quando l'utente non esiste: bcrypt gira comunque, cosi' la risposta
+# non e' piu' veloce e dal tempo non si capisce se l'account esiste.
+_HASH_FINTO = bcrypt.hashpw(b"utente-inesistente", bcrypt.gensalt())
+CREDENZIALI_ERRATE = "Email o password non corretti"
+
 def _format_tempo_attesa(secondi: int) -> str:
     """Formatta i secondi rimanenti in un messaggio leggibile."""
     if secondi >= 60:
@@ -37,7 +42,8 @@ def authenticate_user(email: str, password: str, portale: str):
     # [8]=bloccato_fino_al
     user = user_repository.get_user_by_email_or_username(email)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenziali non valide")
+        bcrypt.checkpw(password.encode(), _HASH_FINTO)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=CREDENZIALI_ERRATE)
 
     id_utente = user[2]
     must_change = user[3] if len(user) > 3 else False
@@ -60,25 +66,9 @@ def authenticate_user(email: str, password: str, portale: str):
             # Il blocco è scaduto: sblocca ma MANTIENI il contatore per escalation progressiva
             user_repository.clear_lockout(id_utente)
 
-    # ── Controllo sospensione account ──
-    if sospeso_fino_al:
-        if isinstance(sospeso_fino_al, str):
-            sospeso_fino_al = datetime.strptime(sospeso_fino_al, "%Y-%m-%d").date()
-        if sospeso_fino_al >= datetime.now().date():
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Account sospeso fino al {sospeso_fino_al}")
-
-    # Se il portale è istruttore, un admin può loggarsi qui se vogliamo? 
-    # Il frontend dovrebbe inviare portale=admin, non istruttore, se è admin.
-    if user[1] != portale:
-        # Se un admin cerca di accedere dal portale istruttore, lo autorizziamo ma cambiamo il ruolo nel token
-        # oppure frontend manderà 'admin' come portale
-        if not (portale == "istruttore" and user[1] == "admin"):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Accesso non autorizzato per questo portale"
-            )
-
     # ── Verifica password con escalation progressiva ──
+    # Va fatta PRIMA di sospensione e portale: quei messaggi dicono che l'account
+    # esiste (e che ruolo ha), quindi li vede solo chi conosce la password.
     if not bcrypt.checkpw(password.encode(), user[0].encode()):
         tentativi_falliti += 1
         if tentativi_falliti >= 4:
@@ -95,12 +85,30 @@ def authenticate_user(email: str, password: str, portale: str):
             user_repository.increment_failed_attempts(id_utente)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email o password non corretti"
+                detail=CREDENZIALI_ERRATE
             )
 
-    # ── Login riuscito: reset contatore ──
+    # ── Password giusta: reset contatore ──
     if tentativi_falliti > 0:
         user_repository.reset_failed_attempts(id_utente)
+
+    # ── Controllo sospensione account ──
+    if sospeso_fino_al:
+        if isinstance(sospeso_fino_al, str):
+            sospeso_fino_al = datetime.strptime(sospeso_fino_al, "%Y-%m-%d").date()
+        if sospeso_fino_al >= datetime.now().date():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Account sospeso fino al {sospeso_fino_al}")
+
+    # Se il portale è istruttore, un admin può loggarsi qui se vogliamo?
+    # Il frontend dovrebbe inviare portale=admin, non istruttore, se è admin.
+    if user[1] != portale:
+        # Se un admin cerca di accedere dal portale istruttore, lo autorizziamo ma cambiamo il ruolo nel token
+        # oppure frontend manderà 'admin' come portale
+        if not (portale == "istruttore" and user[1] == "admin"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Accesso non autorizzato per questo portale"
+            )
 
     actual_email = user[5] if len(user) > 5 and user[5] else email
     token = create_access_token({"sub": actual_email, "ruolo": user[1], "id_utente": user[2], "must_change_password": must_change})
