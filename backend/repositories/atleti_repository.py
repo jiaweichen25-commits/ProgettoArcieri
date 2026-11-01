@@ -47,11 +47,21 @@ def get_id_istruttore_by_utente(id_utente: int):
     finally:
         conn.close()
 
-def crea_atleta(id_istruttore: int, id_utente_atleta: int, dati: dict):
+def crea_atleta(id_istruttore: int, id_utente_atleta, dati: dict, hash_nuovo_utente: str = None):
+    # Se id_utente_atleta è None crea anche l'account in Tutenti, nella STESSA transazione:
+    # se l'insert in Tatleti fallisce sparisce anche l'account (niente login orfani).
     conn = get_db_conn()
     try:
         # 'with conn' gestisce AUTOMATICAMENTE commit e rollback
         with conn, conn.cursor() as cur:
+            if id_utente_atleta is None:
+                cur.execute(
+                    '''INSERT INTO "Tutenti" ("E-mail", "passwd_hash", "Ruolo", must_change_password)
+                       VALUES (LOWER(%s), %s, 'atleta', true)
+                       RETURNING "IDutente"''',
+                    (dati.get("email"), hash_nuovo_utente)
+                )
+                id_utente_atleta = cur.fetchone()[0]
             cur.execute(
                 '''INSERT INTO "Tatleti"
                    ("IDistruttore", "IDutente", "Nome", "Cognome", "Codice_Fiscale",
@@ -69,6 +79,8 @@ def crea_atleta(id_istruttore: int, id_utente_atleta: int, dati: dict):
                 )
             )
             return cur.fetchone()[0]
+    except UniqueViolation:
+        raise ValueError("Email o Codice Fiscale già in uso da un altro atleta")
     finally:
         conn.close()
 
@@ -90,9 +102,17 @@ def modifica_atleta(id_atleta: int, id_istruttore: int, dati: dict):
                     id_atleta, id_istruttore
                 )
             )
-            return cur.rowcount > 0
+            if cur.rowcount == 0:
+                return False
+            # Stessa email anche per il login, nella stessa transazione
+            cur.execute(
+                '''UPDATE "Tutenti" SET "E-mail" = LOWER(%s)
+                   WHERE "IDutente" = (SELECT "IDutente" FROM "Tatleti" WHERE "IDatleta" = %s)''',
+                (dati.get("email"), id_atleta)
+            )
+            return True
     except UniqueViolation:
-        raise ValueError("Email o Codice Fiscale già in uso da un altro atleta")
+        raise ValueError("Email o Codice Fiscale già in uso")
     finally:
         conn.close()
 

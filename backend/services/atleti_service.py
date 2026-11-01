@@ -68,18 +68,21 @@ def crea_atleta(id_utente: int, dati: dict):
                 detail="Questa email è già registrata come istruttore"
             )
         id_utente_atleta = existing[2]
+        password_temp = hashed = None
     else:
-        # Crea account con password temporanea
+        # Account nuovo con password temporanea: lo crea il repository insieme all'atleta
+        id_utente_atleta = None
         password_temp = genera_password_temporanea()
         hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
-        user_repository.create_user(email_atleta, hashed, "atleta", must_change_password=True)
-        nuovo_utente = user_repository.get_user_by_email(email_atleta)
-        id_utente_atleta = nuovo_utente[2]
-        
-        # Invia email con credenziali
-        invia_email_credenziali(email_atleta, password_temp, "atleta")
 
-    new_id = atleti_repository.crea_atleta(id_istruttore, id_utente_atleta, dati)
+    try:
+        new_id = atleti_repository.crea_atleta(id_istruttore, id_utente_atleta, dati, hashed)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    # Email solo dopo il salvataggio: se qualcosa fallisce sopra, nessuna password parte
+    if password_temp:
+        invia_email_credenziali(email_atleta, password_temp, "atleta")
     return {"IDatleta": new_id, "message": "Atleta creato con successo"}
 
 def modifica_atleta(id_atleta: int, id_utente: int, dati: dict):

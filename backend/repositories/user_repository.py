@@ -182,15 +182,25 @@ def create_user(email: str, hashed_password: str, ruolo: str, must_change_passwo
     finally:
         conn.close()
 
-def create_istruttore(id_utente: int, nome: str, cognome: str, email: str, qualifica: str = None):
+def create_istruttore(email: str, hashed_password: str, username: str, nome: str, cognome: str, qualifica: str = None):
+    # Account e istruttore nella STESSA transazione: se uno dei due fallisce non resta niente a metà.
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
+            cur.execute(
+                '''INSERT INTO "Tutenti" ("E-mail", "Username", "passwd_hash", "Ruolo", must_change_password)
+                   VALUES (LOWER(%s), %s, %s, 'istruttore', true)
+                   RETURNING "IDutente"''',
+                (email, username, hashed_password)
+            )
+            id_utente = cur.fetchone()[0]
             cur.execute(
                 '''INSERT INTO "Tistruttori" ("IDutente", "Nome", "Cognome", "Qualifica", "E-mail")
                    VALUES (%s, %s, %s, %s, %s)''',
                 (id_utente, nome, cognome, qualifica, email)
             )
+    except UniqueViolation:
+        raise ValueError("Email o Username già registrati")
     finally:
         conn.close()
 

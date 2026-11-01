@@ -43,18 +43,19 @@ def create_istruttore(dati: dict):
     hashed = bcrypt.hashpw(password_temp.encode(), bcrypt.gensalt()).decode()
     
     username = (dati.get("username") or "").strip() or None
-    user_repository.create_user(email, hashed, "istruttore", must_change_password=True, username=username)
-    new_user = user_repository.get_user_by_email(email)
-    id_utente = new_user[2]
-    
-    user_repository.create_istruttore(
-        id_utente,
-        dati.get("nome", "").strip(),
-        dati.get("cognome", "").strip(),
-        email,
-        dati.get("qualifica", "").strip()
-    )
-    
+    try:
+        user_repository.create_istruttore(
+            email,
+            hashed,
+            username,
+            (dati.get("nome") or "").strip(),
+            (dati.get("cognome") or "").strip(),
+            (dati.get("qualifica") or "").strip()
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Email solo dopo il salvataggio: se qualcosa fallisce sopra, nessuna password parte
     invia_email_credenziali(email, password_temp, "istruttore")
     return {"message": "Istruttore creato con successo"}
 
