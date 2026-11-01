@@ -551,29 +551,21 @@ def get_nota(id_allenamento: int, id_settimana: int):
     finally:
         conn.close()
 
-def crea_nota(id_allenamento: int, id_settimana: int, dati: dict):
+def salva_nota(id_allenamento: int, id_settimana: int, dati: dict):
+    # Crea la riga della settimana o, se esiste già, aggiorna solo "Nota" (la nota dell'atleta resta).
+    # Un solo comando: anche se istruttore e atleta salvano insieme non nascono due righe.
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
             cur.execute(
                 '''INSERT INTO "TdetNoteAtleta" ("IDallenamento", "IDsettimana", "Nota")
                    VALUES (%s, %s, %s)
+                   ON CONFLICT ("IDallenamento", "IDsettimana")
+                   DO UPDATE SET "Nota" = EXCLUDED."Nota"
                    RETURNING "IDnota"''',
                 (id_allenamento, id_settimana, dati.get("nota"))
             )
             return cur.fetchone()[0]
-    finally:
-        conn.close()
-
-def modifica_nota(id_nota: int, dati: dict):
-    conn = get_db_conn()
-    try:
-        with conn, conn.cursor() as cur:
-            cur.execute(
-                '''UPDATE "TdetNoteAtleta" SET "Nota" = %s WHERE "IDnota" = %s''',
-                (dati.get("nota"), id_nota)
-            )
-            return cur.rowcount > 0
     finally:
         conn.close()
 

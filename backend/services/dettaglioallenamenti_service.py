@@ -303,13 +303,7 @@ def get_nota(id_utente: int, id_allenamento: int, id_settimana: int):
 def salva_nota(id_utente: int, id_allenamento: int, id_settimana: int, dati: dict):
     _autorizza(id_utente, id_allenamento)
     # Se esiste già la aggiorna, altrimenti la crea
-    esistente = repo.get_nota(id_allenamento, id_settimana)
-    if esistente is None:
-        id_nuovo = repo.crea_nota(id_allenamento, id_settimana, dati)
-        return {"IDnota": id_nuovo}
-    else:
-        repo.modifica_nota(esistente[0], dati)
-        return {"IDnota": esistente[0]}
+    return {"IDnota": repo.salva_nota(id_allenamento, id_settimana, dati)}
 
 def crea_seduta_se_non_esiste(id_utente: int, id_allenamento: int, id_settimana: int, id_seduta: int):
     _autorizza(id_utente, id_allenamento)

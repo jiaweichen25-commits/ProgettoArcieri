@@ -158,26 +158,18 @@ def get_nota_allenamento(id_allenamento: int, id_settimana: int):
 
 def salva_nota_atleta(id_allenamento: int, id_settimana: int, testo: str):
     """Crea o aggiorna la nota personale scritta dall'atleta per una settimana."""
+    # Un solo comando (vedi salva_nota in dettaglioallenamenti_repository): aggiorna solo
+    # "NotaAtleta" e lascia la nota dell'istruttore, senza mai creare una seconda riga.
     conn = get_db_conn()
     try:
         with conn, conn.cursor() as cur:
             cur.execute(
-                '''SELECT "IDnota" FROM "TdetNoteAtleta"
-                   WHERE "IDallenamento" = %s AND "IDsettimana" = %s''',
-                (id_allenamento, id_settimana)
+                '''INSERT INTO "TdetNoteAtleta" ("IDallenamento", "IDsettimana", "NotaAtleta")
+                   VALUES (%s, %s, %s)
+                   ON CONFLICT ("IDallenamento", "IDsettimana")
+                   DO UPDATE SET "NotaAtleta" = EXCLUDED."NotaAtleta"''',
+                (id_allenamento, id_settimana, testo)
             )
-            riga = cur.fetchone()
-            if riga:
-                cur.execute(
-                    '''UPDATE "TdetNoteAtleta" SET "NotaAtleta" = %s WHERE "IDnota" = %s''',
-                    (testo, riga[0])
-                )
-            else:
-                cur.execute(
-                    '''INSERT INTO "TdetNoteAtleta" ("IDallenamento", "IDsettimana", "NotaAtleta")
-                       VALUES (%s, %s, %s)''',
-                    (id_allenamento, id_settimana, testo)
-                )
             return True
     finally:
         conn.close()

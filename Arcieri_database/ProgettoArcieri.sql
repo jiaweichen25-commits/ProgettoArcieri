@@ -293,6 +293,7 @@ CREATE TABLE IF NOT EXISTS public."TdetNoteAtleta"
     "Nota"                      text,
     "NotaAtleta"                text,
     PRIMARY KEY ("IDnota"),
+    UNIQUE ("IDallenamento", "IDsettimana"),
     FOREIGN KEY ("IDallenamento")
         REFERENCES public."Tallenamenti" ("IDallenamento")
         ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -341,7 +342,7 @@ CREATE TABLE IF NOT EXISTS public."Tpianogare"
 CREATE TABLE IF NOT EXISTS public."TSserie"
 (
     "IDserie"      serial NOT NULL,
-    "Serie"        character varying,
+    "Serie"        character varying UNIQUE,
     "NumeroFrecce" integer NOT NULL,
     PRIMARY KEY ("IDserie")
 );
