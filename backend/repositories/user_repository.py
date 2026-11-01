@@ -10,6 +10,7 @@ def ensure_security_columns():
                 ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS bloccato_fino_al timestamp without time zone;
                 ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS reset_token character varying;
                 ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS reset_token_scadenza timestamp without time zone;
+                ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS reset_tentativi integer DEFAULT 0 NOT NULL;
                 ALTER TABLE "Tutenti" ADD COLUMN IF NOT EXISTS creato_il timestamp without time zone DEFAULT NOW();
             ''')
     except Exception as e:
@@ -119,22 +120,28 @@ def set_reset_token(email: str, token: str, expiry):
     try:
         with conn, conn.cursor() as cur:
             cur.execute(
-                'UPDATE "Tutenti" SET reset_token = %s, reset_token_scadenza = %s WHERE LOWER("E-mail") = LOWER(%s)',
+                'UPDATE "Tutenti" SET reset_token = %s, reset_token_scadenza = %s, reset_tentativi = 0 '
+                'WHERE LOWER("E-mail") = LOWER(%s)',
                 (token, expiry, email)
             )
             return cur.rowcount > 0
     finally:
         conn.close()
 
-def get_user_by_reset_token(email: str, token: str):
+def consuma_tentativo_reset(email: str, max_tentativi: int):
+    """Conta un tentativo sul codice di recupero e restituisce (IDutente, reset_token, reset_token_scadenza).
+    None se l'utente non ha un codice attivo o ha gia' usato tutti i tentativi."""
+    # Il tentativo si conta PRIMA di confrontare il codice, nello stesso UPDATE che legge il codice:
+    # l'UPDATE blocca la riga, quindi anche 100 richieste contemporanee consumano 100 tentativi
+    # (e dopo il quinto non leggono piu' niente), invece di leggere tutte il codice insieme.
     conn = get_db_conn()
     try:
-        with conn.cursor() as cur:
+        with conn, conn.cursor() as cur:
             cur.execute(
-                'SELECT "passwd_hash", "Ruolo", "IDutente", must_change_password, sospeso_fino_al, '
-                '"E-mail", "Username", tentativi_falliti, bloccato_fino_al, reset_token, reset_token_scadenza '
-                'FROM "Tutenti" WHERE LOWER("E-mail") = LOWER(%s) AND reset_token = %s',
-                (email, token)
+                'UPDATE "Tutenti" SET reset_tentativi = reset_tentativi + 1 '
+                'WHERE LOWER("E-mail") = LOWER(%s) AND reset_token IS NOT NULL AND reset_tentativi < %s '
+                'RETURNING "IDutente", reset_token, reset_token_scadenza',
+                (email, max_tentativi)
             )
             return cur.fetchone()
     finally:
@@ -146,7 +153,7 @@ def reset_password_with_token(id_utente: int, new_hashed_password: str):
         with conn, conn.cursor() as cur:
             cur.execute(
                 'UPDATE "Tutenti" '
-                'SET passwd_hash = %s, reset_token = NULL, reset_token_scadenza = NULL, '
+                'SET passwd_hash = %s, reset_token = NULL, reset_token_scadenza = NULL, reset_tentativi = 0, '
                 'tentativi_falliti = 0, bloccato_fino_al = NULL, must_change_password = false '
                 'WHERE "IDutente" = %s',
                 (new_hashed_password, id_utente)

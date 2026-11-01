@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public."Tutenti"
     bloccato_fino_al        timestamp without time zone,
     reset_token             character varying,
     reset_token_scadenza    timestamp without time zone,
+    reset_tentativi         integer DEFAULT 0 NOT NULL,
     PRIMARY KEY ("IDutente")
 );
 

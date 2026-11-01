@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 import bcrypt
 import re
+import secrets
 from fastapi import HTTPException, status
 from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from repositories import user_repository
@@ -130,6 +131,17 @@ def change_user_password(email: str, old_password: str, new_password: str):
 # Recupero Password
 # ══════════════════════════════════════════════
 
+DURATA_CODICE = timedelta(minutes=15)
+# Ogni codice si puo' sbagliare al massimo 5 volte, poi non vale piu': 5 tentativi su 900000 codici possibili.
+MAX_TENTATIVI_RESET = 5
+# Un nuovo codice al massimo ogni minuto per account: senza, chi attacca chiederebbe un codice nuovo
+# (con altri 5 tentativi) a ripetizione, e la vittima riceverebbe una raffica di email.
+ATTESA_NUOVO_CODICE = timedelta(seconds=60)
+CODICE_ERRATO = (
+    f"Codice non valido o email errata. Dopo {MAX_TENTATIVI_RESET} tentativi sbagliati "
+    "il codice non vale più: richiedine uno nuovo."
+)
+
 def request_password_reset(email: str):
     """Genera un codice OTP a 6 cifre, lo salva nel DB e invia l'email."""
     email_clean = email.strip().lower() if email else ""
@@ -138,8 +150,14 @@ def request_password_reset(email: str):
         # Non rivelare se l'email esiste o meno per sicurezza
         return {"message": "Se l'email è registrata, riceverai un codice di recupero."}
 
+    # [9]=reset_token, [10]=reset_token_scadenza: il codice attuale e' stato creato alle scadenza - 15 minuti.
+    # Se e' passato meno di un minuto non ne mandiamo un altro (stessa risposta, per non rivelare niente).
+    reset_token, scadenza_attuale = user[9], user[10]
+    if reset_token and scadenza_attuale and datetime.now() < scadenza_attuale - DURATA_CODICE + ATTESA_NUOVO_CODICE:
+        return {"message": "Se l'email è registrata, riceverai un codice di recupero."}
+
     codice = genera_otp()
-    scadenza = datetime.now() + timedelta(minutes=15)
+    scadenza = datetime.now() + DURATA_CODICE
     user_repository.set_reset_token(email_clean, codice, scadenza)
     invia_email_recupero_password(email_clean, codice)
 
@@ -149,23 +167,22 @@ def reset_password(email: str, code: str, new_password: str):
     """Verifica il codice OTP e reimposta la password."""
     email_clean = email.strip().lower() if email else ""
     code_clean = code.strip() if code else ""
-    user = user_repository.get_user_by_reset_token(email_clean, code_clean)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Codice non valido o email errata")
+    # Conta il tentativo prima di controllare il codice (vedi consuma_tentativo_reset):
+    # None = email sconosciuta, nessun codice richiesto, oppure tentativi finiti.
+    riga = user_repository.consuma_tentativo_reset(email_clean, MAX_TENTATIVI_RESET)
+    if not riga:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=CODICE_ERRATO)
 
-    # Indice 10 = reset_token_scadenza
-    scadenza = user[10]
-    if not scadenza:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Codice non valido")
+    id_utente, codice_salvato, scadenza = riga
+    # compare_digest: confronto che impiega sempre lo stesso tempo, dal tempo non si indovinano le cifre
+    if not secrets.compare_digest(codice_salvato, code_clean):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=CODICE_ERRATO)
 
-    if isinstance(scadenza, str):
-        scadenza = datetime.strptime(scadenza, "%Y-%m-%d %H:%M:%S")
-
-    if scadenza < datetime.now():
+    if not scadenza or scadenza < datetime.now():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Il codice è scaduto. Richiedine uno nuovo.")
 
     new_hashed = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
-    user_repository.reset_password_with_token(user[2], new_hashed)
+    user_repository.reset_password_with_token(id_utente, new_hashed)
 
     return {"message": "Password reimpostata con successo. Puoi effettuare il login."}
 
