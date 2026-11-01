@@ -28,6 +28,10 @@ REGOLE NON NEGOZIABILI:
 - Rispondi in italiano, in modo diretto e concreto: numeri prima delle opinioni quando disponibili, passi numerati per le istruzioni pratiche.
 """
 
+# Quanti segnapunti (i piu' recenti) mandare all'AI: con tutti, un atleta con anni di gare
+# farebbe un messaggio enorme (piu' lento, piu' costoso, oltre il limite di token del modello).
+MAX_SEGNAPUNTI_CONTESTO = 10
+
 def _get_istruttore_or_404(id_utente: int) -> int:
     id_istruttore = atleti_repository.get_id_istruttore_by_utente(id_utente)
     if not id_istruttore:
@@ -78,10 +82,11 @@ def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
     if piano_attivo:
         gare = pianogare_service.get_gare(id_utente, piano_attivo["IDallenamento"])
 
-    # Recupera segnapunti con dettaglio volée per analisi punteggi
+    # Recupera segnapunti con dettaglio volée per analisi punteggi.
+    # get_segnapunti li ordina dal piu' recente, quindi [:MAX] sono gli ultimi.
     segnapunti_raw = segnapunti_service.get_segnapunti(id_utente, id_atleta)
     segnapunti_con_volee = []
-    for sp in segnapunti_raw:
+    for sp in segnapunti_raw[:MAX_SEGNAPUNTI_CONTESTO]:
         volee = segnapunti_service.get_volee(id_utente, id_atleta, sp["IDsegnapunto"])
         segnapunti_con_volee.append({
             "data": sp["data"],
@@ -122,6 +127,8 @@ def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
             }
             for g in gare
         ],
+        # cosi' l'AI sa che quelli in "segnapunti" sono solo gli ultimi, non tutti
+        "segnapunti_registrati_in_totale": len(segnapunti_raw),
         "segnapunti": segnapunti_con_volee,
     }
 

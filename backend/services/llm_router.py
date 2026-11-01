@@ -66,8 +66,6 @@ def _chiama_gemini(system_prompt: str, messaggio: str) -> str:
 
 
 def genera_risposta(system_prompt: str, messaggio: str, task: str) -> LLMResult:
-    ultimo_errore: str | None = None
-
     for provider in LLM_PROVIDER_ORDER:
         try:
             if provider == "openrouter":
@@ -91,14 +89,12 @@ def genera_risposta(system_prompt: str, messaggio: str, task: str) -> LLMResult:
                 task=task,
             )
         except ProviderError as exc:
-            ultimo_errore = str(exc)
             print(f"[LLM FALLBACK] {provider} failed: {exc}")
             continue
 
+    # L'errore del provider resta solo nei log ([LLM FALLBACK] qui sopra): il testo grezzo
+    # (status, body della risposta) non va mostrato all'utente.
     raise HTTPException(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-        detail=(
-            "Tutti i provider AI non sono disponibili, riprova più tardi."
-            + (f" Ultimo errore: {ultimo_errore}" if ultimo_errore else "")
-        ),
+        detail="Tutti i provider AI non sono disponibili, riprova più tardi.",
     )

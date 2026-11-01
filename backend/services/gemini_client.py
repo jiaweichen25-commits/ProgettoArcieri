@@ -39,6 +39,10 @@ def genera_risposta(system_prompt: str, messaggio_utente: str) -> str:
 
     try:
         data = resp.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except (KeyError, IndexError, ValueError) as exc:
+        testo = data["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
         raise ProviderError("gemini", f"Risposta non valida: {exc}") from exc
+    # come in openai_compatible_client: testo mancante o vuoto = errore, si passa al provider successivo
+    if not isinstance(testo, str) or not testo.strip():
+        raise ProviderError("gemini", "Risposta vuota")
+    return testo.strip()

@@ -61,6 +61,11 @@ def genera_risposta(
 
     try:
         data = resp.json()
-        return data["choices"][0]["message"]["content"].strip()
+        contenuto = data["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError, ValueError) as exc:
         raise ProviderError(provider, f"Risposta non valida: {exc}") from exc
+    # Alcuni modelli rispondono 200 con "content": null (es. risposta bloccata dal filtro):
+    # anche quello e' un errore del provider, cosi' il router passa al successivo.
+    if not isinstance(contenuto, str) or not contenuto.strip():
+        raise ProviderError(provider, "Risposta vuota")
+    return contenuto.strip()
