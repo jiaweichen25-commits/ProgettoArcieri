@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, status
 from dependencies.auth_deps import solo_admin
 from services import admin_service
 from pydantic import BaseModel, EmailStr
-from schemas.auth_schemas import UpdateUsernameInput
+from typing import Optional
+from schemas.modifica import ModificaCompleta
+from schemas.auth_schemas import UsernameInput
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -21,22 +23,23 @@ def get_istruttori(utente: dict = Depends(solo_admin)):
 def create_istruttore(data: IstruttoreCreateInput, utente: dict = Depends(solo_admin)):
     return admin_service.create_istruttore(data.model_dump())
 
-class AdminCreateInput(UpdateUsernameInput):
+class AdminCreateInput(UsernameInput):
     email: EmailStr
 
 @router.post("/amministratori", status_code=status.HTTP_201_CREATED)
 def create_admin(data: AdminCreateInput, utente: dict = Depends(solo_admin)):
     return admin_service.create_admin(data.model_dump())
 
-class IstruttoreUpdateInput(BaseModel):
+class IstruttoreUpdateInput(ModificaCompleta):
     nome: str
     cognome: str
     email: EmailStr
     qualifica: str = None
     username: str = None
 
-class SuspendInput(BaseModel):
-    data_fine_sospensione: str = None
+class SuspendInput(ModificaCompleta):
+    # Optional: null = "Rimuovi sospensione" (con solo "str" Pydantic rifiutava il null con un 422)
+    data_fine_sospensione: Optional[str] = None
 
 @router.get("/istruttori/{id_istruttore}/atleti")
 def get_atleti_di_istruttore(id_istruttore: int, utente: dict = Depends(solo_admin)):

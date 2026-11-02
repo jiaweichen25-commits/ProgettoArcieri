@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from schemas.modifica import ModificaCompleta
 from typing import Optional
 
 
@@ -35,7 +36,7 @@ class StretchingCreate(BaseModel):
     sabato:    Optional[str] = None
     domenica:  Optional[str] = None
 
-class StretchingUpdate(StretchingCreate):
+class StretchingUpdate(ModificaCompleta, StretchingCreate):
     pass
 
 class StretchingOut(StretchingCreate):
@@ -59,7 +60,7 @@ class RiscaldamentoCreate(BaseModel):
     sabato:    Optional[str] = None
     domenica:  Optional[str] = None
 
-class RiscaldamentoUpdate(RiscaldamentoCreate):
+class RiscaldamentoUpdate(ModificaCompleta, RiscaldamentoCreate):
     pass
 
 class RiscaldamentoOut(RiscaldamentoCreate):
@@ -86,7 +87,7 @@ class TecForCorCreate(BaseModel):
     sabato:    Optional[str] = None
     domenica:  Optional[str] = None
 
-class TecForCorUpdate(TecForCorCreate):
+class TecForCorUpdate(ModificaCompleta, TecForCorCreate):
     pass
 
 class TecForCorOut(TecForCorCreate):
@@ -111,7 +112,7 @@ class AllFisForResCreate(BaseModel):
     sabato:    Optional[str] = None
     domenica:  Optional[str] = None
 
-class AllFisForResUpdate(AllFisForResCreate):
+class AllFisForResUpdate(ModificaCompleta, AllFisForResCreate):
     pass
 
 class AllFisForResOut(AllFisForResCreate):
@@ -136,7 +137,7 @@ class AllFisCorCreate(BaseModel):
     sabato:    Optional[str] = None
     domenica:  Optional[str] = None
 
-class AllFisCorUpdate(AllFisCorCreate):
+class AllFisCorUpdate(ModificaCompleta, AllFisCorCreate):
     pass
 
 class AllFisCorOut(AllFisCorCreate):

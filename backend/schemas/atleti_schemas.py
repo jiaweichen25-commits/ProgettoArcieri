@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from schemas.modifica import ModificaCompleta
 from typing import Optional
 from datetime import date
 
@@ -16,7 +17,7 @@ class AtletaCreate(BaseModel):
     cap: Optional[str] = None
     citta: Optional[str] = None
 
-class AtletaUpdate(BaseModel):
+class AtletaUpdate(ModificaCompleta):
     nome: str
     cognome: str
     codice_fiscale: str

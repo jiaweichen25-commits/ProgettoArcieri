@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from schemas.modifica import ModificaCompleta
 from typing import Optional
 from datetime import date
 
@@ -36,7 +37,7 @@ class MaterialeBase(BaseModel):
 class MaterialeCreate(MaterialeBase):
     pass
 
-class MaterialeUpdate(MaterialeBase):
+class MaterialeUpdate(ModificaCompleta, MaterialeBase):
     pass
 
 class MaterialeOut(MaterialeBase):

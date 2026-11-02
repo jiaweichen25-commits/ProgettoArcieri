@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from schemas.modifica import ModificaCompleta
 from datetime import date
 from typing import Optional
 
@@ -10,7 +11,7 @@ class PianoGaraCreate(BaseModel):
     note: Optional[str] = None
     escludi_visualizzazione: bool = False
 
-class PianoGaraUpdate(BaseModel):
+class PianoGaraUpdate(ModificaCompleta):
     id_tipogara: Optional[int] = None
     data: Optional[date] = None
     luogo: Optional[str] = None

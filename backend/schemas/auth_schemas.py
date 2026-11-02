@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, field_validator
+from schemas.modifica import ModificaCompleta
 from typing import Optional
 
 class LoginInput(BaseModel):
@@ -51,7 +52,7 @@ class ResetPasswordInput(BaseModel):
             raise ValueError("Il codice deve essere di 6 cifre")
         return v.strip()
 
-class UpdateUsernameInput(BaseModel):
+class UsernameInput(BaseModel):
     username: Optional[str] = None
 
     @field_validator("username")
@@ -74,3 +75,8 @@ class UserProfileOut(BaseModel):
     email: str
     username: Optional[str] = None
     ruolo: str
+
+# PUT /auth/username: stesso controllo di UsernameInput (che usa anche la creazione di un admin),
+# ma il campo va mandato, anche null
+class UpdateUsernameInput(ModificaCompleta, UsernameInput):
+    pass

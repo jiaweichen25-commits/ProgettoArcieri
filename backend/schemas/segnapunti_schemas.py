@@ -1,4 +1,5 @@
 from pydantic import BaseModel, field_validator
+from schemas.modifica import ModificaCompleta
 from typing import Optional
 from datetime import date
 
@@ -56,13 +57,12 @@ class SegnapuntoCreate(BaseModel):
         return v
 
 
-class SegnapuntoUpdate(BaseModel):
-    note_istruttore: Optional[str] = None
+class SegnapuntoUpdate(ModificaCompleta):
     note_atleta: Optional[str] = None
     ImpattiBersaglio: Optional[list] = None
 
 
-class SegnapuntoNoteIstruttoreUpdate(BaseModel):
+class SegnapuntoNoteIstruttoreUpdate(ModificaCompleta):
     note_istruttore: Optional[str] = None
 
 
