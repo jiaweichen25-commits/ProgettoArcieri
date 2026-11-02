@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from config.limiter import limiter, rate_limit_handler
 from config.db_errors import db_error_handler
-from config.migrazioni import ensure_vincoli_unici
+from config.migrazioni import ensure_vincoli_unici, ensure_indici
 from psycopg2 import IntegrityError, DataError
 from config.settings import DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD, CORS_ORIGINS
 import os
@@ -68,6 +68,7 @@ app.include_router(me_segnapunti_controller.router)
 @app.on_event("startup")
 def startup_event():
     ensure_vincoli_unici()
+    ensure_indici()
     try:
         user = user_repository.get_user_by_email(DEFAULT_ADMIN_EMAIL)
         if not user:

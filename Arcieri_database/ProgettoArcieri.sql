@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS public."Tutenti"
     reset_tentativi         integer DEFAULT 0 NOT NULL,
     PRIMARY KEY ("IDutente")
 );
+CREATE INDEX IF NOT EXISTS index_tutenti_email ON public."Tutenti" (LOWER("E-mail"));
+CREATE INDEX IF NOT EXISTS index_tutenti_username ON public."Tutenti" (LOWER("Username"));
 
 CREATE TABLE IF NOT EXISTS public."Tistruttori"
 (
@@ -29,6 +31,7 @@ CREATE TABLE IF NOT EXISTS public."Tistruttori"
     "E-mail"            character varying NOT NULL UNIQUE,
     PRIMARY KEY ("IDistruttore")
 );
+CREATE INDEX IF NOT EXISTS index_tistruttori_idutente ON public."Tistruttori" ("IDutente");
 
 COMMENT ON TABLE public."Tistruttori"
     IS 'tabella principale per gli istruttori, nome, cognome, qualifica.';
@@ -51,6 +54,8 @@ CREATE TABLE IF NOT EXISTS public."Tatleti"
     "Foto"                  text,
     PRIMARY KEY ("IDatleta")
 );
+CREATE INDEX IF NOT EXISTS index_tatleti_idistruttore ON public."Tatleti" ("IDistruttore");
+CREATE INDEX IF NOT EXISTS index_tatleti_idutente ON public."Tatleti" ("IDutente");
 
 CREATE TABLE IF NOT EXISTS public."Tmateriali"
 (
@@ -87,6 +92,7 @@ CREATE TABLE IF NOT EXISTS public."Tmateriali"
     "MaterialeCorrente"     boolean NOT NULL,
     PRIMARY KEY ("IDmateriale")
 );
+CREATE INDEX IF NOT EXISTS index_tmateriali_idatleta ON public."Tmateriali" ("IDatleta");
 
 CREATE TABLE IF NOT EXISTS public."Tallenamenti"
 (
@@ -97,6 +103,7 @@ CREATE TABLE IF NOT EXISTS public."Tallenamenti"
     "Obiettivi"             character varying,
     PRIMARY KEY ("IDallenamento")
 );
+CREATE INDEX IF NOT EXISTS index_tallenamenti_idatleta ON public."Tallenamenti" ("IDatleta");
 
 CREATE TABLE IF NOT EXISTS public."TdetAllenamenti"
 (
@@ -125,6 +132,7 @@ CREATE TABLE IF NOT EXISTS public."TdetStretching"
     "IDesercizioStretching"     integer,
     PRIMARY KEY ("IDdetStretching")
 );
+CREATE INDEX IF NOT EXISTS index_tdetstretching_seduta ON public."TdetStretching" ("IDallenamento", "IDsettimana", "IDseduta");
 
 CREATE TABLE IF NOT EXISTS public."TSstretching"
 (
@@ -153,6 +161,7 @@ CREATE TABLE IF NOT EXISTS public."TdetRiscaldamento"
     "IDesercizioRiscaldamento"  integer,
     PRIMARY KEY ("IDdetRiscaldamento")
 );
+CREATE INDEX IF NOT EXISTS index_tdetriscaldamento_seduta ON public."TdetRiscaldamento" ("IDallenamento", "IDsettimana", "IDseduta");
 
 CREATE TABLE IF NOT EXISTS public."TSriscaldamento"
 (
@@ -181,6 +190,7 @@ CREATE TABLE IF NOT EXISTS public."TdetTecForCor"
     "IDposizionePiedi"          integer,
     PRIMARY KEY ("IDdetTecForCor")
 );
+CREATE INDEX IF NOT EXISTS index_tdettecforcor_seduta ON public."TdetTecForCor" ("IDallenamento", "IDsettimana", "IDseduta");
 
 COMMENT ON TABLE public."TdetTecForCor"
     IS 'Tabella dettagli Tecnica-Forza-Coordinazione';
@@ -237,6 +247,7 @@ CREATE TABLE IF NOT EXISTS public."TdetAllFisForRes"
     "IDdescrizioneEsercizioAllFisForRes"    integer,
     PRIMARY KEY ("IDdetAllFisForRes")
 );
+CREATE INDEX IF NOT EXISTS index_tdetallfisforres_seduta ON public."TdetAllFisForRes" ("IDallenamento", "IDsettimana", "IDseduta");
 
 CREATE TABLE IF NOT EXISTS public."TStabellaNumero"
 (
@@ -270,6 +281,7 @@ CREATE TABLE IF NOT EXISTS public."TdetAllFisCor"
     "IDdescrizioneEsercizioAllFisCor"   integer,
     PRIMARY KEY ("IDdetAllFisCor")
 );
+CREATE INDEX IF NOT EXISTS index_tdetallfiscor_seduta ON public."TdetAllFisCor" ("IDallenamento", "IDsettimana", "IDseduta");
 
 CREATE TABLE IF NOT EXISTS public."TSattrezzi"
 (
@@ -308,6 +320,7 @@ CREATE TABLE IF NOT EXISTS public."Tvisitemediche"
     "DataScadenza"      date NOT NULL,
     PRIMARY KEY ("IDvisita")
 );
+CREATE INDEX IF NOT EXISTS index_tvisitemediche_idatleta ON public."Tvisitemediche" ("IDatleta");
 
 CREATE TABLE IF NOT EXISTS public."Tantidoping"
 (
@@ -318,6 +331,7 @@ CREATE TABLE IF NOT EXISTS public."Tantidoping"
     "ScadenzaAutorizzazione"    date,
     PRIMARY KEY ("IDantidoping")
 );
+CREATE INDEX IF NOT EXISTS index_tantidoping_idatleta ON public."Tantidoping" ("IDatleta");
 
 CREATE TABLE IF NOT EXISTS public."TStipigare"
 (
@@ -339,6 +353,7 @@ CREATE TABLE IF NOT EXISTS public."Tpianogare"
     "EscludiVisualizzazione"    BOOLEAN NOT NULL DEFAULT false,
     PRIMARY KEY ("IDpianogara")
 );
+CREATE INDEX IF NOT EXISTS index_tpianogare_idallenamento ON public."Tpianogare" ("IDallenamento");
 
 CREATE TABLE IF NOT EXISTS public."TSserie"
 (
@@ -363,6 +378,7 @@ CREATE TABLE IF NOT EXISTS public."Tsegnapunti"
     "ImpattiBersaglio" jsonb,
     PRIMARY KEY ("IDsegnapunto")
 );
+CREATE INDEX IF NOT EXISTS index_tsegnapunti_idatleta ON public."Tsegnapunti" ("IDatleta");
 
 CREATE TABLE IF NOT EXISTS public."TsegnapuntiVolee"
 (
