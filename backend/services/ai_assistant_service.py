@@ -85,9 +85,14 @@ def _costruisci_contesto_atleta(id_utente: int, id_atleta: int) -> dict:
     # Recupera segnapunti con dettaglio volée per analisi punteggi.
     # get_segnapunti li ordina dal piu' recente, quindi [:MAX] sono gli ultimi.
     segnapunti_raw = segnapunti_service.get_segnapunti(id_utente, id_atleta)
+    ultimi = segnapunti_raw[:MAX_SEGNAPUNTI_CONTESTO]
+    # le volee di tutti gli ultimi segnapunti con una query sola (prima: circa 4 query per segnapunti)
+    volee_per_segnapunto = segnapunti_service.get_volee_di_segnapunti(
+        id_utente, id_atleta, [sp["IDsegnapunto"] for sp in ultimi]
+    )
     segnapunti_con_volee = []
-    for sp in segnapunti_raw[:MAX_SEGNAPUNTI_CONTESTO]:
-        volee = segnapunti_service.get_volee(id_utente, id_atleta, sp["IDsegnapunto"])
+    for sp in ultimi:
+        volee = volee_per_segnapunto.get(sp["IDsegnapunto"], [])
         segnapunti_con_volee.append({
             "data": sp["data"],
             "distanza": sp["distanza"],

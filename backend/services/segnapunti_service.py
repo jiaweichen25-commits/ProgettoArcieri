@@ -105,6 +105,15 @@ def get_volee(id_utente: int, id_atleta: int, id_segnapunto: int):
     return [_volee_row_to_dict(r) for r in rows]
 
 
+def get_volee_di_segnapunti(id_utente: int, id_atleta: int, id_segnapunti: list[int]) -> dict:
+    """Le volee di piu' segnapunti dell'atleta: {IDsegnapunto: [volee]}, con un solo controllo e una sola query."""
+    _verifica_atleta(id_utente, id_atleta)
+    volee = {}
+    for r in segnapunti_repository.get_volee_di_segnapunti(id_atleta, id_segnapunti):
+        volee.setdefault(r[1], []).append(_volee_row_to_dict(r))
+    return volee
+
+
 def salva_volee(id_utente: int, id_atleta: int, id_segnapunto: int, volee: list):
     get_segnapunto(id_utente, id_atleta, id_segnapunto)
     segnapunti_repository.salva_volee(id_segnapunto, volee)

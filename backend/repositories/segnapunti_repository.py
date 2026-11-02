@@ -149,6 +149,26 @@ def get_volee(id_segnapunto: int):
         conn.close()
 
 
+def get_volee_di_segnapunti(id_atleta: int, id_segnapunti: list[int]):
+    """Le volee di piu' segnapunti dello stesso atleta con una query sola (stesse colonne di get_volee)."""
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            # ANY(%s): psycopg2 trasforma la lista Python in un array PostgreSQL
+            cur.execute(
+                '''SELECT v."IDvolee", v."IDsegnapunto", v."mezza", v."numero",
+                          v."f1", v."f2", v."f3", v."f4", v."f5", v."f6", v."somma", v."totale"
+                   FROM "TsegnapuntiVolee" v
+                   JOIN "Tsegnapunti" s ON v."IDsegnapunto" = s."IDsegnapunto"
+                   WHERE v."IDsegnapunto" = ANY(%s) AND s."IDatleta" = %s
+                   ORDER BY v."IDsegnapunto", v."mezza", v."numero"''',
+                (id_segnapunti, id_atleta)
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
+
+
 def salva_volee(id_segnapunto: int, volee: list[dict]):
     conn = get_db_conn()
     try:

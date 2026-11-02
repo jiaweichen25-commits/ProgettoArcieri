@@ -18,6 +18,26 @@ def get_gare_by_allenamento(id_allenamento: int):
     finally:
         conn.close()
 
+def get_gare_visibili_by_atleta(id_atleta: int):
+    """Gare non escluse dalla visualizzazione, di tutti gli allenamenti dell'atleta (stesse colonne di get_gare_by_allenamento)."""
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                '''SELECT p."IDpianogara", p."IDallenamento", p."IDtipogara",
+                          t."Descrizione", p."Data", p."Luogo",
+                          p."Distanza", p."Note", p."EscludiVisualizzazione"
+                   FROM "Tpianogare" p
+                   JOIN "Tallenamenti" a ON p."IDallenamento" = a."IDallenamento"
+                   LEFT JOIN "TStipigare" t ON p."IDtipogara" = t."IDtipogara"
+                   WHERE a."IDatleta" = %s AND NOT p."EscludiVisualizzazione"
+                   ORDER BY p."Data" ASC NULLS LAST, p."IDpianogara"''',
+                (id_atleta,)
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
+
 def crea_gara(id_allenamento: int, dati: dict):
     conn = get_db_conn()
     try:

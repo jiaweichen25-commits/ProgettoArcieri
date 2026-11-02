@@ -56,28 +56,30 @@ def get_antidoping(id_utente: int):
 
 def get_piano_gare(id_utente: int):
     atleta = _get_atleta_or_404(id_utente)
-    # Prende tutti gli allenamenti dell'atleta
-    rows_all = allenamenti_repository.get_allenamenti_by_atleta(atleta["IDatleta"])
-    # Per ogni allenamento prende le gare visibili
-    gare = []
-    for row in rows_all:
-        id_allenamento = row[0]
-        rows_gare = pianogare_repository.get_gare_by_allenamento(id_allenamento)
-        for g in rows_gare:
-            if not g[8]:  # EscludiVisualizzazione = False
-                gare.append({
-                    "IDpianogara":   g[0],
-                    "IDallenamento": g[1],
-                    "id_tipogara":   g[2],
-                    "tipo_gara":     g[3],
-                    "data":          g[4],
-                    "luogo":         g[5],
-                    "distanza":      g[6],
-                    "note":          g[7],
-                    "escludi_visualizzazione": g[8],
-                })
-    gare.sort(key=lambda x: (x["data"] is None, x["data"]))
-    return gare
+    # Le gare visibili di tutti gli allenamenti dell'atleta, gia' ordinate per data,
+    # con una query sola (prima: una query per ogni allenamento)
+    rows_gare = pianogare_repository.get_gare_visibili_by_atleta(atleta["IDatleta"])
+    return [
+        {
+            "IDpianogara":   g[0],
+            "IDallenamento": g[1],
+            "id_tipogara":   g[2],
+            "tipo_gara":     g[3],
+            "data":          g[4],
+            "luogo":         g[5],
+            "distanza":      g[6],
+            "note":          g[7],
+            "escludi_visualizzazione": g[8],
+        }
+        for g in rows_gare
+    ]
+
+def _per_seduta(rows) -> dict:
+    """Divide le righe per (settimana, seduta), che sono le ultime due colonne di ogni riga."""
+    gruppi = {}
+    for r in rows:
+        gruppi.setdefault((r[-2], r[-1]), []).append(r)
+    return gruppi
 
 def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
     # Verify the allenamento belongs to the atleta
@@ -88,17 +90,27 @@ def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
 
     # Get sedute
     sedute_rows = me_repository.get_sedute_by_allenamento(id_allenamento)
-    
+
+    # Una query per tabella per TUTTO l'allenamento (prima: 5 query per ogni seduta
+    # e una per ogni settimana), poi le righe vengono divise per settimana/seduta qui.
+    note = {r[0]: r for r in me_repository.get_note_allenamento(id_allenamento)}
+    stretching = _per_seduta(me_repository.get_stretching_con_nomi(id_allenamento))
+    riscaldamento = _per_seduta(me_repository.get_riscaldamento_con_nomi(id_allenamento))
+    tec_for_cor = _per_seduta(me_repository.get_tec_for_cor_con_nomi(id_allenamento))
+    all_fis_for_res = _per_seduta(me_repository.get_all_fis_for_res_con_nomi(id_allenamento))
+    all_fis_cor = _per_seduta(me_repository.get_all_fis_cor_con_nomi(id_allenamento))
+
     # Structure the response
     # We want to group by settimana, then by seduta
     dettaglio = {}
-    
+
     for row in sedute_rows:
         id_settimana = row[1]
         id_seduta = row[2]
-        
+        seduta = (id_settimana, id_seduta)
+
         if id_settimana not in dettaglio:
-            nota_row = me_repository.get_nota_allenamento(id_allenamento, id_settimana)
+            nota_row = note.get(id_settimana)
             dettaglio[id_settimana] = {
                 "id_settimana": id_settimana,
                 "nota": nota_row[1] if nota_row else None,
@@ -116,38 +128,33 @@ def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
         }
         
         # Stretching
-        stretch_rows = me_repository.get_stretching_con_nomi(id_allenamento, id_settimana, id_seduta)
-        for sr in stretch_rows:
+        for sr in stretching.get(seduta, []):
             seduta_dict["stretching"].append({
                 "id": sr[0], "nome": sr[1], "giorni": {"lun": sr[2], "mar": sr[3], "mer": sr[4], "gio": sr[5], "ven": sr[6], "sab": sr[7], "dom": sr[8]}
             })
             
         # Riscaldamento
-        risc_rows = me_repository.get_riscaldamento_con_nomi(id_allenamento, id_settimana, id_seduta)
-        for rr in risc_rows:
+        for rr in riscaldamento.get(seduta, []):
             seduta_dict["riscaldamento"].append({
                 "id": rr[0], "nome": rr[1], "giorni": {"lun": rr[2], "mar": rr[3], "mer": rr[4], "gio": rr[5], "ven": rr[6], "sab": rr[7], "dom": rr[8]}
             })
             
         # TecForCor
-        tfc_rows = me_repository.get_tec_for_cor_con_nomi(id_allenamento, id_settimana, id_seduta)
-        for tr in tfc_rows:
+        for tr in tec_for_cor.get(seduta, []):
             seduta_dict["tec_for_cor"].append({
                 "id": tr[0], "posizione_piedi": tr[1], "distanza": tr[2], "targa": tr[3], "esercizio": tr[4],
                 "giorni": {"lun": tr[5], "mar": tr[6], "mer": tr[7], "gio": tr[8], "ven": tr[9], "sab": tr[10], "dom": tr[11]}
             })
             
         # AllFisForRes
-        affr_rows = me_repository.get_all_fis_for_res_con_nomi(id_allenamento, id_settimana, id_seduta)
-        for ar in affr_rows:
+        for ar in all_fis_for_res.get(seduta, []):
             seduta_dict["all_fis_for_res"].append({
                 "id": ar[0], "tabella_n": ar[1], "esercizio": ar[2],
                 "giorni": {"lun": ar[3], "mar": ar[4], "mer": ar[5], "gio": ar[6], "ven": ar[7], "sab": ar[8], "dom": ar[9]}
             })
             
         # AllFisCor
-        afc_rows = me_repository.get_all_fis_cor_con_nomi(id_allenamento, id_settimana, id_seduta)
-        for cr in afc_rows:
+        for cr in all_fis_cor.get(seduta, []):
             seduta_dict["all_fis_cor"].append({
                 "id": cr[0], "attrezzo": cr[1], "esercizio": cr[2],
                 "giorni": {"lun": cr[3], "mar": cr[4], "mer": cr[5], "gio": cr[6], "ven": cr[7], "sab": cr[8], "dom": cr[9]}
