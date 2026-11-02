@@ -11,9 +11,7 @@ def _get_istruttore_or_404(id_utente: int) -> int:
     return id_istruttore
 
 def _verifica_allenamento(id_allenamento: int, id_istruttore: int):
-    rows = allenamenti_repository.get_allenamenti_by_atleta_istruttore(id_istruttore)
-    ids = {row[0] for row in rows}
-    if id_allenamento not in ids:
+    if not allenamenti_repository.allenamento_di_istruttore(id_allenamento, id_istruttore):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Allenamento non trovato o non appartiene a questo istruttore"

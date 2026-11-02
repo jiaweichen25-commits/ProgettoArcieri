@@ -18,6 +18,19 @@ def get_atleti_by_istruttore(id_istruttore: int):
     finally:
         conn.close()
 
+def atleta_di_istruttore(id_atleta: int, id_istruttore: int) -> bool:
+    """True se l'atleta esiste ed e' di questo istruttore (senza caricare tutti i suoi atleti)."""
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'SELECT 1 FROM "Tatleti" WHERE "IDatleta" = %s AND "IDistruttore" = %s',
+                (id_atleta, id_istruttore)
+            )
+            return cur.fetchone() is not None
+    finally:
+        conn.close()
+
 def get_atleta_by_id_utente(id_utente: int):
     conn = get_db_conn()
     try:

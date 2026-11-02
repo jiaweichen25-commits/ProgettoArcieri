@@ -9,9 +9,7 @@ def _verifica_atleta(id_utente: int, id_atleta: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profilo istruttore non trovato"
         )
-    atleti = atleti_repository.get_atleti_by_istruttore(id_istruttore)
-    ids = {a[0] for a in atleti}
-    if id_atleta not in ids:
+    if not atleti_repository.atleta_di_istruttore(id_atleta, id_istruttore):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Atleta non trovato o non appartiene a questo istruttore"

@@ -84,8 +84,7 @@ def _per_seduta(rows) -> dict:
 def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
     # Verify the allenamento belongs to the atleta
     atleta = _get_atleta_or_404(id_utente)
-    allenamenti_atleta = allenamenti_repository.get_allenamenti_by_atleta(atleta["IDatleta"])
-    if not any(a[0] == id_allenamento for a in allenamenti_atleta):
+    if not allenamenti_repository.allenamento_di_atleta(id_allenamento, atleta["IDatleta"]):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Allenamento non trovato o non autorizzato")
 
     # Get sedute
@@ -167,8 +166,7 @@ def get_dettaglio_allenamento(id_utente: int, id_allenamento: int):
 def salva_nota_atleta(id_utente: int, id_allenamento: int, id_settimana: int, testo: str):
     # Verify the allenamento belongs to the atleta
     atleta = _get_atleta_or_404(id_utente)
-    allenamenti_atleta = allenamenti_repository.get_allenamenti_by_atleta(atleta["IDatleta"])
-    if not any(a[0] == id_allenamento for a in allenamenti_atleta):
+    if not allenamenti_repository.allenamento_di_atleta(id_allenamento, atleta["IDatleta"]):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Allenamento non trovato o non autorizzato")
 
     return me_repository.salva_nota_atleta(id_allenamento, id_settimana, testo)
