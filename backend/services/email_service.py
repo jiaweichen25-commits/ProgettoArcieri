@@ -4,6 +4,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from config.settings import SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
 
+# Secondi massimi di attesa per ogni passo con il server di posta: senza, se il server non risponde
+# la richiesta (creazione atleta/istruttore, recupero password) resta bloccata per sempre.
+SMTP_TIMEOUT = 10
+
 def invia_email_credenziali(destinatario: str, password_temporanea: str, ruolo: str = "atleta"):
     oggetto = "Credenziali di accesso - Arcieri Vicenza"
     
@@ -35,7 +39,7 @@ def invia_email_credenziali(destinatario: str, password_temporanea: str, ruolo: 
     msg.attach(MIMEText(corpo, 'plain'))
 
     try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=SMTP_TIMEOUT)
         # Verifica il certificato del server: senza contesto starttls() accetta chiunque si finga Gmail
         server.starttls(context=ssl.create_default_context())
         server.login(SMTP_USER, SMTP_PASSWORD)
@@ -77,7 +81,7 @@ def invia_email_recupero_password(destinatario: str, codice_recupero: str):
     msg.attach(MIMEText(corpo, 'plain'))
 
     try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=SMTP_TIMEOUT)
         # Verifica il certificato del server: senza contesto starttls() accetta chiunque si finga Gmail
         server.starttls(context=ssl.create_default_context())
         server.login(SMTP_USER, SMTP_PASSWORD)
